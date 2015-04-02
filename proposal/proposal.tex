@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{color}
+
+\newcommand{\ind}{\mathbb{I}} % Indicator function
+\newcommand{\pr}{P} % Generic probability
+\newcommand{\ex}{E} % Generic expectation
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+
+\title{Proposal: Extrapolating Sample Average Treatment Effects to the Population}
+\author{Kellie Ottoboni, Jason Poulos}
+%\date{}               
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when RCTs use samples of individuals who do not represent the population of interest.  For example, the location where a RCT is conducted may result in a distribution of participant ethnicities that does not reflect the makeup of the population \textcolor{red}{(perhaps come up with a better example; how sick patients are to participate in an RCT for example)}.  This is particularly relevant to policy-maker who want to know how a treatment would affect the members of their constituency, rather than just an idealized sample of them.  Hartman et. al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, this estimate is asymptotically unbiased \cite{Hartman}. \\
+
+A prevalent issue in RCTs is noncompliance.  In one-way crossover from treatment to control, individuals who are randomly assigned to the treatment group refuse the treatment.  The serves to dilute the treatment effect, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. to RCTs with one-way crossover from treatment to control.
+
+\section{Statistical Analysis}
+We propose to modify the estimator of PATT from \cite{Hartman} by allowing for the possibility of one-way crossover from treatment to control in the RCT.  We will make the same assumptions, and further assume that the potential outcomes for non-compliers are the same for treatment and control assignment.  It does not make sense to talk about compliers and non-compliers in the population, as there is no imposed treatment assignment.  We additionally assume that there are no ``defiers," individuals in the RCT who never accept the group to which they are assigned. \\
+
+The estimator of PATT involves the expectation of the response of individuals in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we plan to use a nonparametric method (e.g. ensemble tree methods) to estimate the response curve or surface.  Then, we will use the model to estimate population members' response given their covariates.  These estimates will be used to estimate the PATT.
+
+\section{Data}
+We will apply our method to study how Medicaid subscription affects use of the emergency department and other health outcomes.  Medicaid is a federally-funded program, so understanding how its subscribers benefit from it is informative for public policy. \\
+
+We draw RCT data from the Oregon Health Insurance Experiment \cite{Taubman}.  In 2008, approximately 90,000 low-income individuals participated in a lottery to receive Medicaid benefits.  About \textcolor{red}{30,000} participants were randomly selected to receive benefits; the rest served as controls in the experiment.  Health outcomes were assessed using surveys every six months.  Emergency room records were obtained from $12$ hospitals serving the participants and used to compare frequency of emergency room visits.  The authors of the study found that in their sample, Medicaid coverage increased emergency room use by $40\%$ relative to the control group. \\
+
+The target population of interest for national policy-makers is the entire United States.  We have data on the target population from the National Hospital Ambulatory Medical Care Survey (NHAMCS) \cite{NHAMCS}.  The data comes from a random sample of visits to emergency and outpatient departments observed around the United States.  It includes information on the reason for the visit and the type of insurance that the individual had.
+
+\section{Anticipated Results and Implications}
+
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+
+
+\end{document}  
