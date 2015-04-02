@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage[margin=0.75in]{geometry}
 \usepackage{color}
+\usepackage{hyperref}
 
 \newcommand{\ind}{\mathbb{I}} % Indicator function
 \newcommand{\pr}{P} % Generic probability
@@ -32,7 +33,9 @@ The estimator of PATT involves the expectation of the response of individuals in
 \section{Data}
 We will apply our method to study how Medicaid subscription affects use of the emergency department and other health outcomes.  Medicaid is a federally-funded program, so understanding how its subscribers benefit from it is informative for public policy. \\
 
-We draw RCT data from the Oregon Health Insurance Experiment \cite{Taubman}.  In 2008, approximately 90,000 low-income individuals participated in a lottery to receive Medicaid benefits.  About \textcolor{red}{30,000} participants were randomly selected to receive benefits; the rest served as controls in the experiment.  Health outcomes were assessed using surveys every six months.  Emergency room records were obtained from $12$ hospitals serving the participants and used to compare frequency of emergency room visits.  The authors of the study found that in their sample, Medicaid coverage increased emergency room use by $40\%$ relative to the control group. \\
+We draw RCT data from the Oregon Health Insurance Experiment \cite{finkelstein2012,Taubman}.  In 2008, approximately 90,000 low-income individuals participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the federal poverty level and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid. In total, about 35,000 participants (representing about 30,000 households) were selected by the lottery; the remaining participants were not able to apply for Medicaid and served as controls in the experiment.  %Line about compliance 
+
+Health outcomes were assessed using surveys every six months.  Emergency room records were obtained from $12$ hospitals serving the participants and used to compare frequency of emergency room visits.  The authors of the study found that in their sample, Medicaid coverage increased emergency room use by $40\%$ relative to the control group. \\
 
 The target population of interest for national policy-makers is the entire United States.  We have data on the target population from the National Hospital Ambulatory Medical Care Survey (NHAMCS) \cite{NHAMCS}.  The data comes from a random sample of visits to emergency and outpatient departments observed around the United States.  It includes information on the reason for the visit and the type of insurance that the individual had.
 

@@ -1,0 +1,30 @@
+\begin{thebibliography}{1}
+
+\bibitem{Hartman}
+Erin Hartman, Richard Grieve, Roland Ramsahai, and Jasjeet~S. Sekhon.
+\newblock From sate to patt: Combining experimental with observational studies
+  to estimate population treatment effects.
+\newblock {\em Journal of the Royal Statistical Society, Series A}, (to
+  appear).
+
+\bibitem{Taubman}
+Sarah Taubman, Heidi Allen, Bill Wright, Katherine Baicker, Amy Finkelstein,
+  and the Oregon Health Study~Group.
+\newblock Medicaid increases emergency department use: Evidence from oregon's
+  health insurance experiment.
+\newblock {\em Science}, 343(6168):263--268, January 2014.
+
+\bibitem{finkelstein2012}
+Amy Finkelstein, Sarah Taubman, Bill Wright, Mira Bernstein, Jonathan Gruber,
+  Joseph~P Newhouse, Heidi Allen, Katherine Baicker, Oregon Health~Study Group,
+  et~al.
+\newblock The oregon health insurance experiment: Evidence from the first year.
+\newblock {\em The quarterly journal of economics}, 127(3):1057, 2012.
+
+\bibitem{NHAMCS}
+National~Center for Health~Statistics.
+\newblock National hospital ambulatory medical care survey.
+\newblock \url{http://www.cdc.gov/nchs/ahcd/ahcd\_questionnaires.htm}.
+\newblock April 2015.
+
+\end{thebibliography}
