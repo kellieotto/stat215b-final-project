@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  2 APR 2015 22:25
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  2 APR 2015 22:55
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -380,7 +380,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 39--40
 [1
 
 {/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Underfull \hbox (badness 10000) in paragraph at lines 45--46
+Underfull \hbox (badness 10000) in paragraph at lines 49--50
 
  []
 
@@ -393,16 +393,12 @@ Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 60.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 60.
 Package rerunfilecheck Info: File `proposal.out' has not changed.
 (rerunfilecheck)             Checksum: 57ED7BD9D3B3F6AA0EA60D58A8CF6D07;212.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 60.
  ) 
 Here is how much of TeX's memory you used:
  6159 strings out of 493315
  89814 string characters out of 6137904
- 188314 words of memory out of 5000000
+ 188317 words of memory out of 5000000
  9542 multiletter control sequences out of 15000+600000
  9230 words of font info for 34 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
@@ -418,7 +414,7 @@ l/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/t
 exlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texl
 ive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texli
 ve/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on proposal.pdf (2 pages, 142520 bytes).
+Output written on proposal.pdf (2 pages, 141664 bytes).
 PDF statistics:
  104 PDF objects out of 1000 (max. 8388607)
  88 compressed objects within 1 object stream
