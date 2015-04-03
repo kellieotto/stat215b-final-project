@@ -1,0 +1,7 @@
+
+data/OHIE_Public_Use_Files/.Rhistory
+*.log
+*.out
+*.aux
+*.bbl
+*.blg
