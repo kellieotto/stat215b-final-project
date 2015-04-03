@@ -13,7 +13,7 @@
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 
 
-\title{Proposal: Extrapolating Sample Average Treatment Effects to the Population}
+\title{Proposal: Identifying complier--average causal effects for target populations}
 \author{Kellie Ottoboni, Jason Poulos}
 %\date{}               
 
@@ -21,7 +21,7 @@
 \maketitle
 
 \section{Introduction}
-Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when RCTs use samples of individuals who do not represent the population of interest.  For example, the location where a RCT is conducted may result in a distribution of participant ethnicities that does not reflect the makeup of the population \textcolor{red}{(perhaps come up with a better example; how sick patients are to participate in an RCT for example)}.  This is particularly relevant to policy-maker who want to know how a treatment would affect the members of their constituency, rather than just an idealized sample of them.  Hartman et. al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, this estimate is asymptotically unbiased \cite{Hartman}. \\
+Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when RCTs use samples of individuals who do not represent the population of interest.  For example, RCTs in which participants volunteer to sign up for health insurance coverage may exhibit a sample population that is more sick than the target population.  This is particularly relevant to policy-maker who want to know how a treatment would affect the members of their constituency, rather than just an idealized sample of them.  Hartman et. al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, this estimate is asymptotically unbiased \cite{Hartman}. \\
 
 A prevalent issue in RCTs is noncompliance.  In one-way crossover from treatment to control, individuals who are randomly assigned to the treatment group refuse the treatment.  The serves to dilute the treatment effect, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. to RCTs with one-way crossover from treatment to control in order to identify the complier--average causal effect for the target population.
 
@@ -38,17 +38,17 @@ We will apply our method to study how Medicaid subscription affects use of the e
 
 We draw RCT data from the Oregon Health Insurance Experiment \cite{finkelstein2012,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the federal poverty level (FPL) and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid.\footnote{Since randomization is applied on the household level, we will need to account for the number of each participant's household members when specifying the probability of treatment assignment.} In total, about 35,000 participants (representing about 30,000 households) were selected by the lottery; the remaining participants were not able to apply for Medicaid and served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among  participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} \\
 
-% description of covariates 
+The RCT data includes demographic variables such as age, gender, ethnicity, health status, education, employment, income, and insurance coverage. 
 
 \paragraph{Health outcomes} 
 
-The Oregon Health Study obtained data on the number of emergency room visits for every RCT participant who resides near twelve hospitals in the Portland area ($N=24,646$). The authors find Medicaid coverage increased emergency-room use over an 18--month period by 40\% relative to the control group \cite{Taubman}. \\
+The Oregon Health Study obtained data on the number of emergency room visits for every RCT participant who resides near twelve hospitals in the Portland area ($N=24,646$). The authors find Medicaid coverage increased emergency-room use over an 18--month period by 40\% relative to the control group \cite{Taubman}. 
  
 \paragraph{RCT sample vs. target population}
 
-The treatment effect of Medicaid on emergency--room use applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the opportunity provided to states by the Affordable Care Act to expand Medicaid to all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white, urban--dwellers \cite{Taubman}. 
+The treatment effect of Medicaid on emergency--room use applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the Affordable Care Act to expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. \\
  
-We have data on the target population from the National Hospital Ambulatory Medical Care Survey (NHAMCS) \cite{NHAMCS}.  The data comes from a random sample of visits to emergency and outpatient departments observed around the United States.  It includes information on the reason for the visit and the type of insurance that the individual had. %more on covariates 
+We have data on the target population from the National Hospital Ambulatory Medical Care Survey (NHAMCS) \cite{NHAMCS}.  These data come from a random sample of visits to emergency and outpatient departments observed around the United States.  It includes information on the reason for the visit and the type of insurance that the individual had. %more on covariates 
 
 \section{Anticipated Results and Implications}
 
