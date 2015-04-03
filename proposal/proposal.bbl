@@ -27,10 +27,16 @@ Sarah Taubman, Heidi Allen, Bill Wright, Katherine Baicker, Amy Finkelstein,
   health insurance experiment.
 \newblock {\em Science}, 343(6168):263--268, January 2014.
 
-\bibitem{NHAMCS}
+\bibitem{BRFSS}
+Centers for Disease~Control and Prevention.
+\newblock Behavioral risk factor surveillance system.
+\newblock \url{http://www.cdc.gov/brfss/index.html}.
+\newblock April 2015.
+
+\bibitem{NHIS}
 National~Center for Health~Statistics.
-\newblock National hospital ambulatory medical care survey.
-\newblock \url{http://www.cdc.gov/nchs/ahcd/ahcd\_questionnaires.htm}.
+\newblock National health interview survey.
+\newblock \url{http://www.cdc.gov/nchs/nhis.htm}.
 \newblock April 2015.
 
 \end{thebibliography}
