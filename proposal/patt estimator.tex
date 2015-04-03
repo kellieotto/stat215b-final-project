@@ -18,7 +18,10 @@
 \maketitle
 
 
-Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $W_i^T$ and $W_i^C$ denote individual $i$'s observable covariates related to the sample selection mechanism for membership in the RCT under treatment and control assignment, respectively. For a generic value, we drop the subscript $i$.  \\
+\section{Assumptions}
+Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $W_i^T$ and $W_i^C$ denote individual $i$'s observable covariates related to the sample selection mechanism for membership in the RCT under treatment and control assignment, respectively.  For a generic value, we drop the subscript $i$.  \\
+
+Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  In the population $S=0$, it doesn't make sense to talk about compliance, as treatment isn't assigned at random.  Compliance is only observable for individuals in the RCT, $S=1$.
 
 
 We make the following assumptions:
@@ -45,8 +48,14 @@ where $L_j$ is the treatment and sample assignment vector for unit $j$.  This me
 C \independent (S=1, T=1) \mid (W^T, W^C), 0 < \pr(C = 1 \mid (W^T, W^C)) < 1
 \end{equation}
 }
+\item{Monotonicity: Assume that there are no defiers, and crossover is only possible from treatment to control.}
+\item{Exclusion restriction (ER): For non-compliers, $Y_{11} = Y_{10}$.  A treatment effect is may only be non-zero for compliers.}
 \end{itemize}
 
+
+
+
+\section{Estimation}
 
 The estimand of interest is 
 
@@ -54,14 +63,12 @@ The estimand of interest is
 \tau_{\text{PATT}} = \ex\left( Y_{01} - Y_{00} \mid S=0, T=1\right)
 \end{equation}
 
-Let $C$ be an indicator for compliers.  Assume that there are no defiers, and crossover is only possible from treatment to control.  For non-compliers, $Y_{11} = Y_{10}$.  In the population $S=0$, it doesn't make sense to talk about compliance, as treatment isn't assigned at random.  
-
 \begin{align*}
 \ex\left(Y_{01} \mid S=0, T=1\right) &= \ex\left(Y_{11} \mid S=0, T=1\right) \tag*{by \eqref{consistency}} \\
 &= \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, W^T\right) \right] \tag*{by \eqref{si_treat}} \\
 &= \ex_{01}\left[\ex_{C}\left[  \ex\left(Y_{11} \mid S=1, T=1, W^T, C\right) \right]\right]  \\
 &= \ex_{01}\left[  \pr(C=1 \mid W^T) \ex\left(Y_{11} \mid S=1, T=1, W^T, C=1\right)\right. \\& \qquad+ \left.(1-\pr(C=1 \mid W^T))\ex\left(Y_{10} \mid S=1, T=1, W^T, C=0\right) \right]  \tag*{by \eqref{compl}} \\
-&= \ex_{01}\left[  \pr(C=1 \mid W^T) \ex\left(Y_{11} \mid S=1, T=1, W^T, C=1\right)\right. \\& \qquad+ \left.(1-\pr(C=1 \mid W^T))\ex\left(Y_{11} \mid S=1, T=1, W^T, C=0\right) \right]  \tag*{by non-compliance} \\
+&= \ex_{01}\left[  \pr(C=1 \mid W^T) \ex\left(Y_{11} \mid S=1, T=1, W^T, C=1\right)\right. \\& \qquad+ \left.(1-\pr(C=1 \mid W^T))\ex\left(Y_{11} \mid S=1, T=1, W^T, C=0\right) \right]  \tag*{by ER} \\
 \end{align*}
 
 \begin{align*}
