@@ -1,0 +1,2 @@
+cut -c 885-891 ED2010.txt > demog.txt
+cut -c 1-313 ED2010.txt > patient.txt
