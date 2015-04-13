@@ -1,4 +1,4 @@
-# Prepares Oregon Health Insurance Experiment (OHIE) data
+## Prepares Oregon Health Insurance Experiment (OHIE) data
 
 # Libraries
 library(foreign)
