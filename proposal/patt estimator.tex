@@ -1,14 +1,18 @@
 \documentclass{article}
 \usepackage{color}
 \usepackage{graphicx}
-\usepackage{amsmath}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=0.75in]{geometry}
 
 \newcommand{\ind}{\mathbb{I}} % Indicator function
-\newcommand{\pr}{P} % Generic probability
-\newcommand{\ex}{E} % Generic expectation
+\newcommand{\pr}{\mathbb{P}} % Generic probability
+\newcommand{\ex}{\mathbb{E}} % Generic expectation
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+
+\setlength{\parindent}{0cm}
 
 
 \title{Estimating PATT with noncompliance}
@@ -19,9 +23,9 @@
 
 
 \section{Assumptions}
-Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $W_i^T$ and $W_i^C$ denote individual $i$'s observable covariates related to the sample selection mechanism for membership in the RCT under treatment and control assignment, respectively.  For a generic value, we drop the subscript $i$.  \\
+Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $T_i$ denote the treatment assigned and $D_i$ denote treatment received. Let $W_i$ be individual $i$'s observable covariates related to the sample selection mechanism for membership in the RCT.  Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  For a generic value, we drop the subscript $i$.  \\
 
-Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  In the population $S=0$, it doesn't make sense to talk about compliance, as treatment isn't assigned at random.  Compliance is only observable for individuals in the RCT, $S=1$.
+We assume that in the RCT, treatment is assigned at random.  Then for individuals with $C_i = 1$, we observe $D_i = T_i$.  In the population, we suppose that treatment is made available to individuals according to some rule based on their covariates; treatment assignment is not completely random. Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D$, not $T$, in the population.  Among the population controls, we can't distinguish non-compliers (individuals with $T_i=1$ and $D_i = 0$) from compliers (those with $T_i = 0$ and $D_i = 0$).  Compliance is only observable for individuals assigned to treatment in the RCT. \\
 
 
 We make the following assumptions:
@@ -32,12 +36,14 @@ Y_{i0t} = Y_{i1t}
 \end{equation}}
 \item{Strong ignorability of sample assignment for treated:
 \begin{equation}\label{si_treat}
-(Y_{01}, Y_{11}) \independent S \mid (W^T, T=1), 0 < \pr(S=1 \mid W^T, T=1) <1 
+(Y_{01}, Y_{11}) \independent S \mid (W, T=1), 0 < \pr(S=1 \mid W, T=1) <1 
 \end{equation}}
+This means that the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
 \item{Strong ignorability of sample assignment for controls:
 \begin{equation}\label{si_ctrl}
-(Y_{00}, Y_{10}) \independent S \mid (W^C, T=1), 0 < \pr(S=1 \mid W^C, T=1) <1 
+(Y_{00}, Y_{10}) \independent S \mid (W, T=1), 0 < \pr(S=1 \mid W, T=1) <1 
 \end{equation}}
+This means that the potential outcomes for control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
 \item{Stable unit treatment value assumption (SUTVA):
 \begin{equation}\label{sutva}
 Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
@@ -45,54 +51,97 @@ Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
 where $L_j$ is the treatment and sample assignment vector for unit $j$.  This means that the treatment assignment for all other individuals $j$ does not affect the potential outcomes of individual $i$.}
 \item{Conditional independence of compliance and assignment:
 \begin{equation}\label{compl}
-C \independent (S=1, T=1) \mid (W^T, W^C), 0 < \pr(C = 1 \mid (W^T, W^C)) < 1
+C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
 \end{equation}
+This means that compliance is independent of sample and treatment assignment for all individuals with covariates $W$.
 }
-\item{Monotonicity: Assume that there are no defiers, and crossover is only possible from treatment to control.}
-\item{Exclusion restriction (ER): For non-compliers, $Y_{11} = Y_{10}$.  A treatment effect is may only be non-zero for compliers.}
+\item{Monotonicity: 
+\begin{equation}\label{monotonicity}
+T_i \geq D_i, \forall i
+\end{equation}
+This assumption implies that there are no defiers and that crossover is only possible from treatment to control.}
+\item{Exclusion restriction (ER): For non-compliers
+\begin{equation}\label{ER}
+Y_{11} = Y_{10}
+\end{equation}  
+A treatment effect may only be non-zero for compliers.}
 \end{itemize}
 
 
 
 
 \section{Estimation}
-
+\subsection{Population Average Treatment Effect on the Treated}
 The estimand of interest is 
 
 \begin{equation}
-\tau_{\text{PATT}} = \ex\left( Y_{01} - Y_{00} \mid S=0, T=1\right)
+\tau_{\text{PATT}} = \ex\left( Y_{01} - Y_{00} \mid S=0, D=1\right)
 \end{equation}
+This is the average treatment effect on those in the population who receive treatment.  It includes individuals who actually receive the treatment, but does not include those who are eligible for treatment and do not accept it (non-compliers).
 
+\begin{theorem}
+Under assumptions \eqref{consistency} - \eqref{ER},
+
+$$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
+-\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] $$
+
+where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the target population.  
+\end{theorem}
+
+
+
+
+This first term is the weighted average of observed responses in the treatment group in the RCT. The second term is the weighted average of the control response for compliers assigned to control in the RCT.  This is unobservable, as we cannot tell who is a complier or non-complier in the control group.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment. \\
+
+\begin{proof}
+We separate the expectation into two terms and treat each individually.
 \begin{align*}
-\ex\left(Y_{01} \mid S=0, T=1\right) &= \ex\left(Y_{11} \mid S=0, T=1\right) \tag*{by \eqref{consistency}} \\
-&= \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, W^T\right) \right] \tag*{by \eqref{si_treat}} \\
-&= \ex_{01}\left[\ex_{C}\left[  \ex\left(Y_{11} \mid S=1, T=1, W^T, C\right) \right]\right]  \\
-&= \ex_{01}\left[  \pr(C=1 \mid W^T) \ex\left(Y_{11} \mid S=1, T=1, W^T, C=1\right)\right. \\& \qquad+ \left.(1-\pr(C=1 \mid W^T))\ex\left(Y_{10} \mid S=1, T=1, W^T, C=0\right) \right]  \tag*{by \eqref{compl}} \\
-&= \ex_{01}\left[  \pr(C=1 \mid W^T) \ex\left(Y_{11} \mid S=1, T=1, W^T, C=1\right)\right. \\& \qquad+ \left.(1-\pr(C=1 \mid W^T))\ex\left(Y_{11} \mid S=1, T=1, W^T, C=0\right) \right]  \tag*{by ER} \\
+\ex\left(Y_{01} \mid S=0,D=1\right) &= \ex\left(Y_{11} \mid S=0, D=1\right) \tag*{by \eqref{consistency}} \\
+&= \ex\left(Y_{11} \mid S=0, T=1, C=1\right) \tag*{by \eqref{monotonicity}} \\
+&= \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, C=1, W\right) \right] \tag*{by \eqref{si_treat}} \\
+&= \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
 \end{align*}
 
+
 \begin{align*}
-\ex\left(Y_{00} \mid S=0, T=1\right) &= \ex\left(Y_{10} \mid S=0, T=1\right) \tag*{by \eqref{consistency}} \\
-&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=1, W^C\right) \right] \tag*{by \eqref{si_ctrl}} \\
-&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, W^C\right) \right] \tag*{by randomization, i.e. $Y_{10} \independent T \mid (W^C, S=1)$} \\
-&= \ex_{01}\left[ \ex_{C}\left[  \ex\left(Y_{10} \mid S=1, T=0, W^C, C\right) \right]\right] \\
-&=  \ex_{01}\left[  \pr(C = 1\mid W^C) \ex\left(Y_{10} \mid S=1, T=0, W^C, C=1\right)\right. \\&\qquad \left. + (1-\pr(C=1 \mid W^C)) \ex\left(Y_{10} \mid S=1, T=0, W^C, C=0\right) \right]   \tag*{by \eqref{compl}} \\\\
+\ex\left(Y_{00} \mid S=0, D=1\right) &= \ex\left(Y_{10} \mid S=0, D=1\right) \tag*{by \eqref{consistency}} \\
+&= \ex\left(Y_{10} \mid S=0, T=1, C=1\right) \tag*{by \eqref{monotonicity}} \\
+&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=1, C=1, W\right) \right] \tag*{by \eqref{si_ctrl}} \\
+&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] \\
 \end{align*}
+The last line follows because of the randomization carried out in the RCT.  This ensures $Y_{10} \independent T \mid (W, S=1)$.
+\end{proof}
 
-
-If we additionally assume that 
-$$\ex\left(Y_{10} \mid S=1, T=1, W^T, C=0\right) = \ex\left(Y_{10} \mid S=1, T=0, W^C, C=0\right)$$
-
-then the terms corresponding to the non-compliers cancel and
-
-\begin{equation}\label{patt}
-\tau_{\text{PATT}} = \ex_{01}\left[  \pr(C=1 \vert W^T) \ex\left(Y_{11} \mid S=1, T=1, W^T, C=1\right)\right] -  \ex_{01}\left[ \pr(C=1 \vert W^C) \ex\left(Y_{10} \mid S=1, T=0, W^C, C=1\right)\right]
-\end{equation}
-
-There are two issues:
-\begin{itemize}
-\item We must estimate the conditional probability of being a complier given a set of covariates.  This can be done using a standard logistic or probit regression, or can be done using a nonparametric method.
-\item We cannot observe who among the RCT controls is a complier or a ``never-treat".  However, the second term in \eqref{patt} involves an expectation over the compliers assigned to control in the RCT.  We will use the model for compliers that we fit previously to predict who among these controls is a complier, given their observed characteristics.
-\end{itemize}
-
+%
+%\begin{align*}
+%\ex\left(Y_{01} \mid S=0, T=1\right) &= \ex\left(Y_{11} \mid S=0, T=1\right) \tag*{by \eqref{consistency}} \\
+%&= \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, W\right) \right] \tag*{by \eqref{si_treat}} \\
+%&= \ex_{01}\left[\ex_{C}\left[  \ex\left(Y_{11} \mid S=1, T=1, W, C\right) \right]\right]  \\
+%&= \ex_{01}\left[  \pr(C=1 \mid W) \ex\left(Y_{11} \mid S=1, T=1, W, C=1\right)\right. \\& \qquad+ \left.(1-\pr(C=1 \mid W))\ex\left(Y_{10} \mid S=1, T=1, W, C=0\right) \right]  \tag*{by \eqref{compl}} \\
+%&= \ex_{01}\left[  \pr(C=1 \mid W) \ex\left(Y_{11} \mid S=1, T=1, W, C=1\right)\right. \\& \qquad+ \left.(1-\pr(C=1 \mid W))\ex\left(Y_{11} \mid S=1, T=1, W, C=0\right) \right]  \tag*{by ER} \\
+%\end{align*}
+%
+%\begin{align*}
+%\ex\left(Y_{00} \mid S=0, T=1\right) &= \ex\left(Y_{10} \mid S=0, T=1\right) \tag*{by \eqref{consistency}} \\
+%&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=1, W\right) \right] \tag*{by \eqref{si_ctrl}} \\
+%&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, W\right) \right] \tag*{by randomization, i.e. $Y_{10} \independent T \mid (W, S=1)$} \\
+%&= \ex_{01}\left[ \ex_{C}\left[  \ex\left(Y_{10} \mid S=1, T=0, W, C\right) \right]\right] \\
+%&=  \ex_{01}\left[  \pr(C = 1\mid W) \ex\left(Y_{10} \mid S=1, T=0, W, C=1\right)\right. \\&\qquad \left. + (1-\pr(C=1 \mid W)) \ex\left(Y_{10} \mid S=1, T=0, W, C=0\right) \right]   \tag*{by \eqref{compl}} \\\\
+%\end{align*}
+%
+%
+%If we additionally assume that 
+%$$\ex\left(Y_{10} \mid S=1, T=1, W, C=0\right) = \ex\left(Y_{10} \mid S=1, T=0, W, C=0\right)$$
+%
+%then the terms corresponding to the non-compliers cancel and
+%
+%\begin{equation}\label{patt}
+%\tau_{\text{PATT}} = \ex_{01}\left[  \pr(C=1 \vert W) \ex\left(Y_{11} \mid S=1, T=1, W, C=1\right)\right] -  \ex_{01}\left[ \pr(C=1 \vert W) \ex\left(Y_{10} \mid S=1, T=0, W, C=1\right)\right]
+%\end{equation}
+%
+%There are two issues:
+%\begin{itemize}
+%\item We must estimate the conditional probability of being a complier given a set of covariates.  This can be done using a standard logistic or probit regression, or can be done using a nonparametric method.
+%\item We cannot observe who among the RCT controls is a complier or a ``never-treat".  However, the second term in \eqref{patt} involves an expectation over the compliers assigned to control in the RCT.  We will use the model for compliers that we fit previously to predict who among these controls is a complier, given their observed characteristics.
+%
 \end{document}  
