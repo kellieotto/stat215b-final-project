@@ -36,12 +36,12 @@ Y_{i0t} = Y_{i1t}
 \end{equation}}
 \item{Strong ignorability of sample assignment for treated:
 \begin{equation}\label{si_treat}
-(Y_{01}, Y_{11}) \independent S \mid (W, T=1), 0 < \pr(S=1 \mid W, T=1) <1 
+(Y_{01}, Y_{11}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
 \end{equation}}
 This means that the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
 \item{Strong ignorability of sample assignment for controls:
 \begin{equation}\label{si_ctrl}
-(Y_{00}, Y_{10}) \independent S \mid (W, T=1), 0 < \pr(S=1 \mid W, T=1) <1 
+(Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
 \end{equation}}
 This means that the potential outcomes for control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
 \item{Stable unit treatment value assumption (SUTVA):
