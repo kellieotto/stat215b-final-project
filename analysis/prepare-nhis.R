@@ -21,9 +21,14 @@ nhisMerge <- function(i){
 
 years <- c(2009:2013) # leave out 2008 for now -- imputed income is categorical
 
-# Combine each merged dataset row-wise
-nhis <- foreach(i=years, .combine = 'rbind') %dopar% { 
+# Combine each merged dataset into list
+nhis <- foreach(i=years) %dopar% { 
   data <- nhisMerge(i)
   return(data)
 }
+
+names(nhis) <- c("2009","2010","2011","2012","2013") # name elements
+
+# Clean up workspace
+rm(years,nhisMerge)
 

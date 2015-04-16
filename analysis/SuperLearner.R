@@ -111,6 +111,4 @@ fitSL <- SuperLearner(Y=Y,X=X,
                       family=gaussian()) 
 
 fitSL # summarize
-
-
 }

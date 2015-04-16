@@ -13,16 +13,11 @@ f <- file.path(data.directory, c("oregonhie_descriptive_vars.dta",
                                  "oregonhie_stateprograms_vars.dta",
                                  "oregonhie_survey0m_vars.dta",
                                  "oregonhie_survey12m_vars.dta"))
-ohie <- lapply(f, read.dta) # read data to list
-names(ohie) <- gsub(".*/oregonhie_(.*)\\..*", "\\1", f) # name elements
+ohie.list <- lapply(f, read.dta) # read data to list
+names(ohie.list) <- gsub(".*/oregonhie_(.*)\\..*", "\\1", f) # name elements
 
-# Extract each element of list as a data frame
-descriptive <- as.data.frame(ohie[["descriptive_vars"]])
-ed <- as.data.frame(ohie[["ed_vars"]])
-inperson <- as.data.frame(ohie[["inperson_vars"]])
-stateprograms <- as.data.frame(ohie[["stateprograms_vars"]])
-survey0m <- as.data.frame(ohie[["survey0m_vars"]])
-survey12m <- as.data.frame(ohie[["survey12m_vars"]])
+# Merge into single dataframe by unique person ID
+ohie <- Reduce(function(...) merge(..., by="person_id", all=T), ohie.list)
 
 # Clean up workspace
-rm(data.directory,f,ohie)
+rm(data.directory,f,ohie.list)
