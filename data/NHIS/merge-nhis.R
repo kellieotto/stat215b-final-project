@@ -54,7 +54,7 @@
 # use forward slashes instead of back slashes
 
 # uncomment this line by removing the `#` at the front..
-# setwd( "C:/My Directory/NHIS/" )
+setwd("~/Dropbox/github/stat215b-final-project/data/NHIS")
 # ..in order to set your current working directory
 
 
@@ -62,19 +62,19 @@
 # remove the # in order to run this install.packages line only once
 # install.packages( c( "survey" , "mitools" ) )
 
-library(survey) 	# load survey package (analyzes complex design surveys)
-library(mitools)	# allows analysis of multiply-imputed survey data
+#library(survey) 	# load survey package (analyzes complex design surveys)
+#library(mitools)	# allows analysis of multiply-imputed survey data
 
 # set R to produce conservative standard errors instead of crashing
 # http://r-survey.r-forge.r-project.org/survey/exmample-lonely.html
-options( survey.lonely.psu = "adjust" )
+#options( survey.lonely.psu = "adjust" )
 # this setting matches the MISSUNIT option in SUDAAN
 
 
 # choose what year of data to analyze
 # note: this can be changed to any year that has already been downloaded locally
 # by the "1963-2011 - download all microdata.R" program above
-year <- 2011
+# year <- 2009 #JP: set year outside script
 
 
 # construct the filepath (within the current working directory) to the three rda files
@@ -179,7 +179,7 @@ x.sa <- merge( x , sa )
 # note that the merge() function merges using all intersecting columns -
 
 # uncomment this line to see intersecting columns
-# intersect( names( sa ) , names( x ) )
+intersect( names( sa ) , names( x ) )
 
 # - by default, the 'by' parameter does not need to be specified
 # for more detail about the merge function, type ?merge in the console
@@ -193,143 +193,10 @@ stopifnot( nrow( x.sa ) == nrow( sa ) )
 # all columns from both the samadult and personsx files
 # therefore, there's no more need for the samadult file on its own
 # so delete the samadult file
-rm( sa )
+rm( sa ) 
 
 # and clear up RAM
 gc()
-
-
-# at this point, taylor-series linearization survey objects can be created
-# so long as the analysis does not involve the imputed income variables
-
-
-#################################################
-# survey design for taylor-series linearization #
-# not using any imputed income variables        #
-#################################################
-
-# create survey design object with NHIS design information
-# using personsx alone
-personsx.design <- 
-  svydesign(
-    id = ~psu_p , 
-    strata = ~strat_p ,
-    nest = TRUE ,
-    weights = ~wtfa ,
-    data = x
-  )
-
-
-# create survey design object with NHIS design information
-# using the merged personsx and samadult files
-psa.design <- 
-  svydesign(
-    id = ~psu_p , 
-    strata = ~strat_p ,
-    nest = TRUE ,
-    weights = ~wtfa_sa ,	# note the change in the weighting variable
-    data = x.sa				# note the change in the source data frame
-  )
-
-
-# notice these two 'design' objects can be used 
-# in all subsequent analysis commands that do not involve imputed income
-
-
-#######################
-# analysis examples   #
-# sans imputed income #
-#######################
-
-# count the total (unweighted) number of records in nhis #
-
-# simply use the nrow function on both designs
-nrow( personsx.design )
-nrow( psa.design )
-
-# since the samadult file is a subset of the personsx file,
-# the personsx.design should always be used if it contains
-# all variables necessary for the analysis.  the sample size is larger.
-
-
-# count the weighted number of individuals in nhis #
-
-# add a new variable 'one' that simply has the number 1 for each record #
-
-personsx.design <-
-  update( 
-    one = 1 ,
-    personsx.design
-  )
-
-psa.design <-
-  update( 
-    one = 1 ,
-    psa.design
-  )
-
-# remember that the samadult file only generalizes to the adult population,
-# so the merged personsx-samadult file also generalizes to adults only
-
-# the civilian, non-institutionalized population of the united states #
-svytotal( 
-  ~one , 
-  personsx.design 
-)
-
-# the adult civilian, non-institutionalized population of the united states #
-svytotal(
-  ~one ,
-  psa.design 
-)
-
-
-# note that at any time, the personsx.design can be subsetted to adults only,
-# which would also generalize to the adult civilian non-institutionalized pop.
-adult.only.personsx.design <-
-  subset( personsx.design , age_p >= 18 )
-
-# and this number should be close to (but perhaps not perfectly aligned with)
-# the personsx-samadult merge file's population total, since both estimate
-# the adult civilian, non-institutionalized population of the united states #
-svytotal(
-  ~one ,
-  adult.only.personsx.design
-)
-
-
-# this has the advantage of a larger sample size
-# than the samadult-personsx merge file
-nrow( adult.only.personsx.design )
-nrow( psa.design )
-
-# but the disadvantage of not containing any columns
-# included in the sample adult questionnaire
-ncol( adult.only.personsx.design )
-ncol( psa.design )
-
-
-# # # # # # # # # # # # # # # # # # # 
-# for additional analysis examples, #
-# see the other 'analyze' script in #
-# the same NHIS github folder       #
-
-# any of those analysis examples    #
-# starting with 'svy' like svymean, #
-# svytotal, svyquantile, svyglm can #
-# be run on designs created above   #
-# # # # # # # # # # # # # # # # # # # 
-
-# remove all of these objects from memory to conserve RAM
-rm( personsx.design , psa.design , adult.only.personsx.design )
-
-# clear up RAM
-gc()
-
-
-# end of personsx - samadult merge example #
-
-############################################
 
 
 #######################################
@@ -348,41 +215,11 @@ gc()
 
 
 # this example uses x.sa (the merged data frame), so delete x (the personsx data frame)
-rm( x )
+rm( x ) # keep persons file
 
 # and immediately clear up RAM
 gc()
 
-
-# # # # # # # # # # # #
-# beginning of thinning to conserve RAM
-# create a character vector containing only
-# the variables in the merged file that are needed
-# for this specific analysis.  this will keep RAM usage to a minimum.
-# note: if working with more than 4 gigabytes of RAM, this step can be commented out
-variables.to.keep <-
-  c( 
-    # survey variables
-    "wtfa_sa" , "strat_p" , "psu_p" , 
-    
-    # merge variables
-    "hhx" , "fmx" , "fpx" , 
-    
-    # analysis variables
-    "aworpay" , "age_p"
-  )
-
-# now actually overwrite the personsx-samadult merged file with a 'thinned'
-# version of itself, only containing the columns specified in variables.to.keep
-x.sa <- x.sa[ , variables.to.keep ]
-
-# look at the first six records of the 'thinned' data frame
-head( x.sa )
-
-# clear up RAM
-gc()
-
-# end of thinning to conserve RAM
 # # # # # # # # # # # #
 
 # now load the imputed income data frames
@@ -403,15 +240,13 @@ for ( i in 1:5 ){
   # loop through all variables used in the merge
   # overwrite each column with itself, only converted to a numeric field
   for ( j in merge.vars ) x.sa[ , j ] <- as.numeric( x.sa[ , j ] )
-  
+  for ( j in merge.vars ) current.i[ , j ] <- as.numeric( current.i[ , j ] ) # JP
   
   # a handy trick to view the class of all columns within a data frame at once:
   # sapply( x.sa , class )
   
-  
   # merge the merged file with each of the five imputed income files
-  y <- 
-    merge( 
+  y <- merge( 
       x.sa , # the 2011 samadult-personsx merged data frame
       current.i # ii1 - ii5, depending on the current iteration of this loop
     )
@@ -419,37 +254,6 @@ for ( i in 1:5 ){
   # and confirm the new data frame (merged + the current iteration of the multiply-imputed data)
   # contains the same number of records as the original merged file
   stopifnot( nrow( x.sa ) == nrow( y ) )
-  
-  
-  ##############################
-  # START OF VARIABLE RECODING #
-  # any new variables that the user would like to create should be constructed here #
-  
-  # create two different poverty category variables
-  y <- 
-    transform( 
-      y , 
-      
-      # note that these poverty categories go out to the tenth decimal
-      
-      # create an 'at or above 200% fpl' flag
-      at.or.above.200 = ifelse( povrati3 >= 2000 , 1 , 0 ) ,
-      
-      # create a four-category poverty variable
-      fine.povcat =
-        cut( 
-          povrati3 , 
-          c( -Inf , 1380 , 2000 , 4000 , Inf ) ,
-          labels = c( "<138%" , "138-200%" , "200-399%" , "400%+" )
-        )
-    )
-  
-  # to look closely at, for example, the first imputed income file, uncomment these lines:
-  # head( ii1 )				# first six records of ii1
-  # summary( ii1$povrati3 )	# summary statistics of the povrati3 column in ii1
-  
-  # END OF VARIABLE RECODING #
-  ############################
   
   # save the data frames as objects x1 - x5, depending on the iteration in the loop
   assign( paste0( 'x' , i ) , y )
@@ -462,93 +266,18 @@ for ( i in 1:5 ){
   gc()
 }
 
-# now that the five imputed income data frames have been created,
-# free up ram by removing the original data frames
-rm( x.sa )
+# Take means of imputed income vars
 
-# and immediately clear up RAM
-gc()
+faminci2 <- cbind(x1$faminci2,x2$faminci2,x3$faminci2,x4$faminci2,x5$faminci2)
+x.sa$faminci2 <- rowMeans(faminci2)
 
+ernyr_i2 <- cbind(x1$ernyr_i2,x2$ernyr_i2,x3$ernyr_i2,x4$ernyr_i2,x5$ernyr_i2)
+x.sa$ernyr_i2 <- rowMeans(ernyr_i2)
 
-# build a new survey design object,
-# but unlike the 'personsx.design' or 'psa.design' objects above,
-# this object contains the five multiply-imputed data tables - imp1 through imp5
-psa.imp <- 
-  svydesign( 
-    id = ~psu_p , 
-    strata = ~strat_p ,
-    nest = TRUE ,
-    weights = ~wtfa_sa ,	# note the change in the weighting variable
-    data = imputationList( list( x1 , x2 , x3 , x4 , x5 ) )
-  )
-
-# if this analysis had not required samadult questions, the weighting variable
-# would have been 'wtfa' from the personsx table
-
-
-# note that survey design objects containing multiply-imputed data
-# (like income in this case) must be analyzed using the MIcombine function 
-# in the format of the examples below
-
-
-# calculate the mean of a linear variable #
-
-# average age
-MIcombine( 
-  with( 
-    psa.imp , 
-    svymean( ~age_p ) 
-  ) 
-)
-
-# broken out by fine poverty categories
-MIcombine( 
-  with( 
-    psa.imp , 
-    svyby( 
-      ~age_p , 
-      ~fine.povcat ,
-      svymean 
-    ) 
-  ) 
-)
-
-
-# calculate the distribution of a categorical variable #
-
-# any worries about paying medical bills
-MIcombine( 
-  with( 
-    psa.imp , 
-    svymean( 
-      ~factor( aworpay ) 
-    ) 
-  ) 
-)
-
-# broken out by above/below 200% fpl
-MIcombine( 
-  with( 
-    psa.imp , 
-    svyby( 
-      ~factor( aworpay ) , 
-      ~at.or.above.200 ,
-      svymean 
-    ) 
-  ) 
-)
-
-
-# for more details on how to work with data in r
-# check out my two minute tutorial video site
-# http://www.twotorials.com/
-
-# dear everyone: please contribute your script.
-# have you written syntax that precisely matches an official publication?
-message( "if others might benefit, send your code to ajdamico@gmail.com" )
-# http://asdfree.com needs more user contributions
-
-# let's play the which one of these things doesn't belong game:
-# "only you can prevent forest fires" -smokey bear
-# "take a bite out of crime" -mcgruff the crime pooch
-# "plz gimme your statistical programming" -anthony damico
+if(year %in% c(2010:2013)){
+  povrati3 <- cbind(x1$povrati3,x2$povrati3,x3$povrati3,x4$povrati3,x5$povrati3)
+  x.sa$povrati3 <- rowMeans(povrati3)
+}   else{
+  povrati2 <- cbind(x1$povrati2,x2$povrati2,x3$povrati2,x4$povrati2,x5$povrati2)
+  x.sa$povrati2 <- rowMeans(povrati2)
+}
