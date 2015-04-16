@@ -24,6 +24,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
 
   # set up storage
   tpatt <- true_patt <- rct_sate <- tpatt_unadj <- rep(0, sims)
+  rateC <- rateX <- rateS <- rep(0, sims)
   
   for(i in 1:sims){
     # Pick target sample size
@@ -67,12 +68,15 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     
     Y <- a + b*Xobs + c1*W1 + c2*W2 + d*U
     dat <- data.frame(Y, X, Xobs, S, C, W1, W2, W3)
-    print(i)
-    if(i == 1){
-      cat("Compliance rate is approximately ", mean(C), "\n")
-      cat("Proportion eligible for RCT is approximately ", mean(S), "\n")
-      cat("Proportion eligible for treatment is approximately ", mean(X), "\n")
-    }
+#    print(i)
+#     if(i == 1){
+#       cat("Compliance rate is approximately ", mean(C), "\n")
+#       cat("Proportion eligible for RCT is approximately ", mean(S), "\n")
+#       cat("Proportion eligible for treatment is approximately ", mean(X), "\n")
+#     }
+    rateC[i] <- mean(C)
+    rateS[i] <- mean(S)
+    rateX[i] <- mean(X)
     
     # Set up the RCT
     rct <- dat[rctsample,]
@@ -129,15 +133,28 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     tpatt_unadj[i] <- term1 - term2
     
   }
-res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate)
+res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rateC, rateS, rateX)
 return(res)
 }
 
-res1 <- sim_estimates(10)
-sapply(2:4, function(x) mean((res1[,1]-res1[,x])^2))
+# res1 <- sim_estimates(10)
+# sapply(2:4, function(x) mean((res1[,1]-res1[,x])^2))
+# 
+# res2 <- sim_estimates(10, e3 = 2)
+# sapply(2:4, function(x) mean((res2[,1]-res2[,x])^2))
+# 
+# res3 <- sim_estimates(10, e2 = -0.5)
+# sapply(2:4, function(x) mean((res3[,1]-res3[,x])^2))
+# 
+# res4 <- sim_estimates(10, e1 = -2, e3 = 2)
+# sapply(2:4, function(x) mean((res4[,1]-res4[,x])^2))
 
-res2 <- sim_estimates(10, e3 = 2)
-sapply(2:4, function(x) mean((res2[,1]-res2[,x])^2))
+e <- seq(-2, 2, by = 1)
+e <- expand.grid(e,e,e)
+res <- t(sapply(1:nrow(e), function(x){print(x);sim_estimates(1,e[x,1],e[x,2],e[x,3])}))
+colnames(res) <- c("true_patt","tpatt","tpatt_unadj","rct_sate","rateC","rateS","rateX")
+mse <- sapply(2:4, function(x) ((res[,1]-res[,x])^2))
+colnames(mse) <- c("mse_tpatt", "mse_tpatt_unadj", "mse_rct_sate")
+res <- cbind(res, mse)
 
-res3 <- sim_estimates(10, e2 = -0.5)
-sapply(2:4, function(x) mean((res3[,1]-res3[,x])^2))
+good <- mse[,1]<mse[,2]
