@@ -2,6 +2,7 @@
 
 # Libraries
 library(weights)
+library(plyr)
 
 # Define directory for analysis 
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
@@ -20,12 +21,27 @@ n.hh <- dummify(ohie$numhh_list)
 
 # Compliance is "ever on Medicaid" during study period
 # (variable used for analysis of hospital discharge data in Taubman et al. 2014)
-insurance <- ifelse(ohie$ohp_all_ever_firstn_30sep2009=="Enrolled",1,0)
+insurance <- ifelse(ohie$ohp_all_ever_firstn_30sep2009=="Enrolled",1,0) #Any ED visit in the study period
 
 table(insurance, treatment) # there's two-way crossover?
 
-## Create vectors for health care use outcomes
+## Create vectors for health care use outcomes used in Taubman et al (2014)
 
+# Any ED visit in the study period  
+any.visit <- NA
+any.visit[ohie$any_visit_ed=="Yes"] <- 1
+any.visit[ohie$any_visit_ed=="No"] <- 0
+
+# Number of ED visits in the study period (censored)
+num.visit <- ohie$num_visit_cens_ed
+
+# Any ED visit resulting in a hospitalization in the study period
+any.hosp <- NA
+any.hosp[ohie$any_hosp_ed=="Yes"] <- 1
+any.hosp[ohie$any_hosp_ed=="No"] <- 0
+
+# Number of ED visits resulting in a hospitalization in the study period
+num.hosp <- ohie$num_hosp_cens_ed
 
 ## Create vectors for common covariates
 
