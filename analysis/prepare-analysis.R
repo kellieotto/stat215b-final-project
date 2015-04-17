@@ -11,7 +11,14 @@ directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 source(file.path(directory,"prepare-ohie.R"))
 source(file.path(directory,"prepare-nhis.R"))
 
-## Create numeric vectors for treatment, # of HH members, and compliance status
+## NHIS: sample selection - keep participants below 138% FPL
+nhis[["2009"]] <- subset(nhis[["2009"]], nhis[["2009"]]$povrati2 <= 1380)
+nhis[["2010"]] <- subset(nhis[["2010"]], nhis[["2010"]]$povrati3 <= 1380) # check
+nhis[["2011"]] <- subset(nhis[["2011"]], nhis[["2011"]]$povrati3 <= 1380)
+nhis[["2012"]] <- subset(nhis[["2012"]], nhis[["2012"]]$povrati3 <= 1380)
+nhis[["2013"]] <- subset(nhis[["2013"]], nhis[["2013"]]$povrati3 <= 1380)
+
+## OHIE: create vectors for treatment, # of HH members, and compliance status
 
 # Treatment assignment
 treatment <- ifelse(ohie$treatment=="Selected",1,0)
@@ -25,28 +32,39 @@ insurance <- ifelse(ohie$ohp_all_ever_firstn_30sep2009=="Enrolled",1,0) #Any ED 
 
 table(insurance, treatment) # there's two-way crossover?
 
-## Create vectors for health care use outcomes used in Taubman et al (2014)
+## OHIE: create vectors for health care use outcomes 
+# (outcomes used in Taubman et al (2014))
 
-# Any ED visit in the study period  
+# Any ED visit in study period  
 any.visit <- NA
 any.visit[ohie$any_visit_ed=="Yes"] <- 1
 any.visit[ohie$any_visit_ed=="No"] <- 0
 
-# Number of ED visits in the study period (censored)
+# Number of ED visits in study period (censored)
 num.visit <- ohie$num_visit_cens_ed
 
-# Any ED visit resulting in a hospitalization in the study period
+# Any ED visit resulting in a hospitalization the study period
 any.hosp <- NA
 any.hosp[ohie$any_hosp_ed=="Yes"] <- 1
 any.hosp[ohie$any_hosp_ed=="No"] <- 0
 
-# Number of ED visits resulting in a hospitalization in the study period
+# Number of ED visits resulting in a hospitalization in study period (censored)
 num.hosp <- ohie$num_hosp_cens_ed
 
-## Create vectors for common covariates
+# Any Outpatient ED visit in study period
+any.out <- NA
+any.out[ohie$any_out_ed=="Yes"] <- 1
+any.out[ohie$any_out_ed=="No"] <- 0
 
-# create at or below 138% fpl dummy
-x.sa$below.138.fpl = ifelse(x.sa$povrati3 <= 1380 , 1 , 0 ) 
+# Number of Outpatient ED visits in study period (censored)
+num.out <- ohie$num_out_cens_ed
+
+## Create NHIS outcome vectors
+
+# Number of times in ER/ED, past 12 m
+nhis[[2009]]$ahernoyr
+
+## Create vectors for common covariates
 
 # create family income categories
 x.sa <- 
