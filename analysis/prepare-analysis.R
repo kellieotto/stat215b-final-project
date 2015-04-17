@@ -9,14 +9,16 @@ directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 
 # Source data prep scripts
 source(file.path(directory,"prepare-ohie.R"))
-source(file.path(directory,"prepare-nhis.R"))
+source(file.path(directory,"prepare-nhis.R")) # script merges person, sample adult, and imputed income files
 
-## NHIS: sample selection - keep participants below 138% FPL
-nhis[["2009"]] <- subset(nhis[["2009"]], nhis[["2009"]]$povrati2 <= 1380)
-nhis[["2010"]] <- subset(nhis[["2010"]], nhis[["2010"]]$povrati3 <= 1380) # check
+## NHIS: sample selection
+
+# Keep participants below 138% FPL
+nhis[["2009"]] <- subset(nhis[["2009"]], nhis[["2009"]]$povrati2 <= 138) # diff'nt var
+nhis[["2010"]] <- subset(nhis[["2010"]], nhis[["2010"]]$povrati3 <= 1380) 
 nhis[["2011"]] <- subset(nhis[["2011"]], nhis[["2011"]]$povrati3 <= 1380)
-nhis[["2012"]] <- subset(nhis[["2012"]], nhis[["2012"]]$povrati3 <= 1380)
-nhis[["2013"]] <- subset(nhis[["2013"]], nhis[["2013"]]$povrati3 <= 1380)
+nhis[["2012"]] <- subset(nhis[["2012"]], nhis[["2012"]]$povrati3 <= 1.380) # diffn't decimals
+nhis[["2013"]] <- subset(nhis[["2013"]], nhis[["2013"]]$povrati3 <= 1.380)
 
 ## OHIE: create vectors for treatment, # of HH members, and compliance status
 
@@ -62,7 +64,33 @@ num.out <- ohie$num_out_cens_ed
 ## Create NHIS outcome vectors
 
 # Number of times in ER/ED, past 12 m
-nhis[[2009]]$ahernoyr
+nhis.num.visit <- foreach(i=years, .combine=c) %do% {
+  nhis[[as.character(i)]]$ahernoy2
+}
+nhis.num.visit[nhis.num.visit==97 | nhis.num.visit==98 | nhis.num.visit==99]  <- NA # make missing NA
+
+# Any ER/ED visit in past 12 m
+nhis.any.visit <- NA
+nhis.any.visit[nhis.num.visit==0] <- 0
+nhis.any.visit[nhis.num.visit>0] <- 1
+  
+# ER visit resulted in hospital admission 
+nhis.any.hosp <- foreach(i=c(2011:2013), .combine=c) %do% { # available for 2011-13
+  nhis[[as.character(i)]]$aerhos
+}
+nhis.any.hosp[nhis.any.hosp==2] <- 0 #recode
+nhis.any.hosp[nhis.any.hosp==7 | nhis.any.hosp==8 | nhis.any.hosp==9] <- NA
+
+# Total number of office visits, past 12 m 
+nhis.num.out <- foreach(i=years, .combine=c) %do% {
+  nhis[[as.character(i)]]$ahcnoyr
+}
+nhis.num.out[nhis.num.out==97 | nhis.num.out==98 | nhis.num.out==99]  <- NA # make missing NA
+
+# Any office visit in last 12 m
+nhis.any.out <- NA
+nhis.any.out[nhis.num.out==0] <- 0
+nhis.any.out[nhis.num.out>0] <- 1
 
 ## Create vectors for common covariates
 
