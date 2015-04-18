@@ -26,7 +26,7 @@ nhis[["2013"]] <- subset(nhis[["2013"]], nhis[["2013"]]$povrati3 <= 1.380)
 treatment <- ifelse(ohie$treatment=="Selected",1,0)
 
 # Assignment is random only conditional on # of HH members on waiting list 
-n.hh <- dummify(ohie$numhh_list)
+n.hh <- dummify(ohie$numhh_list,keep.na=TRUE)
 
 # Compliance is "ever on Medicaid" during study period
 # (variable used for analysis of hospital discharge data in Taubman et al. 2014)
@@ -96,9 +96,9 @@ nhis.any.out[nhis.num.out>0] <- 1
 ## Note: OHIE variables are pretreatment (Initial Mail Survey dataset)
 
 # Gender
-gender <- dummify(ohie$female_0m)
+gender <- dummify(ohie$female_0m,keep.na=TRUE)
 gender.nhis <- foreach(i=years, .combine=rbind) %do% {
-  dummify(factor(nhis[[as.character(i)]]$sex))
+  dummify(factor(nhis[[as.character(i)]]$sex),keep.na=TRUE)
 }
 colnames(gender.nhis) <- c("Male","Female")
 
@@ -147,3 +147,43 @@ asthma.nhis <- foreach(i=years, .combine=c) %do% {
   ifelse(nhis[[as.character(i)]]$aasmev==1,1,0)
 }
 
+# Diagnosed with high blood pressure
+bp <- ifelse(ohie$hbp_dx_0m=="Diagnosed",1,0)
+bp.nhis <- foreach(i=years, .combine=c) %do% {
+  nhis[[as.character(i)]]$hypev[nhis[[as.character(i)]]$hypev>2] <- NA # missing is NA
+  ifelse(nhis[[as.character(i)]]$hypev==1,1,0)
+}
+
+# Diagnosed with Emphysema or chronic bronchitis (COPD)
+copd <- ifelse(ohie$emp_dx_0m=="Diagnosed",1,0)
+copd.nhis <- foreach(i=c(2012,2013), .combine=c) %do% { # 2012 and 2013 only 
+  nhis[[as.character(i)]]$copdev[nhis[[as.character(i)]]$copdev>2] <- NA # missing is NA
+  ifelse(nhis[[as.character(i)]]$copdev==1,1,0)
+}
+# Diagnosed with heart condition/disease
+heart <- ifelse(ohie$chf_dx_0m=="Diagnosed",1,0)
+heart.nhis <- foreach(i=years, .combine=c) %do% {  
+  nhis[[as.character(i)]]$hrtev[nhis[[as.character(i)]]$hrtev>2] <- NA # missing is NA
+  ifelse(nhis[[as.character(i)]]$hrtev==1,1,0)
+}
+
+# Highest level of education completed
+education <- dummify(ohie$edu_0m,keep.na=TRUE)
+education.nhis <- foreach(i=years, .combine=c) %do% {  
+  nhis[[as.character(i)]]$educ[nhis[[as.character(i)]]$educ>21] <- NA # missing is NA
+  cut(nhis[[as.character(i)]]$educ, 
+      breaks=c(-Inf,12,14,17,Inf)) 
+}
+education.nhis <- factor(education.nhis)
+levels(education.nhis) <- colnames(education)
+education.nhis <- dummify(education.nhis, keep.na=TRUE)
+
+# HH income level
+income <- dummify(ohie$hhinc_cat_0m,keep.na=TRUE)
+income.nhis <- foreach(i=years, .combine=c) %do% {  
+  cut(nhis[[as.character(i)]]$faminci2, 
+      breaks=c(-Inf,0,1,2501,5001,7501,100001,12501,15001,17501,20001,22501,25001,27501,30001,32501,35001,37501,40001,42501,45001,47501,50000,Inf))
+}
+income.nhis <- factor(income.nhis)
+levels(income.nhis) <- colnames(income)
+income.nhis <- dummify(income.nhis, keep.na=TRUE)
