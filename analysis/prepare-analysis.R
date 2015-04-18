@@ -34,8 +34,8 @@ insurance <- ifelse(ohie$ohp_all_ever_firstn_30sep2009=="Enrolled",1,0) #Any ED 
 
 table(insurance, treatment) # there's two-way crossover?
 
-## OHIE: create vectors for health care use outcomes 
-# (outcomes used in Taubman et al (2014))
+## OHIE: create vectors for health care use outcomes (Taubman et al (2014))
+# (Emergency Department variables)
 
 # Any ED visit in study period  
 any.visit <- NA
@@ -93,20 +93,57 @@ nhis.any.out[nhis.num.out==0] <- 0
 nhis.any.out[nhis.num.out>0] <- 1
 
 ## Create vectors for common covariates
+## Note: OHIE variables are pretreatment (Initial Mail Survey dataset)
 
-# create family income categories
-x.sa <- 
-  transform( 
-    x.sa , 
-    
-    # create a four-category family income variable
-    fine.faminci2 =
-      cut( 
-        faminci2, 
-        c( -Inf , summary(faminci2[below.138.fpl==1])[[2]] , summary(faminci2[below.138.fpl==1])[[3]], summary(faminci2[below.138.fpl==1])[[5]] , Inf ) ,
-        labels = c( "Fam. income (<Q1)" , "Fam. income (>Q1 & <Q2)" , "Fam. income (>Q2 & <Q3)" , "Fam. income (>Q3)" )
-      )
-  )
+# Gender
+gender <- dummify(ohie$female_0m)
+gender.nhis <- foreach(i=years, .combine=rbind) %do% {
+  dummify(factor(nhis[[as.character(i)]]$sex))
+}
+colnames(gender.nhis) <- c("Male","Female")
 
+# Age 20–49
+age.20to49 <- ifelse(ohie$birthyear_0m<1958,1,0)
+age.20to49.nhis <- foreach(i=years, .combine=c) %do% {
+   nhis[[as.character(i)]]$dob_y_p[nhis[[as.character(i)]]$dob_y_p>=9997] <- NA # missing is NA
+   ifelse(nhis[[as.character(i)]]$dob_y_p<1958,1,0)
+}
 
+# Age 50–64
+age.50to64 <- ifelse(ohie$birthyear_0m>=1958,1,0)
+age.50to64.nhis <- foreach(i=years, .combine=c) %do% {
+  ifelse(nhis[[as.character(i)]]$dob_y_p>=1958,1,0)
+}
+
+# Race: white
+white <- ifelse(ohie$race_white_0m=="Yes",1,0)
+white.nhis <- foreach(i=years, .combine=c) %do% {
+  ifelse(nhis[[as.character(i)]]$racerpi2==1,1,0)
+}
+
+# Race: black
+black <- ifelse(ohie$race_black_0m=="Yes",1,0)
+black.nhis <- foreach(i=years, .combine=c) %do% {
+  ifelse(nhis[[as.character(i)]]$racerpi2==2,1,0)
+}
+
+# Ethnicity: Spanish/Hispanic/Latino
+hisp <- ifelse(ohie$race_hisp_0m=="Yes",1,0)
+hisp.nhis <- foreach(i=years, .combine=c) %do% {
+  ifelse(nhis[[as.character(i)]]$origin_i==1,1,0)
+}
+
+# Diagnosed with diabetes
+diabetes <- ifelse(ohie$dia_dx_0m=="Diagnosed",1,0)
+diabetes.nhis <- foreach(i=years, .combine=c) %do% {
+  nhis[[as.character(i)]]$dibev[nhis[[as.character(i)]]$dibev>2] <- NA # missing is NA
+  ifelse(nhis[[as.character(i)]]$dibev==1,1,0)
+}
+
+# Diagnosed with asthma
+asthma <- ifelse(ohie$ast_dx_0m=="Diagnosed",1,0)
+asthma.nhis <- foreach(i=years, .combine=c) %do% {
+  nhis[[as.character(i)]]$aasmev[nhis[[as.character(i)]]$aasmev>2] <- NA # missing is NA
+  ifelse(nhis[[as.character(i)]]$aasmev==1,1,0)
+}
 
