@@ -30,9 +30,9 @@ n.hh <- dummify(ohie$numhh_list,keep.na=TRUE)
 
 # Compliance is "ever on Medicaid" during study period
 # (variable used for analysis of hospital discharge data in Taubman et al. 2014)
-insurance <- data.frame("insurance"=ifelse(ohie$ohp_all_ever_firstn_30sep2009=="Enrolled",1,0)) #Any ED visit in the study period
+insurance <- ifelse(ohie$ohp_all_ever_firstn_30sep2009=="Enrolled",1,0) #Any ED visit in the study period
 
-table(insurance[,1], treatment) # there's two-way crossover?
+table(insurance, treatment) # there's two-way crossover?
 
 ## OHIE: create vectors for health care use outcomes (Taubman et al (2014))
 # (Emergency Department variables)
