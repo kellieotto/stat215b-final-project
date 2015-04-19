@@ -154,12 +154,6 @@ bp.nhis <- foreach(i=years, .combine=c) %do% {
   ifelse(nhis[[as.character(i)]]$hypev==1,1,0)
 }
 
-# Diagnosed with Emphysema or chronic bronchitis (COPD)
-copd <- ifelse(ohie$emp_dx_0m=="Diagnosed",1,0)
-copd.nhis <- foreach(i=c(2012,2013), .combine=c) %do% { # 2012 and 2013 only 
-  nhis[[as.character(i)]]$copdev[nhis[[as.character(i)]]$copdev>2] <- NA # missing is NA
-  ifelse(nhis[[as.character(i)]]$copdev==1,1,0)
-}
 # Diagnosed with heart condition/disease
 heart <- ifelse(ohie$chf_dx_0m=="Diagnosed",1,0)
 heart.nhis <- foreach(i=years, .combine=c) %do% {  
