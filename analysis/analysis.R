@@ -46,28 +46,25 @@ Y.ohie <- data.frame("any.visit"=any.visit[as.numeric(rownames(X.ohie))], # remo
                     "any.out"=any.out[as.numeric(rownames(X.ohie))],
                     "num.out"=num.out[as.numeric(rownames(X.ohie))]) 
 
-Y.insurance <- insurance[as.numeric(rownames(X.ohie))] # remove rows with missing predictors
-
 Y.nhis <- data.frame("any.visit"=nhis.any.visit[as.numeric(rownames(X.nhis))], # remove rows with missing predictors
                      "num.visit"=nhis.num.visit[as.numeric(rownames(X.nhis))],
                      "any.hosp"=nhis.any.hosp[as.numeric(rownames(X.nhis))], 
                      "any.out"=nhis.any.out[as.numeric(rownames(X.nhis))],
                      "num.out"=nhis.num.out[as.numeric(rownames(X.nhis))]) 
 
-# Predict who is a complier in the control group
-run <- FALSE 
-if(run){ # run this on SCF
-set.seed(42)
-complier.mod <- SuperLearner(Y=Y.insurance, # estimate propensity of compliance
-                             X=X.ohie, 
-                             SL.library=SL.library.class,
-                             family=binomial(), # glmnet response is 2-level factor
-                             method="method.NNLS",
-                             cvControl=list(stratifyCV=TRUE))
-# Store predictions
-C.pscore <- complier.mod$SL.predict
-}
-rct$C_pscore <- predict(complier_mod, rct, type = "response")
-rct$Chat <- rep(1, nrow(rct))
-rct$Chat[rct$Xobs == 0] <- as.numeric(rct$C_pscore[rct$Xobs == 0] >= 0.5)
-rct_compliers <- rct[rct$Chat == 1,]
+# Predict who in the controls would have accepted treatment had they been assigned by fitting 
+# model P(accept treatment | covariates) to the people randomly assigned to treatment
+complier.mod <- randomForest(x=X.ohie[treatment==1,],
+                             y=insurance[treatment==1,][as.numeric(rownames(X.ohie))]) # estimate propensity of compliance
+C.pscore <- data.frame(complier.mod$predicted)
+Chat <- rep(1, nrow(X.ohie))
+Chat[rct$D == 0] <- as.numeric(rct$C_pscore[rct$D == 0] >= 0.5)
+rct.compliers <- rct[rct$Chat == 1,]
+
+rct.compliers <- data.frame("C.pscore"=complier.mod$predicted,
+                            "C.hat"=ifelse(complier.mod$predicted>=0.5,1,0))
+
+nrt$Chat <- rep(1, nrow(nrt))
+nrt$C_pscore <- predict(complier_mod, nrt, type = "response")
+nrt$Chat[nrt$Tt == 0] <- as.numeric(nrt$C_pscore[nrt$Tt == 0] >= 0.5)
+nrt_compliers <- nrt[nrt$Chat == 1,]
