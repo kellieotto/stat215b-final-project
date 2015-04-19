@@ -2,11 +2,12 @@
 
 ### Simple design from Freedman (Weighting Regressions by P Scores)
 ### We assume a treatment effect b which depends on W1: b = 1 if W1 > 0.75, b=-1 if W1 < 0.75
-### Y = a + bX + c1W1 + c2W2 + dU is the response model
-### X = I(e1 + f1W1 + f2W2 + V > 0) is the selection model for treatment when not randomized
+### Y = a + bD + c1W1 + c2W2 + dU is the response model
+### Tt = I(e1 + f1W1 + f2W2 + V > 0) is the selection model for treatment when not randomized
 ### S = I(e2 + g1W1 + g2W2 + g3W3 + R > 0) is the model for selection into the RCT
 ### C = I(e3 + h2W2 + h3W3 + Q > 0) is the model for compliance
-### U, V, R, T are N(0,1); U, V, R, T, (W1, W2, W3) are mutually independent
+### D depends on C and Tt
+### U, V, R, Q are N(0,1); U, V, R, Q, (W1, W2, W3) are mutually independent
 
 
 rm(list=ls())
@@ -24,7 +25,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
 
   # set up storage
   tpatt <- true_patt <- rct_sate <- tpatt_unadj <- rep(0, sims)
-  rateC <- rateX <- rateS <- rep(0, sims)
+  rateC <- rateT <- rateS <- rep(0, sims)
   
   for(i in 1:sims){
     # Pick target sample size
@@ -60,14 +61,14 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     W2 <- var[,6]
     W3 <- var[,7]
     b <- ifelse(W1 > 0.75, 4, 1)
-    X = as.numeric((e1 + f1*W1 + f2*W2 + V) > 0 )
+    Tt = as.numeric((e1 + f1*W1 + f2*W2 + V) > 0 )
     S = as.numeric(e2 + g1*W1 + g2*W2 + g3*W3 + R > 0) 
-    X[S == 1] <- sample(c(0,1), sum(S==1), replace = TRUE)
+    Tt[S == 1] <- sample(c(0,1), sum(S==1), replace = TRUE)
     C <- as.numeric(e3 + h2*W2 + h3*W3 + Q > 0)
-    Xobs <- ifelse(C == 1, X, 0)
+    D <- ifelse(C == 1, Tt, 0)
     
-    Y <- a + b*Xobs + c1*W1 + c2*W2 + d*U
-    dat <- data.frame(Y, X, Xobs, S, C, W1, W2, W3)
+    Y <- a + b*D + c1*W1 + c2*W2 + d*U
+    dat <- data.frame(Y, Tt, D, S, C, W1, W2, W3)
 #    print(i)
 #     if(i == 1){
 #       cat("Compliance rate is approximately ", mean(C), "\n")
@@ -76,7 +77,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
 #     }
     rateC[i] <- mean(C)
     rateS[i] <- mean(S)
-    rateX[i] <- mean(X)
+    rateT[i] <- mean(Tt)
     
     # Set up the RCT
     rct <- dat[rctsample,]
@@ -85,55 +86,55 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     # Set up the non-randomized trial. 
     nrt <- dat[nrtsample,]
     nrt <- nrt[nrt$S==0,]
-    nrt <- nrt[,-2]; colnames(nrt)[2] <- "X"
+    nrt <- nrt[,-2]; colnames(nrt)[2] <- "Tt"
     
-    # Predict who is a complier in the control group (X=0) using W1, W2, W3
+    # Predict who is a complier in the control group (T=0) using W1, W2, W3
     #  suppressWarnings(complier_mod <- randomForest(C~W1+W2+W3, data = rct)) # estimate propensity of compliance
     complier_mod <- glm(C~W1+W2+W3, data = rct, family = "binomial")
     rct$C_pscore <- predict(complier_mod, rct, type = "response")
     rct$Chat <- rep(1, nrow(rct))
-    rct$Chat[rct$Xobs == 0] <- as.numeric(rct$C_pscore[rct$Xobs == 0] >= 0.5)
+    rct$Chat[rct$D == 0] <- as.numeric(rct$C_pscore[rct$D == 0] >= 0.5)
     rct_compliers <- rct[rct$Chat == 1,]
     
     nrt$Chat <- rep(1, nrow(nrt))
     nrt$C_pscore <- predict(complier_mod, nrt, type = "response")
-    nrt$Chat[nrt$X == 0] <- as.numeric(nrt$C_pscore[nrt$X == 0] >= 0.5)
+    nrt$Chat[nrt$Tt == 0] <- as.numeric(nrt$C_pscore[nrt$Tt == 0] >= 0.5)
     nrt_compliers <- nrt[nrt$Chat == 1,]
     
     # Fit a regression to the compliers in the RCT, use it to predict response in population "compliers"
-    response_mod <- randomForest(Y~X + W1 + W2 + W3, data = rct_compliers)
-    #response_mod <- lm(Y~X+W1+W2+W3, data = rct_compliers)
-    nrt_tr_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "X" = rep(1, nrow(nrt_compliers)))
-    nrt_ctrl_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "X" = rep(0, nrow(nrt_compliers)))
+    response_mod <- randomForest(Y~Tt + W1 + W2 + W3, data = rct_compliers)
+    #response_mod <- lm(Y~Tt+W1+W2+W3, data = rct_compliers)
+    nrt_tr_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "Tt" = rep(1, nrow(nrt_compliers)))
+    nrt_ctrl_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "Tt" = rep(0, nrow(nrt_compliers)))
     nrt_compliers$Yhat_1 <- predict(response_mod, nrt_tr_counterfactual)
     nrt_compliers$Yhat_0 <- predict(response_mod, nrt_ctrl_counterfactual)
     
     
     
     # Compute the estimator
-    #  term1 <- mean(nrt_compliers$C_pscore[nrt_compliers$X == 1]*nrt_compliers$Yhat_1[nrt_compliers$X==1])
-    #  term2 <- mean(nrt_compliers$C_pscore[nrt_compliers$X == 1]*nrt_compliers$Yhat_0[nrt_compliers$X==1])
-    term1 <- mean(nrt_compliers$Yhat_1[nrt_compliers$X==1])
-    term2 <- mean(nrt_compliers$Yhat_0[nrt_compliers$X==1])
+    #  term1 <- mean(nrt_compliers$C_pscore[nrt_compliers$Tt == 1]*nrt_compliers$Yhat_1[nrt_compliers$Tt==1])
+    #  term2 <- mean(nrt_compliers$C_pscore[nrt_compliers$Tt == 1]*nrt_compliers$Yhat_0[nrt_compliers$Tt==1])
+    term1 <- mean(nrt_compliers$Yhat_1[nrt_compliers$Tt==1])
+    term2 <- mean(nrt_compliers$Yhat_0[nrt_compliers$Tt==1])
     tpatt[i] <- term1 - term2
     
     # Compare to other estimators
-    true_patt[i] <- mean(b[X == 1 & S == 0])
+    true_patt[i] <- mean(b[Tt == 1 & S == 0])
     # SATE
-    rct_sate[i] <- (mean(rct$Y[rct$X == 1]) - mean(rct$Y[rct$X==0]))/mean(rct$C[rct$X==1])
+    rct_sate[i] <- (mean(rct$Y[rct$Tt == 1]) - mean(rct$Y[rct$Tt==0]))/mean(rct$C[rct$Tt==1])
     # Hartman et al - doesn't account for noncompliance
-    response_mod2 <- randomForest(Y~X + W1 + W2 + W3, data = rct)
-    #response_mod2 <- lm(Y~X+W1+W2+W3, data = rct)
-    nrt_tr_counterfactual <- cbind(nrt[,c("W1", "W2", "W3")], "X" = rep(1, nrow(nrt)))
-    nrt_ctrl_counterfactual <- cbind(nrt[,c("W1", "W2", "W3")], "X" = rep(0, nrow(nrt)))
+    response_mod2 <- randomForest(Y~Tt + W1 + W2 + W3, data = rct)
+    #response_mod2 <- lm(Y~Tt+W1+W2+W3, data = rct)
+    nrt_tr_counterfactual <- cbind(nrt[,c("W1", "W2", "W3")], "Tt" = rep(1, nrow(nrt)))
+    nrt_ctrl_counterfactual <- cbind(nrt[,c("W1", "W2", "W3")], "Tt" = rep(0, nrow(nrt)))
     nrt$Yhat_1 <- predict(response_mod2, nrt_tr_counterfactual)
     nrt$Yhat_0 <- predict(response_mod2, nrt_ctrl_counterfactual)
-    term1 <- mean(nrt$Yhat_1[nrt$X==1])
-    term2 <- mean(nrt$Yhat_0[nrt$X==1])
+    term1 <- mean(nrt$Yhat_1[nrt$Tt==1])
+    term2 <- mean(nrt$Yhat_0[nrt$Tt==1])
     tpatt_unadj[i] <- term1 - term2
     
   }
-res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rateC, rateS, rateX)
+res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rateC, rateS, rateT)
 return(res)
 }
 
@@ -150,11 +151,20 @@ return(res)
 # sapply(2:4, function(x) mean((res4[,1]-res4[,x])^2))
 
 e <- seq(-2, 2, by = 1)
+#e <- 1:2
 e <- expand.grid(e,e,e)
 res <- t(sapply(1:nrow(e), function(x){print(x);sim_estimates(1,e[x,1],e[x,2],e[x,3])}))
 colnames(res) <- c("true_patt","tpatt","tpatt_unadj","rct_sate","rateC","rateS","rateX")
 mse <- sapply(2:4, function(x) ((res[,1]-res[,x])^2))
 colnames(mse) <- c("mse_tpatt", "mse_tpatt_unadj", "mse_rct_sate")
 res <- cbind(res, mse)
+res <- as.data.frame(res)
 
+library(ggplot2)
+p1 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateT,1)))) + geom_tile(aes(fill = mse_tpatt),     colour = "yellow")+ scale_fill_gradient(low = "yellow", high = "red")
+p1
+p2 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = mse_tpatt),     colour = "yellow", size = 3)+ scale_fill_gradient(low = "yellow", high = "red")
+p2
+p3 <- ggplot(res, aes(as.factor(round(rateT,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = mse_tpatt),     colour = "yellow", size = 3)+ scale_fill_gradient(low = "yellow", high = "red")
+p3
 good <- mse[,1]<mse[,2]

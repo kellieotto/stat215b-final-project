@@ -95,6 +95,7 @@ nhis.any.out[nhis.num.out>0] <- 1
 ## Create vectors for common covariates
 ## Note: OHIE variables are pretreatment (Initial Mail Survey dataset)
 
+
 # No. people in HH
 n.hh.nhis <- foreach(i=years, .combine=c) %do% {  
   cut(nhis[[as.character(i)]]$acpt_per, 
