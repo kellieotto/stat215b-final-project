@@ -1,0 +1,7 @@
+load("/Users/jason/Dropbox/github/stat215b-final-project/data/NHIS/2013/househld.rda")
+colnames(househld)
+househld
+ls()
+colnames(NHIS.13.househld.df)
+summary(NHIS.13.househld.df$acpt_per)
+summary(NHIS.13.househld.df$rej_per)

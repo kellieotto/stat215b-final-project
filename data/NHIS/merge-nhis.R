@@ -42,7 +42,7 @@
 
 
 #########################################################################################################
-# Analyze the 2011 National Health Interview Survey personsx, samadult, and imputed income files with R #
+# Analyze the 2011 National Health Interview Survey household, personsx, samadult, and imputed income files with R #
 #########################################################################################################
 
 
@@ -81,18 +81,21 @@ setwd("~/Dropbox/github/stat215b-final-project/data/NHIS")
 path.to.personsx.file <- paste( getwd() , year , "personsx.rda" , sep = "/" )
 path.to.samadult.file <- paste( getwd() , year , "samadult.rda" , sep = "/" )
 path.to.incmimp.file <- paste( getwd() , year , "incmimp.rda" , sep = "/" )
-
+path.to.househld.file <- paste( getwd() , year , "househld.rda" , sep = "/" )
 
 # print those filepaths to the screen
 print( path.to.personsx.file )
 print( path.to.samadult.file )
 print( path.to.incmimp.file )
-
+print( path.to.househld.file )
 
 # now the "NHIS.11.personsx.df" data frame can be loaded directly
 # from your local hard drive.  this is much faster.
 load( path.to.personsx.file )		# this loads a data frame called NHIS.11.personsx.df
 load( path.to.samadult.file )		# this loads a data frame called NHIS.11.samadult.df
+load( path.to.househld.file )  	
+
+
 # the five imputed income files will be loaded later
 
 # all objects currently in memory can be viewed with the list function
@@ -106,10 +109,10 @@ ls()
 # by simply changing the 'year' variable above
 df.name <- paste( "NHIS" , substr( year , 3 , 4 ) , "personsx" , "df" , sep = "." )
 
-# repeat this for the sample adult data frame, 
+# repeat this for household and sample adult data frame, 
 # but not for the five imputed income data frames (which will be dealt with later)
 samadult.name <- paste( "NHIS" , substr( year , 3 , 4 ) , "samadult" , "df" , sep = "." )
-
+househld.name <- paste( "NHIS" , substr( year , 3 , 4 ) , "househld" , "df" , sep = "." )
 
 # copy the personsx data frame to the variable x for easier analyses
 # (because NHIS.11.personsx.df is unwieldy to keep typing)
@@ -119,9 +122,11 @@ x <- get( df.name )
 # (because NHIS.11.samadult.df is unwieldy to keep typing)
 sa <- get( samadult.name )
 
+# HH df
+hh <- get(househld.name)
 
 # remove the original copy of the two data frames from memory
-rm( list = c( df.name , samadult.name ) )
+rm( list = c( df.name , samadult.name, househld.name ) )
 
 # clear up RAM
 gc()
@@ -195,30 +200,55 @@ stopifnot( nrow( x.sa ) == nrow( sa ) )
 # so delete the samadult file
 rm( sa ) 
 
-# and clear up RAM
-gc()
+#####################################
+# merge merged and househld files #
+#####################################
+
+# store the names of these three columns in a character vector
+merge.vars <- c( "hhx")
+
+# these two files have multiple overlapping (redundant) columns,
+# so determine which columns are included in both data frames
+# at the same time, enclose this statement in () thereby printing the vector to the screen
+( columns.in.both.dfs <- intersect( names( x.sa ) , names( hh ) ) )
 
 
-#######################################
-# prepare data frames for an analysis #
-# involving multiply-imputed income   #
-#######################################
+# since the merge.vars will be used to merge the two data frames,
+# those three variables should be excluded from the list of redundant columns
+# keep all column names that don't match the merge variables
+# at the same time, enclose this statement in () thereby printing the vector to the screen
+( redundant.columns <- columns.in.both.dfs[ !( columns.in.both.dfs %in% merge.vars ) ] )
+
+# notice that the three merge.vars have disappeared
 
 
-# from the code above, two large data frames are still in memory:
-# x (the personsx data frame) and
-# x.sa (the merged personsx-samadult data frame)
-
-# note: the following steps to create a survey design with multiply-imputed variables
-# can be applied using either the x or x.sa data frame.  the following example will use x.sa,
-# but x can be used with the same techniques (however, the weighting variable must be changed)
+# most analyses start with the personsx file,
+# so shave the redundant columns off of the samadult file
+# keep all columns in the samadult file that are not in the redundant.columns vector
+hh <- hh[ , !( names( hh ) %in% redundant.columns ) ]
 
 
-# this example uses x.sa (the merged data frame), so delete x (the personsx data frame)
-rm( x ) # keep persons file
+# at this point, the only overlap between the personsx and samadult files
+# should be the three merge.vars
+# throw an error if that's not true
+stopifnot( merge.vars == intersect( names( x.sa ) , names( hh ) ) )
 
-# and immediately clear up RAM
-gc()
+
+# remember that the samadult file contains a subset of the individuals in personsx
+# therefore, an inner join of the two should have the same number of records as samadult
+
+# perform the actual merge
+x.sa <- merge( x.sa , hh )
+# note that the merge() function merges using all intersecting columns -
+
+# - by default, the 'by' parameter does not need to be specified
+# for more detail about the merge function, type ?merge in the console
+
+# now the x.sa data frame contains all of the rows in the samadult file and 
+# all columns from both the samadult and personsx files
+# therefore, there's no more need for the samadult file on its own
+# so delete the samadult file
+rm( hh ) 
 
 # # # # # # # # # # # #
 
