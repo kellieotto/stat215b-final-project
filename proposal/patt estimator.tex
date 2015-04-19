@@ -70,8 +70,8 @@ A treatment effect may only be non-zero for compliers.}
 
 
 
-\section{Estimation}
-\subsection{Population Average Treatment Effect on the Treated}
+\section{Population Average Treatment Effect on the Treated}
+\subsection{Parameter}
 The estimand of interest is 
 
 \begin{equation}
@@ -79,7 +79,7 @@ The estimand of interest is
 \end{equation}
 This is the average treatment effect on those in the population who receive treatment.  It includes individuals who actually receive the treatment, but does not include those who are eligible for treatment and do not accept it (non-compliers).
 
-\begin{theorem}
+\begin{theorem}\label{thm1}
 Under assumptions \eqref{consistency} - \eqref{ER},
 
 $$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
@@ -91,7 +91,6 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 
 
 
-This first term is the weighted average of observed responses in the treatment group in the RCT. The second term is the weighted average of the control response for compliers assigned to control in the RCT.  This is unobservable, as we cannot tell who is a complier or non-complier in the control group.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment. \\
 
 \begin{proof}
 We separate the expectation into two terms and treat each individually.
@@ -111,6 +110,11 @@ We separate the expectation into two terms and treat each individually.
 \end{align*}
 The last line follows because of the randomization carried out in the RCT.  This ensures $Y_{10} \independent T \mid (W, S=1)$.
 \end{proof}
+
+\subsection{Estimation}
+Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  Here, we use \textcolor{red}{the SuperLearner ensemble} method to estimate the response curve for compliers, given their treatment assignment and covariates. We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve at each point defined by a complier in the population.  \\
+
+The second challenge is that we cannot observe which individuals are included in the estimation of the second term. We cannot tell who is a complier or non-complier in the control group, as they receive $D=0$ in either case.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible. \\
 
 %
 %\begin{align*}

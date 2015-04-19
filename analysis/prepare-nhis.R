@@ -30,5 +30,5 @@ nhis <- foreach(i=years) %dopar% {
 names(nhis) <- c("2009","2010","2011","2012","2013") # name elements
 
 # Clean up workspace
-rm(years,nhisMerge)
+rm(nhisMerge)
 
