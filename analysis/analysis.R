@@ -54,12 +54,14 @@ Y.nhis <- data.frame("any.visit"=nhis.any.visit[as.numeric(rownames(X.nhis))], #
 
 # Predict who in the controls would have accepted treatment had they been assigned by fitting 
 # model P(accept treatment | covariates) to the people randomly assigned to treatment
-complier.mod <- randomForest(x=X.ohie,
-                             y=insurance[as.numeric(rownames(X.ohie))])
-rct.compliers <- data.frame("C.pscore"=complier.mod$predicted,
+complier.mod <- suppressWarnings(randomForest(x=X.ohie,
+                                              y=insurance[as.numeric(rownames(X.ohie))])) # use rf regression
+rct.compliers <- data.frame("treatment"=treatment[as.numeric(rownames(X.ohie))],
+                            "insurance"=insurance[as.numeric(rownames(X.ohie))],
+                            "C.pscore"=complier.mod$predicted,
                             "C.hat"=ifelse(complier.mod$predicted>=0.5,1,0))
 
-nrt$Chat <- rep(1, nrow(nrt))
-nrt$C_pscore <- predict(complier_mod, nrt, type = "response")
-nrt$Chat[nrt$Tt == 0] <- as.numeric(nrt$C_pscore[nrt$Tt == 0] >= 0.5)
-nrt_compliers <- nrt[nrt$Chat == 1,]
+mean((rct.compliers$insurance - rct.compliers$C.hat)^2) # Calculate MSPE
+
+nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.ohie, type = "response"),
+                            "C.hat"=ifelse(complier.mod$predicted>=0.5,1,0))
