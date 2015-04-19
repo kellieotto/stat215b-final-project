@@ -5,7 +5,7 @@ load("~/analysis.RData")
 
 # Predict who is a complier in the control group
 set.seed(42)
-complier.mod <- SuperLearner(Y=Y.insurance, # estimate propensity of compliance
+complier.mod <- SuperLearner(Y=insurance[as.numeric(rownames(X.ohie))], # estimate propensity of compliance
                              X=X.ohie, 
                              SL.library=SL.library.class,
                              family=binomial(), # glmnet response is 2-level factor
