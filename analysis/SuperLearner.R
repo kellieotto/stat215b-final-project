@@ -85,7 +85,7 @@ run <- FALSE
 if(run){
   set.seed(42)
   fitSL <- SuperLearner(Y=Y,X=X,
-                        SL.library=SL.library.bin,
+                        SL.library=SL.library.class,
                         family=binomial(), # glmnet response is 2-level factor
                         method="method.NNLS",
                         cvControl=list(stratifyCV=TRUE))

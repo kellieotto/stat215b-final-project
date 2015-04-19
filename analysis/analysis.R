@@ -55,6 +55,8 @@ Y.nhis <- data.frame("any.visit"=nhis.any.visit[as.numeric(rownames(X.nhis))], #
                      "num.out"=nhis.num.out[as.numeric(rownames(X.nhis))]) 
 
 # Predict who is a complier in the control group
+run <- FALSE 
+if(run){ # run this on SCF
 set.seed(42)
 complier.mod <- SuperLearner(Y=Y.insurance, # estimate propensity of compliance
                              X=X.ohie, 
@@ -62,7 +64,9 @@ complier.mod <- SuperLearner(Y=Y.insurance, # estimate propensity of compliance
                              family=binomial(), # glmnet response is 2-level factor
                              method="method.NNLS",
                              cvControl=list(stratifyCV=TRUE))
-
+# Store predictions
+C.pscore <- complier.mod$SL.predict
+}
 rct$C_pscore <- predict(complier_mod, rct, type = "response")
 rct$Chat <- rep(1, nrow(rct))
 rct$Chat[rct$Xobs == 0] <- as.numeric(rct$C_pscore[rct$Xobs == 0] >= 0.5)
