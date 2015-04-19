@@ -25,7 +25,7 @@ X.ohie <- na.omit(data.frame(n.hh,  # need to omit rows containing any NA
                              heart,
                              education,
                              income)) 
-X.nhis <- suppressWarnings(na.omit(data.frame(n.hh.nhis, # need to omit rows containing any NA
+X.nhis <-   na.omit(data.frame(n.hh.nhis, # need to omit rows containing any NA
                              gender.nhis, 
                              "age.20to49"=age.20to49.nhis,
                              "age.50to64"=age.50to64.nhis,
@@ -37,7 +37,7 @@ X.nhis <- suppressWarnings(na.omit(data.frame(n.hh.nhis, # need to omit rows con
                              "bp"=bp.nhis,
                              "heart"=heart.nhis,
                              education.nhis,
-                             income.nhis)))
+                             income.nhis))
 
 # Create dfs for outcomes
 Y.ohie <- data.frame("any.visit"=any.visit[as.numeric(rownames(X.ohie))], # remove rows with missing predictors
@@ -54,13 +54,8 @@ Y.nhis <- data.frame("any.visit"=nhis.any.visit[as.numeric(rownames(X.nhis))], #
 
 # Predict who in the controls would have accepted treatment had they been assigned by fitting 
 # model P(accept treatment | covariates) to the people randomly assigned to treatment
-complier.mod <- randomForest(x=X.ohie[treatment==1,],
-                             y=insurance[treatment==1,][as.numeric(rownames(X.ohie))]) # estimate propensity of compliance
-C.pscore <- data.frame(complier.mod$predicted)
-Chat <- rep(1, nrow(X.ohie))
-Chat[rct$D == 0] <- as.numeric(rct$C_pscore[rct$D == 0] >= 0.5)
-rct.compliers <- rct[rct$Chat == 1,]
-
+complier.mod <- randomForest(x=X.ohie,
+                             y=insurance[as.numeric(rownames(X.ohie))])
 rct.compliers <- data.frame("C.pscore"=complier.mod$predicted,
                             "C.hat"=ifelse(complier.mod$predicted>=0.5,1,0))
 
