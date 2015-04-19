@@ -150,21 +150,48 @@ return(res)
 # res4 <- sim_estimates(10, e1 = -2, e3 = 2)
 # sapply(2:4, function(x) mean((res4[,1]-res4[,x])^2))
 
-e <- seq(-2, 2, by = 1)
+
+e <- seq(-2, 2, by = 0.5)
 #e <- 1:2
 e <- expand.grid(e,e,e)
-res <- t(sapply(1:nrow(e), function(x){print(x);sim_estimates(1,e[x,1],e[x,2],e[x,3])}))
-colnames(res) <- c("true_patt","tpatt","tpatt_unadj","rct_sate","rateC","rateS","rateX")
-mse <- sapply(2:4, function(x) ((res[,1]-res[,x])^2))
-colnames(mse) <- c("mse_tpatt", "mse_tpatt_unadj", "mse_rct_sate")
-res <- cbind(res, mse)
-res <- as.data.frame(res)
+B <- 10
+res <- matrix(t(sapply(1:nrow(e), function(x){print(x); sim_estimates(B,e[x,1],e[x,2],e[x,3])})), ncol = 8)
+res <- cbind(rep(1:nrow(e), each = B), res)
+ colnames(res) <- c("combo", "true_patt","tpatt","tpatt_unadj","rct_sate","rateC","rateS","rateT")
+ mse <- t(sapply(unique(res[,"combo"]), function(x){
+                keep <- which(res[,"combo"] == x)
+                sapply(c("tpatt","tpatt_unadj","rct_sate"), function(cc)mean((res[keep,"true_patt"]-res[keep,cc])^2))
+                }))
+ mse_dup <- matrix(NA, ncol = 3, nrow = B*nrow(e))
+ colnames(mse_dup) <- c("mse_tpatt", "mse_tpatt_unadj", "mse_rct_sate")
+ for(i in 1:3){mse_dup[,i] <- rep(mse[,i], each = B)}
+ res <- cbind(res, mse_dup)
+ res <- as.data.frame(res)
+#save(res, file = "simulation_res.Rdata")
 
+#load("simulation_res.Rdata")
 library(ggplot2)
-p1 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateT,1)))) + geom_tile(aes(fill = mse_tpatt),     colour = "yellow")+ scale_fill_gradient(low = "yellow", high = "red")
+library(gridExtra)
+color_extremes <- c("yellow", "red")
+
+### compare compliance rate and treatment rate
+p1 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateT,1)))) + geom_tile(aes(fill = -log(mse_tpatt)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-5,15)) + labs(x = "Compliance rate", y = "% Eligible for Treatment", title = "PATT Adjusted")
 p1
-p2 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = mse_tpatt),     colour = "yellow", size = 3)+ scale_fill_gradient(low = "yellow", high = "red")
+p2 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateT,1)))) + geom_tile(aes(fill = -log(mse_tpatt_unadj)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-5,15)) + labs(x = "Compliance rate", y = "% Eligible for Treatment", title = "PATT Unadjusted")
 p2
-p3 <- ggplot(res, aes(as.factor(round(rateT,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = mse_tpatt),     colour = "yellow", size = 3)+ scale_fill_gradient(low = "yellow", high = "red")
-p3
-good <- mse[,1]<mse[,2]
+plt <- list(p1, p2)
+#pdf("mse_ratec_ratet.pdf", width = 12)
+grid.arrange(p1, p2)
+dev.off()
+
+
+### compare compliance rate and RCT eligibility rate
+p1 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = -log(mse_tpatt)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-5,15)) + labs(x = "Compliance rate", y = "% Eligible for RCT", title = "PATT Adjusted")
+p1
+p2 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = -log(mse_tpatt_unadj)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-5,15)) + labs(x = "Compliance rate", y = "% Eligible for RCT", title = "PATT Unadjusted")
+p2
+plt <- list(p1, p2)
+#pdf("mse_ratec_rates.pdf", width = 12)
+grid.arrange(p1, p2)
+dev.off()
+
