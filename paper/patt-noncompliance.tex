@@ -134,7 +134,6 @@ Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s
 
 We assume that in the RCT, treatment is assigned at random.  Then for individuals with $C_i = 1$, we observe $D_i = T_i$.  In the population, we suppose that treatment is made available to individuals according to some rule based on their covariates; treatment assignment is not completely random. Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D$, not $T$, in the population.  Among the population controls, we can't distinguish non-compliers (individuals with $T_i=1$ and $D_i = 0$) from compliers (those with $T_i = 0$ and $D_i = 0$).  Compliance is only observable for individuals assigned to treatment in the RCT. \\
 
-\todo{clean up formatting. this is ugly}
 We make the following assumptions:
 \begin{assumption}{1}{}\label{consistency}
 Consistency under parallel studies: for all $i$ and for $t=0, 1$,
@@ -147,7 +146,7 @@ Strong ignorability of sample assignment for treated:
 (Y_{01}, Y_{11}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
 \end{equation*}
 \end{assumption}
-This means that the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
+\noindent This means that the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
 
 \begin{assumption}{3}{}\label{si_ctrl}
 Strong ignorability of sample assignment for controls:
@@ -155,7 +154,7 @@ Strong ignorability of sample assignment for controls:
 (Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
 \end{equation*}\end{assumption}
 
-This means that the potential outcomes for control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
+\noindent This means that the potential outcomes for control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
 
 \begin{assumption}{4}{}\label{sutva}
 Stable unit treatment value assumption (SUTVA):
@@ -163,7 +162,7 @@ Stable unit treatment value assumption (SUTVA):
 Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
 \end{equation*}
 where $L_j$ is the treatment and sample assignment vector for unit $j$. \end{assumption}
- This means that the treatment assignment for all other individuals $j$ does not affect the potential outcomes of individual $i$.
+\noindent This means that the treatment assignment for all other individuals $j$ does not affect the potential outcomes of individual $i$.
  
 \begin{assumption}{5}{}\label{compl}
 Conditional independence of compliance and assignment:
@@ -171,7 +170,7 @@ Conditional independence of compliance and assignment:
 C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
 \end{equation*}
 \end{assumption}
-This means that compliance is independent of sample and treatment assignment for all individuals with covariates $W$.
+\noindent This means that compliance is independent of sample and treatment assignment for all individuals with covariates $W$.
 
 \begin{assumption}{6}{}\label{monotonicity}
 Monotonicity: 
@@ -179,7 +178,7 @@ Monotonicity:
 T_i \geq D_i, \forall i
 \end{equation*}
 \end{assumption}
-This assumption implies that there are no defiers and that crossover is only possible from treatment to control.
+\noindent This assumption implies that there are no defiers and that crossover is only possible from treatment to control.
 
 \begin{assumption}{7}{}\label{ER}
 Exclusion restriction (ER): For non-compliers
@@ -187,7 +186,7 @@ Exclusion restriction (ER): For non-compliers
 Y_{11} = Y_{10}
 \end{equation*}  
 \end{assumption}
-A treatment effect may only be non-zero for compliers.
+\noindent A treatment effect may only be non-zero for compliers.
 
 
 
@@ -238,6 +237,13 @@ Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct a
 
 The second challenge is that we cannot observe which individuals are included in the estimation of the second term. We cannot tell who is a complier or non-complier in the control group, as they receive $D=0$ in either case.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible. \\
 
+The procedure for estimating $\tau_{\text{PATT}}$ using theorem~\ref{thm1} is the following:
+\begin{enumerate}
+\item Using the group assigned to treatment in the RCT $(S=1, T=1)$, train a model to predict complier status $C$ using the covariates $W$.
+\item Using the model from step 1, predict who in the RCT assigned to control \textit{would have} complied to treatment had they been assigned to the treatment group.
+\item For the group of observed compliers to treatment and predicted compliers in the control group, train a model to predict the response using as features the covariates $W$ and the treatment $T$ (assigned and observed are the same, for these individuals).  This model gives $\ex(Y_{1t} \mid S=1, C=1, T=t, W)$ for $t = 0,1$.
+\item For all compliers who received treatment in the population $(S=0, D=1)$, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
+\end{enumerate}
 
 \section{Data}
 
@@ -303,20 +309,6 @@ The treatment effect of Medicaid applies to uninsured adults with income below t
 The proposed method allows us to decompose both SATE and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expect to find substantial differences between sample and population estimates in terms of ethnicity and pre--existing condition subgroups. Overall, we expect the PATT estimate to be lower than the SATE estimate due to the adverse selection problem in the RCT.
 
 
-\section{Numbering assumptions} 
-
-This latex template has macros for numbering assumptions. Below are examples if you want to use them. 
-
-\begin{assumption}{1}{}\label{a1}
-No interference between units: $Y_{i\boldsymbol Z}$ varies with $Z_i$, but does not vary with other elements of \textbf{Z}.
-\end{assumption}
-
-\begin{assumption}{2}{}\label{a2}
-Random treatment assignment: $\mathrm{P}(Z_i | Y_{i\boldsymbol Z}) = \mathrm{P}(Z_i)$ for all $i$. 
-\end{assumption} 
-
-\paragraph{Randomization $p$ value}
-Given assumptions \ref{a1}-\ref{a2}, I use Monte Carlo sampling from a randomization distribution of $\boldsymbol \delta$ to estimate the exact two--sided $p$ value:
 
 
 \pagebreak
