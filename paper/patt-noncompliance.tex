@@ -1,0 +1,175 @@
+\title{Estimating population average treatment effects from experiments with noncompliance}
+
+\author{Kellie Ottoboni, Jason Poulos}
+
+\date{\today}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set document class
+\documentclass[12pt]{article}
+
+% Define packages
+\usepackage{graphicx,amsfonts,psfrag,layout,subcaption,array,longtable,lscape,booktabs,dcolumn,natbib,amsmath,amssymb,amssymb,amsthm,setspace,epigraph,chronology,color, colortbl,caption,wasysym}
+\usepackage[]{graphicx}\usepackage[]{color}
+\usepackage[page]{appendix}
+\usepackage{hyperref, url} %For submission, uncheck and fix URLs ($$)
+\usepackage[section]{placeins}
+\usepackage[linewidth=1pt]{mdframed}
+\usepackage[margin=1in]{geometry} %1 inch margins
+
+% Footnotes stick at the bottom
+\usepackage[bottom]{footmisc}
+
+% New footnote characters
+\usepackage{footmisc}
+\DefineFNsymbols{mySymbols}{{\ensuremath\dagger}{\ensuremath\ddagger}\S\P
+   *{**}{\ensuremath{\dagger\dagger}}{\ensuremath{\ddagger\ddagger}}}
+\setfnsymbol{mySymbols}
+
+% New tabular environment
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\raggedleft\arraybackslash}X}% raggedleft column X
+
+% Define appendix 
+\renewcommand*\appendixpagename{Appendix}
+\renewcommand*\appendixtocname{Appendix}
+
+% Position floats
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+\renewcommand{\floatpagefraction}{0.35}
+\setcounter{totalnumber}{5}
+
+% Colors for highlighting tables
+\definecolor{Gray}{gray}{0.9}
+
+% Different font in captions
+\newcommand{\captionfonts}{\scriptsize}
+
+\makeatletter  % Allow the use of @ in command names
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+  \sbox\@tempboxa{{\captionfonts #1: #2}}%
+  \ifdim \wd\@tempboxa >\hsize
+    {\captionfonts #1: #2\par}
+  \else
+    \hbox to\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+%\makeatother   % Cancel the effect of \makeatletter
+ 
+% Set Spacing
+%\doublespacing
+
+% Number assumptions
+\newtheorem*{assumption*}{\assumptionnumber}
+\providecommand{\assumptionnumber}{}
+\makeatletter
+\newenvironment{assumption}[2]
+ {%
+  \renewcommand{\assumptionnumber}{Assumption #1}%
+  \begin{assumption*}%
+  \protected@edef\@currentlabel{#1}%
+ }
+ {%
+  \end{assumption*}
+ }
+\makeatother
+
+% Macros
+\newcommand{\Adv}{{\mathbf{Adv}}}       
+\newcommand{\prp}{{\mathrm{prp}}}                  % How to define new commands 
+\newcommand{\calK}{{\cal K}}
+\newcommand{\outputs}{{\Rightarrow}}                
+\newcommand{\getsr}{{\:\stackrel{{\scriptscriptstyle\hspace{0.2em}\$}}{\leftarrow}\:}}
+\newcommand{\andthen}{{\::\;\;}}    %  \: \; for thinspace, medspace, thickspace
+\newcommand{\Rand}[1]{{\mathrm{Rand}[{#1}]}}       % A command with one argument
+\newcommand{\Perm}[1]{{\mathrm{Perm}[{#1}]}}       
+\newcommand{\Randd}[2]{{\mathrm{Rand}[{#1},{#2}]}} % and with two arguments
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\DeclareMathOperator*{\plim}{plim}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\newcommand{\possessivecite}[1]{\citeauthor{#1}'s [\citeyear{#1}]} 
+
+\begin{document}
+    
+\maketitle  
+\thispagestyle{empty}
+\begin{abstract}  
+\noindent This is the abstract...
+\end{abstract}	
+
+%Move introduction to second page
+\pagebreak
+\setcounter{page}{1} % Reset to Page 1
+
+\section{Introduction}
+Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when RCTs use samples of individuals who do not represent the population of interest.  For example, RCTs in which participants volunteer to sign up for health insurance coverage may exhibit a sample population that is in poorer health than the target population.  External validity is particularly relevant to policymakers who want to know how a sample average treatment effect (SATE) would generalize to the broader population. Hartman et al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, the PATT estimate is asymptotically unbiased \cite{Hartman}. \\
+
+A prevalent issue in RCTs is noncompliance.  In one-way crossover from treatment to control, individuals who are randomly assigned to the treatment group refuse the treatment.  The serves to dilute the treatment effect, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. estimate the PATT in settings with RCT non-compliance.  After deriving the estimator, we will apply the method to identify the effect of extending Medicare coverage to the low--income population in the U.S.
+
+\section{Statistical Analysis}
+We propose to modify the estimator of PATT from \cite{Hartman} by allowing for the possibility of one-way crossover from treatment to control in the RCT.  We make the same assumptions needed for \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also assume monotonicity (no defiers) and exclusion restriction as in \cite{Angrist1996}.  It does not make sense to talk about compliers and non-compliers in the population, as there is no imposed treatment assignment; compliance is observable only in the RCT sample.   \\
+
+The estimator of PATT involves the expectation of the response of individuals in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we plan to use an ensemble learning method to estimate the response surface.  Then, we will use the response model to estimate population members' outcomes given their covariates.  These estimates will be used to estimate the PATT.
+
+\section{Data}
+
+We will apply the proposed method to estimate the effect of extending Medicaid coverage on emergency--room use and other health outcomes.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. 
+
+\paragraph{Oregon Health Insurance Experiment}
+
+We draw RCT data from the Oregon Health Insurance Experiment \cite{finkelstein2012,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the federal poverty level (FPL) and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid.\footnote{Since randomization is applied on the household level, we will need to account for the number of each participant's household members when specifying the probability of treatment assignment.} In total, about 35,000 participants (representing about 30,000 households) were selected by the lottery; the remaining participants were not able to apply for Medicaid and served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} The RCT data includes demographic variables such as age, gender, ethnicity, pre-existing medical conditions, education, employment, income, and insurance coverage. \\
+
+The Oregon Health Study obtained data on the number of emergency room visits for every RCT participant who resides near twelve hospitals in the Portland area ($N=24,646$). The authors find Medicaid coverage increased emergency-room use over an 18--month period by 40\% relative to the control group \cite{Taubman}. 
+ 
+ \paragraph{Observational data} 
+
+We have data on the target population from two surveys conducted by the Center for Disease Control: the Behavioral Risk Factors Surveillance Study (BRFSS) \cite{BRFSS} and the National Health Interview Study (NHIS) \cite{NHIS}.  We will restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The BRFSS outcomes are self-reported health ratings.  Both surveys record individuals' demographic covariates, which match those measured in the RCT.
+
+\section{Anticipated Results and Implications}
+
+The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the Affordable Care Act expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\
+
+The proposed method allows us to decompose both SATE and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expect to find substantial differences between sample and population estimates in terms of ethnicity and pre--existing condition subgroups. Overall, we expect the PATT estimate to be lower than the SATE estimate due to the adverse selection problem in the RCT.
+
+
+\section{Numbering assumptions} 
+
+This latex template has macros for numbering assumptions. Below are examples if you want to use them. 
+
+\begin{assumption}{1}{}\label{a1}
+No interference between units: $Y_{i\boldsymbol Z}$ varies with $Z_i$, but does not vary with other elements of \textbf{Z}.
+\end{assumption}
+
+\begin{assumption}{2}{}\label{a2}
+Random treatment assignment: $\mathrm{P}(Z_i | Y_{i\boldsymbol Z}) = \mathrm{P}(Z_i)$ for all $i$. 
+\end{assumption} 
+
+\paragraph{Randomization $p$ value}
+Given assumptions \ref{a1}-\ref{a2}, I use Monte Carlo sampling from a randomization distribution of $\boldsymbol \delta$ to estimate the exact two--sided $p$ value:
+
+
+\pagebreak
+
+\begin{singlespace}		%Single-space for bibliography 
+
+%Bibliography
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+%Appendix
+\pagebreak
+\begin{appendices}
+
+\end{appendices}
+\end{singlespace}
+
+\itemize
+\end{document}
+
+
