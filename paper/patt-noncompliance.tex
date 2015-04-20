@@ -285,22 +285,28 @@ For this group of observed compliers to treatment and predicted compliers from t
 
 \subsection{Results}
 
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[width = 0.8\textwidth]{mse_ratec_ratet_B5}
-\caption{Simulated mean squared error, transformed by $-\log$. Darker tiles correspond to lower mean squared error.}
-\label{default}
-\end{center}
-\end{figure}
+We vary each of the parameters $e_1, e_2,$ and $e_3$ along a grid by $-2$ to $2$ in increments of $0.5$ in order to generate different combinations of rates of compliance, treatment eligibility, and RCT eligibility in the population of 30,000.  For each possible combination of the three parameters, we run the simulation $5$ times and compute the mean squared error of our proposed estimator for $\tau_{\text{PATT}}$ and the estimator which is unadjusted for non-compliance, from Hartman et. al.  All other parameters are held fixed. \\
+
+Figure~\ref{fig:sim_tiles} shows the relationship between the percent of compliers in the whole population, the percentage of people in the whole population eligible to participate in the RCT, and the mean squared error of the estimators.
+
+
+
 \begin{figure}[htbp]
 \begin{center}
 \includegraphics[width = 0.8\textwidth]{mse_ratec_rates_B5}
-\caption{default}
-\caption{Simulated mean squared error, transformed by $-\log$. Darker tiles correspond to lower mean squared error.}
+\caption{Simulation mean squared error, transformed by -$\log$. Darker tiles correspond to lower mean squared error.}
+\label{fig:sim_tiles}
 \end{center}
 \end{figure}
 
 
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{mse_boxplots_B5}
+\caption{Simulation mean squared error, according to compliance rates in the total population.}
+\label{fig:sim_compliance}
+\end{center}
+\end{figure}
 \section{Discussion}
 
 The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the Affordable Care Act expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\
