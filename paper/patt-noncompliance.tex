@@ -62,6 +62,9 @@
 % Set Spacing
 %\doublespacing
 
+%Theorem
+\newtheorem{theorem}{Theorem}
+
 % Number assumptions
 \newtheorem*{assumption*}{\assumptionnumber}
 \providecommand{\assumptionnumber}{}
@@ -88,12 +91,15 @@
 \newcommand{\Perm}[1]{{\mathrm{Perm}[{#1}]}}       
 \newcommand{\Randd}[2]{{\mathrm{Rand}[{#1},{#2}]}} % and with two arguments
 \newcommand{\E}{\mathrm{E}}
+\newcommand{\ind}{\mathbb{I}} % Indicator function
 \newcommand{\Var}{\mathrm{Var}}
 \newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\cov}{\mathrm{Cov}}
 \DeclareMathOperator*{\plim}{plim}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 \newcommand{\possessivecite}[1]{\citeauthor{#1}'s [\citeyear{#1}]} 
+\newcommand{\todo}[1]{{\color{red}{TO DO: \sc #1}}}
 
 \begin{document}
     
@@ -112,14 +118,18 @@ Randomized control trials (RCTs) are the ``gold standard" for estimating the cau
 
 A prevalent issue in RCTs is noncompliance.  In one-way crossover from treatment to control, individuals who are randomly assigned to the treatment group refuse the treatment.  The serves to dilute the treatment effect, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. estimate the PATT in settings with RCT non-compliance.  After deriving the estimator, we will apply the method to identify the effect of extending Medicare coverage to the low--income population in the U.S.
 
-\section{Statistical Analysis}
+\paragraph{Statistical Analysis}
 We propose to modify the estimator of PATT from \cite{Hartman} by allowing for the possibility of one-way crossover from treatment to control in the RCT.  We make the same assumptions needed for \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also assume monotonicity (no defiers) and exclusion restriction as in \cite{Angrist1996}.  It does not make sense to talk about compliers and non-compliers in the population, as there is no imposed treatment assignment; compliance is observable only in the RCT sample.   \\
 
-The estimator of PATT involves the expectation of the response of individuals in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we plan to use an ensemble learning method to estimate the response surface.  Then, we will use the response model to estimate population members' outcomes given their covariates.  These estimates will be used to estimate the PATT.
+The estimator of PATT involves the expectation of the response of individuals in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we plan to use an ensemble learning method to estimate the response surface.  Then, we will use the response model to estimate population members' outcomes given their covariates.  These estimates will be used to estimate the PATT. \todo{Update this paragraph}
+
+
+
+
 
 \section{Data}
 
-We will apply the proposed method to estimate the effect of extending Medicaid coverage on emergency--room use and other health outcomes.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. 
+We apply the proposed method to estimate the effect of extending Medicaid coverage on emergency--room use and other health outcomes.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. 
 
 \paragraph{Oregon Health Insurance Experiment}
 
@@ -131,10 +141,53 @@ The Oregon Health Study obtained data on the number of emergency room visits for
 
 We have data on the target population from two surveys conducted by the Center for Disease Control: the Behavioral Risk Factors Surveillance Study (BRFSS) \cite{BRFSS} and the National Health Interview Study (NHIS) \cite{NHIS}.  We will restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The BRFSS outcomes are self-reported health ratings.  Both surveys record individuals' demographic covariates, which match those measured in the RCT.
 
-\section{Anticipated Results and Implications}
+\section{Empirical results}
+\todo{short intro}
+\subsection{Simulation Design}
+RCT eligibility, complier status, and treatment assignment in the population depend on observed covariates. 
+The observed covariates $(W_1, W_2, W_3)$ are multivariate normal with mean $(0.5, 1, -1)$ and covariances $\cov(W_1, W_2) = 1$ and $\cov(W_1, W_3) = \cov(W_2, W_3) = 0.5$. 
+ The  equation for selection into studies is
+ $$ S = \ind(e_2 + g_1W_1 + g_2W_2 + g_3W_3 + R > 0)$$
+  where $R$ is standard normal. $e_2$ controls the fraction of the population eligible for the RCT. We set $g_1, g_2,$ and $g_3$ to be $0.5, 0.25,$ and $0.75$, respectively.
+The compliance indicator is determined by
+$$C = \ind(e_3 + h_2W_2 + h_3W_3 + Q > 0)$$
+where $Q$ is standard normal. $e_3$ controls the fraction of compliers in the population. We set $h_2$ and $h_3$ to $0.5$.
+ In the population (individuals with $S=0$),  treatment is assigned by
+  $$T = \ind(e_1 + f_1W_1 + f_2W_2 + V > 0)$$
+Varying $e_1$ controls the fraction eligible for treatment in the population. $V$ is standard normal. We set $f_1$ to $0.25$ and $f_2$ to $0.75$.  For individuals in the RCT ($S=1$), treatment assignment is a sample from a Bernoulli distribution.
+We set treatment received $D$ according to $T$ and $C$: $D = T$ if $C=1$ and $D = 0$ if $C=0$.
+Finally, the response $Y$ is determined by 
+$$Y = a + bD + c_1W_1 + c_2W_2 + dU$$
+ We assume that the treatment effect $b$ is heterogeneous depending on $W_1$: $b = 1$ if $W_1 > 0.75$ and $b=-1$ if $W_1 \leq 0.75$.   We set $a, c_1,$ and $d$ to $1$ and $c_2$ to $2$. $U$ is standard normal and $U, V, R, Q, (W_1, W_2, W_3)$ are mutually independent.\\
+ 
+ We generate a population of 30,000 individuals and randomly sample 5,000.  Those among the 5,000 who are eligible for the RCT ($S=1$) are selected. Similarly, we sample 5,000 individuals from the population and select those who are not eligible for the RCT ($S=0$); these are a sample of the ``target population''.  We set each individual's treatment received $D$ according to their treatment assignment and complier status and observe their responses $Y$.  In the assigned-treatment RCT group $(S = 1, T = 1)$, we fit a logistic regression to compliance status using the covariates.  With this model, we predict who in the control group $(S = 1, T = 0)$ has $C=1$, since this is unobservable.  These individuals \textit{would have} complied had they been assigned to the treatment group.  We do the same for the target population control group.  \\
+ 
+For this group of observed compliers to treatment and predicted compliers from the control group of the RCT, we estimate the response curve using a random forest with features $(W_1, W_2, W_3)$ and $D$.  Then population local average treatment effect on the treated is estimated according to Theorem 1.
+
+
+\subsection{Results}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{mse_ratec_ratet}
+\caption{Simulated mean squared error, transformed by $-\log$. Darker tiles correspond to lower mean squared error.}
+\label{default}
+\end{center}
+\end{figure}
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width = 0.8\textwidth]{mse_ratec_rates}
+\caption{default}
+\caption{Simulated mean squared error, transformed by $-\log$. Darker tiles correspond to lower mean squared error.}
+\end{center}
+\end{figure}
+
+
+\section{Discussion}
 
 The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the Affordable Care Act expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\
 
+\todo{Update tense}
 The proposed method allows us to decompose both SATE and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expect to find substantial differences between sample and population estimates in terms of ethnicity and pre--existing condition subgroups. Overall, we expect the PATT estimate to be lower than the SATE estimate due to the adverse selection problem in the RCT.
 
 
