@@ -74,6 +74,7 @@ nhis.any.visit[nhis.num.visit==0] <- 0
 nhis.any.visit[nhis.num.visit>0] <- 1
   
 # ER visit resulted in hospital admission 
+# (no # of visits variable)
 nhis.any.hosp <- foreach(i=c(2011:2013), .combine=c) %do% { # available for 2011-13
   nhis[[as.character(i)]]$aerhos
 }
