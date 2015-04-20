@@ -92,6 +92,8 @@
 \newcommand{\Randd}[2]{{\mathrm{Rand}[{#1},{#2}]}} % and with two arguments
 \newcommand{\E}{\mathrm{E}}
 \newcommand{\ind}{\mathbb{I}} % Indicator function
+\newcommand{\pr}{\mathbb{P}} % Generic probability
+\newcommand{\ex}{\mathbb{E}} % Generic expectation
 \newcommand{\Var}{\mathrm{Var}}
 \newcommand{\Cov}{\mathrm{Cov}}
 \newcommand{\cov}{\mathrm{Cov}}
@@ -124,7 +126,117 @@ We propose to modify the estimator of PATT from \cite{Hartman} by allowing for t
 The estimator of PATT involves the expectation of the response of individuals in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we plan to use an ensemble learning method to estimate the response surface.  Then, we will use the response model to estimate population members' outcomes given their covariates.  These estimates will be used to estimate the PATT. \todo{Update this paragraph}
 
 
+\section{Estimator}
+\todo{some intro}
 
+\subsection{Assumptions}
+Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $T_i$ denote the treatment assigned and $D_i$ denote treatment received. Let $W_i$ be individual $i$'s observable covariates related to the sample selection mechanism for membership in the RCT.  Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  For a generic value, we drop the subscript $i$.  \\
+
+We assume that in the RCT, treatment is assigned at random.  Then for individuals with $C_i = 1$, we observe $D_i = T_i$.  In the population, we suppose that treatment is made available to individuals according to some rule based on their covariates; treatment assignment is not completely random. Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D$, not $T$, in the population.  Among the population controls, we can't distinguish non-compliers (individuals with $T_i=1$ and $D_i = 0$) from compliers (those with $T_i = 0$ and $D_i = 0$).  Compliance is only observable for individuals assigned to treatment in the RCT. \\
+
+\todo{clean up formatting. this is ugly}
+We make the following assumptions:
+\begin{assumption}{1}{}\label{consistency}
+Consistency under parallel studies: for all $i$ and for $t=0, 1$,
+$$Y_{i0t} = Y_{i1t}$$
+\end{assumption}
+
+\begin{assumption}{2}{}\label{si_treat}
+Strong ignorability of sample assignment for treated:
+\begin{equation*}
+(Y_{01}, Y_{11}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
+\end{equation*}
+\end{assumption}
+This means that the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
+
+\begin{assumption}{3}{}\label{si_ctrl}
+Strong ignorability of sample assignment for controls:
+\begin{equation*}
+(Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
+\end{equation*}\end{assumption}
+
+This means that the potential outcomes for control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
+
+\begin{assumption}{4}{}\label{sutva}
+Stable unit treatment value assumption (SUTVA):
+\begin{equation*}
+Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
+\end{equation*}
+where $L_j$ is the treatment and sample assignment vector for unit $j$. \end{assumption}
+ This means that the treatment assignment for all other individuals $j$ does not affect the potential outcomes of individual $i$.
+ 
+\begin{assumption}{5}{}\label{compl}
+Conditional independence of compliance and assignment:
+\begin{equation*}
+C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
+\end{equation*}
+\end{assumption}
+This means that compliance is independent of sample and treatment assignment for all individuals with covariates $W$.
+
+\begin{assumption}{6}{}\label{monotonicity}
+Monotonicity: 
+\begin{equation*}
+T_i \geq D_i, \forall i
+\end{equation*}
+\end{assumption}
+This assumption implies that there are no defiers and that crossover is only possible from treatment to control.
+
+\begin{assumption}{7}{}\label{ER}
+Exclusion restriction (ER): For non-compliers
+\begin{equation*}
+Y_{11} = Y_{10}
+\end{equation*}  
+\end{assumption}
+A treatment effect may only be non-zero for compliers.
+
+
+
+
+\subsection{Population Average Treatment Effect on the Treated}
+\todo{Move some of this to appendix?}
+The estimand of interest is 
+
+\begin{equation}
+\tau_{\text{PATT}} = \ex\left( Y_{01} - Y_{00} \mid S=0, D=1\right)
+\end{equation}
+This is the average treatment effect on those in the population who receive treatment.  It includes individuals who actually receive the treatment, but does not include those who are eligible for treatment and do not accept it (non-compliers).
+
+\begin{theorem}\label{thm1}
+Under assumptions \eqref{consistency} - \eqref{ER},
+
+$$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
+-\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] $$
+
+where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the target population.  
+\end{theorem}
+
+
+
+
+
+\begin{proof}
+We separate the expectation into two terms and treat each individually.
+\begin{align*}
+\ex\left(Y_{01} \mid S=0,D=1\right) &= \ex\left(Y_{11} \mid S=0, D=1\right) \tag*{by \eqref{consistency}} \\
+&= \ex\left(Y_{11} \mid S=0, T=1, C=1\right) \tag*{by \eqref{monotonicity}} \\
+&= \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, C=1, W\right) \right] \tag*{by \eqref{si_treat}} \\
+&= \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
+\end{align*}
+
+
+\begin{align*}
+\ex\left(Y_{00} \mid S=0, D=1\right) &= \ex\left(Y_{10} \mid S=0, D=1\right) \tag*{by \eqref{consistency}} \\
+&= \ex\left(Y_{10} \mid S=0, T=1, C=1\right) \tag*{by \eqref{monotonicity}} \\
+&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=1, C=1, W\right) \right] \tag*{by \eqref{si_ctrl}} \\
+&= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] \\
+\end{align*}
+The last line follows because of the randomization carried out in the RCT.  This ensures $Y_{10} \independent T \mid (W, S=1)$.
+\end{proof}
+
+\subsection{Estimation Procedure}
+Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  Here, we use \textcolor{red}{the SuperLearner ensemble} method to estimate the response curve for compliers, given their treatment assignment and covariates. We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve at each point defined by a complier in the population.  \\
+
+The second challenge is that we cannot observe which individuals are included in the estimation of the second term. We cannot tell who is a complier or non-complier in the control group, as they receive $D=0$ in either case.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible. \\
 
 
 \section{Data}
