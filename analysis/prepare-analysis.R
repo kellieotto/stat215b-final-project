@@ -28,38 +28,37 @@ treatment <- ifelse(ohie$treatment=="Selected",1,0)
 # Assignment is random only conditional on # of HH members on waiting list 
 n.hh <- dummify(ohie$numhh_list,keep.na=TRUE)
 
-# Compliance is "ever on Medicaid" during study period
-# (variable used for analysis of hospital discharge data in Taubman et al. 2014)
-insurance <- ifelse(ohie$ohp_all_ever_firstn_30sep2009=="Enrolled",1,0) #Any ED visit in the study period
+# Compliance is "ever on Medicaid" during study period (used in Finkelstein et al. (2012))
+insurance <- ifelse(ohie$ohp_all_ever_matchn_30sep2009=="Enrolled",1,0) 
 
 table(insurance, treatment) # there's two-way crossover?
 
-## OHIE: create vectors for health care use outcomes (Taubman et al (2014))
-# (Emergency Department variables)
+## OHIE: create vectors for health care use outcomes  (used in Finkelstein et al. (2012))
+# (Twelve Month Mail Survey)
 
-# Any ED visit in study period  
+# Any ER visit 
 any.visit <- NA
-any.visit[ohie$any_visit_ed=="Yes"] <- 1
-any.visit[ohie$any_visit_ed=="No"] <- 0
+any.visit[ohie$er_any_12m=="Yes"] <- 1
+any.visit[ohie$er_any_12m=="No"] <- 0
 
-# Number of ED visits in study period (censored)
-num.visit <- ohie$num_visit_cens_ed
+# Num of ER visits, truncated at 2*99th%ile
+num.visit <- ohie$er_num_mod_12m
 
-# Any ED visit resulting in a hospitalization the study period
+# Any hospital visits
 any.hosp <- NA
-any.hosp[ohie$any_hosp_ed=="Yes"] <- 1
-any.hosp[ohie$any_hosp_ed=="No"] <- 0
+any.hosp[ohie$hosp_any_12m=="Yes"] <- 1
+any.hosp[ohie$hosp_any_12m=="No"] <- 0
 
-# Number of ED visits resulting in a hospitalization in study period (censored)
-num.hosp <- ohie$num_hosp_cens_ed
+# Number hospital visits, truncated at 2*99th%ile
+num.hosp <- ohie$hosp_num_mod_12m
 
-# Any Outpatient ED visit in study period
+# Any primary care (outpatient) visits
 any.out <- NA
-any.out[ohie$any_out_ed=="Yes"] <- 1
-any.out[ohie$any_out_ed=="No"] <- 0
+any.out[ohie$doc_any_12m=="Yes"] <- 1
+any.out[ohie$doc_any_12m=="No"] <- 0
 
-# Number of Outpatient ED visits in study period (censored)
-num.out <- ohie$num_out_cens_ed
+# Num prim. care visits,truncated at 2*99th%ile
+num.out <- ohie$doc_num_mod_12m
 
 ## Create NHIS outcome vectors
 
@@ -94,7 +93,6 @@ nhis.any.out[nhis.num.out>0] <- 1
 
 ## Create vectors for common covariates
 ## Note: OHIE variables are pretreatment (Initial Mail Survey dataset)
-
 
 # No. people in HH
 n.hh.nhis <- foreach(i=years, .combine=c) %do% {  

@@ -39,7 +39,7 @@ X.nhis <-   na.omit(data.frame(n.hh.nhis, # need to omit rows containing any NA
                              education.nhis,
                              income.nhis))
 
-# Create dfs for outcomes # switch Y.ohie to 12m survey vars
+# Create dfs for outcomes 
 Y.ohie <- data.frame("any.visit"=any.visit[as.numeric(rownames(X.ohie))], # remove rows with missing predictors
                     "num.visit"=num.visit[as.numeric(rownames(X.ohie))],
                     "any.hosp"=any.hosp[as.numeric(rownames(X.ohie))], 
