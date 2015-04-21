@@ -2,8 +2,6 @@
 ## Then, use response model to estimate population members' outcomes given their covariates.
 ## These estimates will be used to estimate the PATT.
 
-# Libraries
-
 # Define directory for analysis 
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 
@@ -25,8 +23,7 @@ X.ohie <- na.omit(data.frame(n.hh,  # need to omit rows containing any NA
                              heart,
                              education,
                              income)) 
-treatment.ohie <- treatment[as.numeric(rownames(X.ohie))]
-insurance.ohie <- insurance[as.numeric(rownames(X.ohie))]
+
 X.nhis <-   na.omit(data.frame(n.hh.nhis, # need to omit rows containing any NA
                              gender.nhis, 
                              "age.20to49"=age.20to49.nhis,
@@ -41,43 +38,33 @@ X.nhis <-   na.omit(data.frame(n.hh.nhis, # need to omit rows containing any NA
                              education.nhis,
                              income.nhis))
 
+# Create vectors for treatment and compliance 
+treatment.ohie <- treatment[as.numeric(rownames(X.ohie))]
+insurance.ohie <- insurance[as.numeric(rownames(X.ohie))]
+
 # Create dfs for outcomes 
 Y.ohie <- data.frame("any.visit"=any.visit[as.numeric(rownames(X.ohie))], # remove rows with missing predictors
                     "num.visit"=num.visit[as.numeric(rownames(X.ohie))],
-                    "any.hosp"=any.hosp[as.numeric(rownames(X.ohie))], 
                     "any.out"=any.out[as.numeric(rownames(X.ohie))],
                     "num.out"=num.out[as.numeric(rownames(X.ohie))]) 
 
 Y.nhis <- data.frame("any.visit"=nhis.any.visit[as.numeric(rownames(X.nhis))], # remove rows with missing predictors
                      "num.visit"=nhis.num.visit[as.numeric(rownames(X.nhis))],
-                     "any.hosp"=nhis.any.hosp[as.numeric(rownames(X.nhis))], 
                      "any.out"=nhis.any.out[as.numeric(rownames(X.nhis))],
                      "num.out"=nhis.num.out[as.numeric(rownames(X.nhis))]) 
 
 # Predict who is a complier in RCT and NRT
-load("analysis.RData")
-run <- FALSE
-if(run){
-  set.seed(42)
-  complier.mod <- SuperLearner(Y=insurance[as.numeric(rownames(X.ohie))], # estimate propensity of compliance
-                               X=X.ohie, 
-                               SL.library=SL.library.class,
-                               family=binomial(), # glmnet response is 2-level factor
-                               method="method.NNLS",
-                               cvControl=list(stratifyCV=TRUE))
-  C.pscore <- complier.mod$SL.predict   # Store predictions
-}
-
-
-complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,],                                        y=insurance.ohie[treatment.ohie==1])) # use rf regression for now
+complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
+                                              y=insurance.ohie[treatment.ohie==1])) 
 rct.compliers <- data.frame("treatment"=treatment.ohie,
                             "insurance"=insurance.ohie,
-                            "C.pscore"=predict(complier.mod, X.ohie), # change to complier.mod$SL.predict
+                            "C.pscore"=predict(complier.mod, X.ohie), 
                             "C.hat"=ifelse(predict(complier.mod, X.ohie)>=0.5,1,0),
                             "complier"=0)
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
-save(complier.mod, rct.compliers, file = "complier-mod-rf.RData")
+
+save(complier.mod, rct.compliers, file = "complier-mod-rf.RData") # save .Rdata
 
 nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
                             "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
