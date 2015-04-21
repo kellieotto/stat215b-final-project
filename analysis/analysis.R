@@ -47,7 +47,7 @@ insurance.ohie <- insurance[as.numeric(rownames(X.ohie))]
 Y.ohie <- na.omit(data.frame("any.visit"=any.visit, # need to omit rows containing any NA
                     "num.visit"=num.visit,
                   #  "any.hosp"=any.hosp,
-                 #   "num.hosp"=num.hosp,
+                  #  "num.hosp"=num.hosp,
                     "any.out"=any.out,
                     "num.out"=num.out))
 
