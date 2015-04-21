@@ -89,3 +89,14 @@ nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(nrt.compliers
                                  X.nhis[which(nrt.compliers$C.hat==1),])
 Yhat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
 Yhat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
+
+# Compute the estimator
+term1 <- lapply(y.col, function (i) mean(Yhat.1[[i]]))
+term2 <- lapply(y.col, function (i) mean(Yhat.0[[i]]))
+tpatt <- lapply(y.col, function (i) term1[[i]] - term2[[i]])
+
+# Compute SATE for comparison
+rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1)]) - # Num. is ITT effect
+                                             mean(Y.ohie[[i]][which(treatment.ohie==0)])) 
+                   /mean(rct.compliers$complier[which(rct.compliers$treatment==1)])) # Denom. is true RCT compliance rate
+
