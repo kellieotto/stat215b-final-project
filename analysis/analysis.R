@@ -8,6 +8,7 @@ directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 # Source scripts
 source(file.path(directory,"prepare-analysis.R"))
 source(file.path(directory,"SuperLearner.R"))
+library(randomForest)
 
 # Create dfs containing common features for RCT and observational study
 X.ohie <- na.omit(data.frame(n.hh,  # need to omit rows containing any NA
@@ -67,9 +68,10 @@ rct.compliers <- data.frame("treatment"=treatment.ohie,
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
 
-save(complier.mod, rct.compliers, file = "complier-mod-rf.RData") # save .Rdata
+#save(complier.mod, rct.compliers, file = "complier-mod-rf.RData") # save .Rdata
 
-# Predict who is a complier in RCT
+load("complier-mod-rf.RData")
+# Predict who is a complier in NRT
 nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
                             "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
 
@@ -82,11 +84,17 @@ response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response,
                                                     y=Y.ohie.response[,i]))
 names(response.mod) <- colnames(Y.ohie.response) # name each element of list
 
-# Use response model to estimate potential outcomes for population "compliers"
+# Use response model to estimate potential outcomes for population "compliers" who received treatment (medicaid == 1)
 nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(nrt.compliers$C.hat==1))),
                                X.nhis[which(nrt.compliers$C.hat==1),])
 nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(nrt.compliers$C.hat==1))),
                                  X.nhis[which(nrt.compliers$C.hat==1),])
+########## lines 88-91 should look like this instead ##########
+# medicaid <- which(rows of nrt where the person has medicaid)
+# nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(medicaid)),
+#                            X.nhis[medicaid,])
+#nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(medicaid)),
+#                                 X.nhis[medicaid,])
 Yhat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
 Yhat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
 
