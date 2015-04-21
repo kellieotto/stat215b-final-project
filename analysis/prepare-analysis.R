@@ -33,6 +33,14 @@ insurance <- ifelse(ohie$ohp_all_ever_matchn_30sep2009=="Enrolled",1,0)
 
 table(insurance, treatment) # there's two-way crossover?
 
+## NHIS: compliance analogue
+
+# Medicaid recode  
+nhis.insurance <- foreach(i=years, .combine=c) %do% {
+  nhis[[as.character(i)]]$medicaid[nhis[[as.character(i)]]$medicaid>3] <- NA # missing is NA
+  ifelse(nhis[[as.character(i)]]$medicaid==1 | nhis[[as.character(i)]]$medicaid==2,1,0)
+}
+
 ## OHIE: create vectors for health care use outcomes  (used in Finkelstein et al. (2012))
 # (Twelve Month Mail Survey)
 
