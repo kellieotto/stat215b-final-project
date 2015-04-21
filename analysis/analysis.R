@@ -71,7 +71,7 @@ save(complier.mod, rct.compliers, file = "complier-mod-rf.RData") # save .Rdata
 nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
                             "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
 
-# Fit a regression to the compliers in the RCT, use it to predict response in population "compliers"
+# Fit a regression to the compliers in the RCT
 y.col <- 1:ncol(Y.ohie) # number of responses
 Y.ohie.response <- Y.ohie[which(rct.compliers$complier==1),]
 X.ohie.response <- data.frame("treatment"=rct.compliers$treatment[which(rct.compliers$complier==1)],
@@ -80,7 +80,10 @@ response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response,
                                                     y=Y.ohie.response[,i]))
 names(response.mod) <- colnames(Y.ohie.response) # name each element of list
 
-nrt_tr_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "Tt" = rep(1, nrow(nrt_compliers)))
-nrt_ctrl_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "Tt" = rep(0, nrow(nrt_compliers)))
-nrt_compliers$Yhat_1 <- predict(response_mod, nrt_tr_counterfactual)
-nrt_compliers$Yhat_0 <- predict(response_mod, nrt_ctrl_counterfactual)
+# Use response model to estimate potential outcomes for population "compliers"
+nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(nrt.compliers$C.hat==1))),
+                               X.nhis[which(nrt.compliers$C.hat==1),])
+nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(nrt.compliers$C.hat==1))),
+                                 X.nhis[which(nrt.compliers$C.hat==1),])
+Yhat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
+Yhat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
