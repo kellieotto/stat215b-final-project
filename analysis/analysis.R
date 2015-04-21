@@ -43,17 +43,18 @@ treatment.ohie <- treatment[as.numeric(rownames(X.ohie))]
 insurance.ohie <- insurance[as.numeric(rownames(X.ohie))]
 
 # Create dfs for outcomes 
-Y.ohie <- data.frame("any.visit"=any.visit[as.numeric(rownames(X.ohie))], # remove rows with missing predictors
-                    "num.visit"=num.visit[as.numeric(rownames(X.ohie))],
-                    "any.out"=any.out[as.numeric(rownames(X.ohie))],
-                    "num.out"=num.out[as.numeric(rownames(X.ohie))]) 
+Y.ohie <- na.omit(data.frame("any.visit"=any.visit, # match response rows with predictors
+                    "num.visit"=num.visit,
+                    "any.out"=any.out,
+                    "num.out"=num.out))
 
-Y.nhis <- data.frame("any.visit"=nhis.any.visit[as.numeric(rownames(X.nhis))], # remove rows with missing predictors
-                     "num.visit"=nhis.num.visit[as.numeric(rownames(X.nhis))],
-                     "any.out"=nhis.any.out[as.numeric(rownames(X.nhis))],
-                     "num.out"=nhis.num.out[as.numeric(rownames(X.nhis))]) 
+Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # match response rows with predictors
+                     "num.visit"=nhis.num.visit,
+                     "any.out"=nhis.any.out,
+                     "num.out"=nhis.num.out))
 
-# Predict who is a complier in RCT and NRT
+
+# Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
 complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
                                               y=insurance.ohie[treatment.ohie==1])) 
 rct.compliers <- data.frame("treatment"=treatment.ohie,
@@ -66,16 +67,21 @@ rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1
 
 save(complier.mod, rct.compliers, file = "complier-mod-rf.RData") # save .Rdata
 
+# Predict who is a complier in RCT
 nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
                             "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
 
 # Fit a regression to the compliers in the RCT, use it to predict response in population "compliers"
 y.col <- 1:ncol(Y.ohie) # number of responses
-response.mod <- lapply(y.col, randomForest, x=cbind(rct.compliers$treatment[rct.compliers$complier==1],
-                                                    X.ohie[rct.compliers$complier==1,]),
-                                                    y=Y.ohie[as.numeric(rownames(X.ohie[rct.compliers$complier==1,])),y.col])
+Y.ohie.response <- Y.ohie[which(rct.compliers$complier==1) %in% as.numeric(row.names(Y.ohie)),]
+X.ohie.response <- data.frame("treatment"=rct.compliers$treatment[rct.compliers$complier==1],
+                         X.ohie[rct.compliers$complier==1,])
+response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response[as.numeric(intersect(row.names(X.ohie.response),
+                                                                                              row.names(Y.ohie.response))),],
+                                                    y=Y.ohie.response[as.numeric(intersect(row.names(X.ohie.response),
+                                                                                           row.names(Y.ohie.response))),i]))
+names(response.mod) <- colnames(Y.ohie.response) # name each element of list
 
-response_mod <- randomForest(Y~Tt + W1 + W2 + W3, data = rct_compliers)
 nrt_tr_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "Tt" = rep(1, nrow(nrt_compliers)))
 nrt_ctrl_counterfactual <- cbind(nrt_compliers[,c("W1", "W2", "W3")], "Tt" = rep(0, nrow(nrt_compliers)))
 nrt_compliers$Yhat_1 <- predict(response_mod, nrt_tr_counterfactual)
