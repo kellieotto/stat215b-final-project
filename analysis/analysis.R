@@ -43,16 +43,18 @@ treatment.ohie <- treatment[as.numeric(rownames(X.ohie))]
 insurance.ohie <- insurance[as.numeric(rownames(X.ohie))]
 
 # Create dfs for outcomes 
-Y.ohie <- na.omit(data.frame("any.visit"=any.visit, # match response rows with predictors
+Y.ohie <- na.omit(data.frame("any.visit"=any.visit, # need to omit rows containing any NA
                     "num.visit"=num.visit,
+                  #  "any.hosp"=any.hosp,
+                 #   "num.hosp"=num.hosp,
                     "any.out"=any.out,
                     "num.out"=num.out))
 
-Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # match response rows with predictors
+Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # need to omit rows containing any NA
                      "num.visit"=nhis.num.visit,
+                #     "any.hosp"=nhis.any.hosp,
                      "any.out"=nhis.any.out,
                      "num.out"=nhis.num.out))
-
 
 # Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
 complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
