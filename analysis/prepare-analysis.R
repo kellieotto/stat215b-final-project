@@ -36,7 +36,7 @@ table(insurance, treatment) # there's two-way crossover?
 ## NHIS: compliance analogue
 
 # Medicaid recode  
-nhis.insurance <- foreach(i=years, .combine=c) %do% {
+medicaid <- foreach(i=years, .combine=c) %do% {
   nhis[[as.character(i)]]$medicaid[nhis[[as.character(i)]]$medicaid>3] <- NA # missing is NA
   ifelse(nhis[[as.character(i)]]$medicaid==1 | nhis[[as.character(i)]]$medicaid==2,1,0)
 }

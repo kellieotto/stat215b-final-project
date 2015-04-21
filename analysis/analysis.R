@@ -41,7 +41,9 @@ X.nhis <-   na.omit(data.frame(n.hh.nhis, # need to omit rows containing any NA
 
 # Create vectors for treatment and compliance 
 treatment.ohie <- treatment[as.numeric(rownames(X.ohie))]
+
 insurance.ohie <- insurance[as.numeric(rownames(X.ohie))]
+insurance.nhis <- medicaid[as.numeric(rownames(X.nhis))]
 
 # Create dfs for outcomes 
 Y.ohie <- na.omit(data.frame("any.visit"=any.visit, # need to omit rows containing any NA
@@ -84,17 +86,12 @@ response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response,
                                                     y=Y.ohie.response[,i]))
 names(response.mod) <- colnames(Y.ohie.response) # name each element of list
 
-# Use response model to estimate potential outcomes for population "compliers" who received treatment (medicaid == 1)
-nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(nrt.compliers$C.hat==1))),
-                               X.nhis[which(nrt.compliers$C.hat==1),])
-nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(nrt.compliers$C.hat==1))),
-                                 X.nhis[which(nrt.compliers$C.hat==1),])
-########## lines 88-91 should look like this instead ##########
-# medicaid <- which(rows of nrt where the person has medicaid)
-# nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(medicaid)),
-#                            X.nhis[medicaid,])
-#nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(medicaid)),
-#                                 X.nhis[medicaid,])
+# Use response model to estimate potential outcomes for population "compliers" on medicaid
+nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
+                               X.nhis[which(insurance.nhis==1),])
+nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
+                                 X.nhis[which(insurance.nhis==1),])
+
 Yhat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
 Yhat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
 
