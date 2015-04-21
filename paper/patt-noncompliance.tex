@@ -289,7 +289,7 @@ We vary each of the parameters $e_1, e_2,$ and $e_3$ along a grid by $-2$ to $2$
 
 Figure~\ref{fig:sim_tiles} shows the relationship between the percent of compliers in the whole population, the percentage of people in the whole population eligible to participate in the RCT, and the mean squared error of the estimators.  The pattern of performance is qualitatively similar for the adjusted and unadjusted estimators: both perform best when compliance is high and perform badly when compliance is low.  Furthermore, for a fixed rate of compliance, the estimators tend to have lower mean squared error when either a very small or very large fraction of the total population is eligible to participate in the RCT. \\
 
-Figure~\ref{fig:sim_compliance} compares the performance of the two estimators at varying levels of compliance in the total population.
+Figure~\ref{fig:sim_compliance} compares the performance of the two estimators at varying levels of compliance in the total population.  When compliance is low, both estimators have a large mean squared error and variance.  The adjusted estimator has a large variance because the subset of the RCT who are considered compliers is relatively small, whereas the unadjusted estimator has large variance because of the large amount of crossover.  On the other hand, when the compliance rate is high, both estimators perform about equally well with mean squared error close to $0$.
 
 
 \begin{figure}[htbp]
@@ -321,6 +321,7 @@ The proposed method allows us to decompose both SATE and PATT estimates by subgr
 \item unadjusted is estimating the intention-to-treat effect, which tends to underestimate the average treatment effect on compliers
 \item Of course, the simulation results depend on the particular way we parameterized the compliance, selection, treatment assignment, and response schedules.  In particular, the strength of correlation between the covariates and compliance governs how well the estimator will perform.
 \item If it is difficult to predict compliance using the observed covariates, then the estimator will perform badly because of noise introduced by incorrectly treating non-compliers as compliers.  Further research should be done into ways to test how well compliance can be predicted.
+\item In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  This gives evidence in favor of using the proposed estimator in this situation.
 \end{itemize}
 
 
