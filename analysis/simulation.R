@@ -196,8 +196,9 @@ grid.arrange(p1, p2)
 dev.off()
 
 library(reshape2); library(dplyr)
-res2 <- data.frame(rep(res$rateC, 2), c(res$mse_tpatt, res$mse_tpatt_unadj), rep(c("Adjusted", "Unadjusted"), each = nrow(res)));
+res2 <- data.frame(rep(res$rateC, 3), c(res$mse_tpatt, res$mse_tpatt_unadj, res$mse_rct_sate), rep(c("Adjusted", "Unadjusted", "SATE"), each = nrow(res)));
 colnames(res2) <- c("rateC", "mse", "Estimator")
+levels(res2$Estimator) <- list("Adjusted" = 1, "Unadjusted" = 2, "SATE" = 3)
 ### Look at just compliance rate
 p1 <- ggplot(res2, aes(x = as.factor(round(rateC,1)), y = mse)) + geom_boxplot(aes(color = Estimator)) +labs(x = "Compliance rate", y = "MSE", title = "MSE of PATT Estimators") + scale_color_brewer(palette="Set1")
 p1
