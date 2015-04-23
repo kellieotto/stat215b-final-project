@@ -7,6 +7,7 @@ library(randomForest)
 
 # Define directory for analysis 
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
+load("prepare-analysis.Rdata")
 
 # Source scripts
 
@@ -101,7 +102,7 @@ Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counte
 t.patt <- lapply(y.col, function (i) mean(Y.hat.1[[i]]) - mean(Y.hat.0[[i]]))
 
 # Compute unadjusted PATT
-run <- TRUE 
+run <- FALSE  # this might crash your local machine
 if(run){
 Y.ohie.response.unadj <- Y.ohie[which(rct.compliers$complier==1 | rct.compliers$complier==0),]
 X.ohie.response.unadj <- data.frame("treatment"=treatment.ohie,
@@ -119,7 +120,22 @@ Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.c
 Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj))
 
 t.patt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
+
+save(Y.ohie.response.unadj,X.ohie.response.unadj,response.mod2,nrt.tr.counterfactual.unadj,nrt.ctrl.counterfactual.unadj,
+     Y.hat.1.unadj,Y.hat.0.unadj,t.patt.unadj,file = file.path(directory,"response-mod2.Rdata"))
 }
+load(file.path(directory,"response-mod2.Rdata"))
+
+# Compute unadjusted SATT
+rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.ohie==1 | insurance.ohie==0))),
+                                     X.ohie[which(insurance.ohie==1| insurance.ohie==0),])
+rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.ohie==1 | insurance.ohie==0))),
+                                       X.ohie[which(insurance.ohie==1 | insurance.ohie==0),])
+
+Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj))
+Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj))
+
+t.satt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
 
 # Compute SATE
 rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1)]) - # Num. is ITT effect
@@ -127,4 +143,7 @@ rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1
                    /mean(rct.compliers$complier[which(treatment.ohie==1)])) # Denom. is true RCT compliance rate
 
 # Save workspace
-save("analysis.Rdata")
+gc()
+save.image(file.path(directory,"analysis.Rdata"))
+
+
