@@ -141,10 +141,11 @@ The estimator of PATT involves the expectation of the response of compliers in t
 \todo{some intro}
 
 \subsection{Assumptions}
-Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $T_i$ denote the treatment assigned and $D_i$ denote treatment received. Let $W_i$ be individual $i$'s observable covariates related to the sample selection mechanism for membership in the RCT.  Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  For a generic value, we drop the subscript $i$.  \\
+Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $T_i$ denote the treatment assigned and $D_i$ denote treatment received. \textcolor{red}{Let $W_i$ be individual $i$'s observable covariates related to the sample selection mechanism for membership in the RCT. } Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  For a generic value, we drop the subscript $i$.  \\
 
 We assume that in the RCT, treatment is assigned at random.  Then for individuals with $C_i = 1$, we observe $D_i = T_i$.  In the population, we suppose that treatment is made available to individuals according to some rule based on their covariates; treatment assignment is not completely random. Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D$, not $T$, in the population.  Among the population controls, we can't distinguish non-compliers (individuals with $T_i=1$ and $D_i = 0$) from compliers (those with $T_i = 0$ and $D_i = 0$).  Compliance is only observable for individuals assigned to treatment in the RCT. \\
 
+\todo{mention distinction between $S=0$ and $S=1$. In practice, data for $S=0$ comes from a non-randomized trial, in which the participants are representative of the target population}
 We make the following assumptions:
 \begin{assumption}{1}{}\label{consistency}
 Consistency under parallel studies: for all $i$ and for $t=0, 1$,
@@ -206,7 +207,7 @@ Y_{11} = Y_{10}
 \Vertex{W}  \NOEA(W){S} \EA(S){T}  \EA(W){C} \SOEA(T){D} \SOEA(C){Y} \SOWE(D){Y}
 \Edges(W, S, T) \Edges(W,T) \Edges(W, C) \Edges(T, D) \Edges(C, D) \Edges(W, Y) \Edges(D, Y)
 \end{tikzpicture}
-\caption{Causal diagram which satisfies the conditional independence assumptions needed to estimate the PATT.}
+\caption{Causal diagram which satisfies the conditional independence assumptions needed to estimate the PATT.}\label{fig:DAG}
 \end{figure}
 
 \subsection{Population Average Treatment Effect on the Treated}
@@ -251,7 +252,7 @@ The last line follows because of the randomization carried out in the RCT.  This
 \end{proof}
 
 \subsection{Estimation Procedure}
-Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  Here, we use \textcolor{red}{the SuperLearner ensemble} method to estimate the response curve for compliers, given their treatment assignment and covariates. We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve at each point defined by a complier in the population.  \\
+Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  Here, we use random forests to estimate the response curve for compliers, given their treatment assignment and covariates. We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve for each treated individual in the population.  \\
 
 The second challenge is that we cannot observe which individuals are included in the estimation of the second term. We cannot tell who is a complier or non-complier in the control group, as they receive $D=0$ in either case.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible. \\
 
@@ -267,18 +268,18 @@ The procedure for estimating $\tau_{\text{PATT}}$ using theorem~\ref{thm1} as fo
 
 
 \section{Empirical results}
-We conduct a simulation study to compare the performance of the proposed estimator, Hartman et. al's estimator, and the instrumental variables estimate of the SATE, as estimators of $\tau_{\text{PATT}}$.  Our simulation is designed so that the effect of treatment is heterogeneous and depends on other covariates
+We conduct a simulation study to compare the performance of the proposed estimator, Hartman et. al's estimator, and the instrumental variables estimate of the SATE, as estimators of $\tau_{\text{PATT}}$.  Our simulation is designed so that the effect of treatment is heterogeneous and depends on other covariates, and the design satisfies the conditional independence assumptions in Figure~\ref{fig:DAG}.
 
 \subsection{Simulation Design}
 RCT eligibility, complier status, and treatment assignment in the population depend on observed covariates. 
 The observed covariates $(W_1, W_2, W_3)$ are multivariate normal with mean $(0.5, 1, -1)$ and covariances $\cov(W_1, W_2) = 1$ and $\cov(W_1, W_3) = \cov(W_2, W_3) = 0.5$. 
  The  equation for selection into studies is
  $$ S = \ind(e_2 + g_1W_1 + g_2W_2 + g_3W_3 + R > 0)$$
-  where $R$ is standard normal. $e_2$ controls the fraction of the population eligible for the RCT. We set $g_1, g_2,$ and $g_3$ to be $0.5, 0.25,$ and $0.75$, respectively.
-The compliance indicator is determined by
+  where $R$ is standard normal. $e_2$ controls the fraction of the population eligible for the RCT. We set $g_1, g_2,$ and $g_3$ to be $0.5,$ $0.25,$ and $0.75$, respectively.
+Complier status is determined by
 $$C = \ind(e_3 + h_2W_2 + h_3W_3 + Q > 0)$$
 where $Q$ is standard normal. $e_3$ controls the fraction of compliers in the population. We set $h_2$ and $h_3$ to $0.5$.
- In the population (individuals with $S=0$),  treatment is assigned by
+ For individuals in the population ($S=0$),  treatment is assigned by
   $$T = \ind(e_1 + f_1W_1 + f_2W_2 + V > 0)$$
 Varying $e_1$ controls the fraction eligible for treatment in the population. $V$ is standard normal. We set $f_1$ to $0.25$ and $f_2$ to $0.75$.  For individuals in the RCT ($S=1$), treatment assignment is a sample from a Bernoulli distribution.
 We set treatment received $D$ according to $T$ and $C$: $D = T$ if $C=1$ and $D = 0$ if $C=0$.
@@ -293,11 +294,11 @@ In the assigned-treatment RCT group $(S = 1, T = 1)$, we fit a logistic regressi
 
 \subsection{Results}
 
-We vary each of the parameters $e_1, e_2,$ and $e_3$ along a grid by $-2$ to $2$ in increments of $0.5$ in order to generate different combinations of rates of compliance, treatment eligibility, and RCT eligibility in the population of 30,000.  For each possible combination of the three parameters, we run the simulation $5$ times and compute the mean squared error of our proposed estimator for $\tau_{\text{PATT}}$ that adjusts for non-compliance and the estimator from Hartman et. al which is unadjusted for non-compliance.  All other parameters are held fixed. \todo{explain how the Hartman estimator is applied} \\
+We vary each of the parameters $e_1, e_2,$ and $e_3$ along a grid by $-2$ to $2$ in increments of $0.5$ in order to generate different combinations of rates of compliance, treatment eligibility, and RCT eligibility in the population of 30,000.  For each possible combination of the three parameters, we run the simulation $5$ times and compute the mean squared error of our proposed estimator for $\tau_{\text{PATT}}$ that adjusts for non-compliance, the estimator from Hartman et. al which is unadjusted for non-compliance, and the SATE using the instrumental variables estimator, given by the intention-to-treat estimate divided by the rate of compliance.  All other parameters are held fixed. The unadjusted estimate is obtained by estimating the response curve on all individuals in the RCT and applying step 4 of our proposed estimation procedure to the non-randomized trial individuals. \\
 
-Figure~\ref{fig:sim_tiles} shows the relationship between the percent of compliers in the whole population, the percentage of people in the whole population eligible to participate in the RCT, and the mean squared error of the estimators.  The pattern of performance is qualitatively similar for the adjusted and unadjusted estimators: both perform best when compliance is high and perform badly when compliance is low.  Furthermore, for a fixed rate of compliance, the estimators tend to have lower mean squared error when either a very small or very large fraction of the total population is eligible to participate in the RCT. \\
+Figure~\ref{fig:sim_tiles} shows the relationship between the percent of compliers in the whole population, the percentage of people in the whole population eligible to participate in the RCT, and the mean squared error of the PATT estimators.  The pattern of performance is qualitatively similar for the adjusted and unadjusted estimators: both perform best when compliance is high and perform badly when compliance is low.  Furthermore, for a fixed rate of compliance, the estimators tend to have lower mean squared error when either a very small or very large fraction of the total population is eligible to participate in the RCT. \\
 
-Figure~\ref{fig:sim_compliance} compares the performance of the two estimators at varying levels of compliance in the total population.  When compliance is low, both estimators have a large mean squared error and variance.  The adjusted estimator has a large variance because the subset of the RCT who are considered compliers is relatively small, whereas the unadjusted estimator has large variance because of the large amount of crossover.  On the other hand, when the compliance rate is high, both estimators perform about equally well with mean squared error close to $0$.
+Figure~\ref{fig:sim_compliance} compares the mean squared error of the two PATT estimators and the SATE (as an estimator of PATT) at varying levels of compliance in the total population.  When compliance is low, both PATT estimators have a large mean squared error and variance.  The adjusted estimator has a large variance because the subset of the RCT who are considered compliers is relatively small, whereas the unadjusted estimator has large variance because of the large amount of crossover.  \todo{For low levels of compliance, SATE actually tends to approximate PATT more closely; the variance due to small sample size is less than the noise added by non-compliance in the other two estimators.}  On the other hand, when the compliance rate is high, both PATT estimators perform about equally well with mean squared error close to $0$.  The median mean squared error for SATE stays relatively constant regardless of compliance rate
 
 
 \begin{figure}[htbp]
@@ -336,6 +337,10 @@ The Oregon Health Study obtained data on the number of emergency room visits for
 
 We have data on the target population from two surveys conducted by the Center for Disease Control: the Behavioral Risk Factors Surveillance Study (BRFSS) \cite{BRFSS} and the National Health Interview Study (NHIS) \cite{NHIS}.  We will restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The BRFSS outcomes are self-reported health ratings.  Both surveys record individuals' demographic covariates, which match those measured in the RCT.
 
+\subsection{Assumptions}
+\todo{Discuss how the assumptions for estimating PATT are met or not met by the data}
+\subsection{Results}
+\todo{}
 
 \section{Discussion}
 
