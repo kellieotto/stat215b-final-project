@@ -2,13 +2,18 @@
 ## Then, use response model to estimate population members' outcomes given their covariates.
 ## These estimates will be used to estimate the PATT.
 
+# Libraries
+library(randomForest)
+
 # Define directory for analysis 
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 
 # Source scripts
-source(file.path(directory,"prepare-analysis.R"))
+
+#source(file.path(directory,"prepare-analysis.R"))
 #source(file.path(directory,"SuperLearner.R"))
-library(randomForest)
+
+load(file.path(directory,"prepare-analysis.Rdata")) # result of prepare-analysis.R
 
 # Create dfs containing common features for RCT and observational study
 X.ohie <- na.omit(data.frame(n.hh,  # need to omit rows containing any NA
@@ -77,7 +82,7 @@ nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
 # Fit a regression to the compliers in the RCT
 y.col <- 1:ncol(Y.ohie) # number of responses
 Y.ohie.response <- Y.ohie[which(rct.compliers$complier==1),]
-X.ohie.response <- data.frame("treatment"=rct.compliers$treatment[which(rct.compliers$complier==1)],
+X.ohie.response <- data.frame("treatment"=treatment.ohie[which(rct.compliers$complier==1)],
                          X.ohie[which(rct.compliers$complier==1),])
 response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response,
                                                     y=Y.ohie.response[,i]))
@@ -89,16 +94,37 @@ nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis=
 nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
                                  X.nhis[which(insurance.nhis==1),])
 
-Yhat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
-Yhat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
+Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
+Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
 
-# Compute the estimator
-term1 <- lapply(y.col, function (i) mean(Yhat.1[[i]]))
-term2 <- lapply(y.col, function (i) mean(Yhat.0[[i]]))
-tpatt <- lapply(y.col, function (i) term1[[i]] - term2[[i]])
+# Compute PATT estimator
+t.patt <- lapply(y.col, function (i) mean(Y.hat.1[[i]]) - mean(Y.hat.0[[i]]))
 
-# Compute SATE for comparison
+# Compute unadjusted PATT
+run <- TRUE 
+if(run){
+Y.ohie.response.unadj <- Y.ohie[which(rct.compliers$complier==1 | rct.compliers$complier==0),]
+X.ohie.response.unadj <- data.frame("treatment"=treatment.ohie,
+                               X.ohie)
+response.mod2 <- lapply(y.col, function(i) randomForest(x=X.ohie.response.unadj,
+                                                       y=Y.ohie.response.unadj[,i]))
+names(response.mod2) <- colnames(Y.ohie) # name each element of list
+
+nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))),
+                               X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
+nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))),
+                                 X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
+
+Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj))
+Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj))
+
+t.patt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
+}
+
+# Compute SATE
 rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1)]) - # Num. is ITT effect
                                              mean(Y.ohie[[i]][which(treatment.ohie==0)])) 
-                   /mean(rct.compliers$complier[which(rct.compliers$treatment==1)])) # Denom. is true RCT compliance rate
+                   /mean(rct.compliers$complier[which(treatment.ohie==1)])) # Denom. is true RCT compliance rate
 
+# Save workspace
+save("analysis.Rdata")
