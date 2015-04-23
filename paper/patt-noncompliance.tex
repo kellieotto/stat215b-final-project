@@ -103,6 +103,17 @@
 \newcommand{\possessivecite}[1]{\citeauthor{#1}'s [\citeyear{#1}]} 
 \newcommand{\todo}[1]{{\color{red}{TO DO: \sc #1}}}
 
+% Making a DAG
+\usepackage{tkz-graph}  
+\usetikzlibrary{shapes.geometric}
+\tikzstyle{VertexStyle} = [shape            = ellipse,
+                               minimum width    = 6ex,%
+                               draw]
+ \tikzstyle{EdgeStyle}   = [->,>=stealth']      
+
+
+
+
 \begin{document}
     
 \maketitle  
@@ -116,14 +127,14 @@
 \setcounter{page}{1} % Reset to Page 1
 
 \section{Introduction}
-Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when RCTs use samples of individuals who do not represent the population of interest.  For example, RCTs in which participants volunteer to sign up for health insurance coverage may exhibit a sample population that is in poorer health than the target population.  External validity is particularly relevant to policymakers who want to know how a sample average treatment effect (SATE) would generalize to the broader population. Hartman et al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, the PATT estimate is asymptotically unbiased \cite{Hartman}. \\
+Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when the individuals in an RCT are unrepresentative of the population of interest.  For example, RCTs in which participants volunteer to sign up for health insurance coverage may exhibit a sample population that is in poorer health than the target population.  External validity is particularly relevant to policymakers who want to know how a sample average treatment effect (SATE) would generalize to the broader population. Hartman et al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, the PATT estimate is asymptotically unbiased \cite{Hartman}. \\
 
-A prevalent issue in RCTs is noncompliance.  In one-way crossover from treatment to control, individuals who are randomly assigned to the treatment group refuse the treatment.  The serves to dilute the treatment effect, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. estimate the PATT in settings with RCT non-compliance.  After deriving the estimator, we will apply the method to identify the effect of extending Medicare coverage to the low--income population in the U.S.
+A prevalent issue in RCTs is non-compliance.  One-way crossover from treatment to control occurs when individuals who are assigned to the treatment group refuse the treatment.  This serves to dilute the effect of treatment assignment, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. estimate the PATT in settings with RCT non-compliance.  After deriving the estimator and investigating its performance in simulations, we apply the method to identify the effect of extending Medicare coverage to the low--income population in the U.S.
 
-\paragraph{Statistical Analysis}
-We propose to modify the estimator of PATT from \cite{Hartman} by allowing for the possibility of one-way crossover from treatment to control in the RCT.  We make the same assumptions needed for \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also assume monotonicity (no defiers) and exclusion restriction as in \cite{Angrist1996}.  It does not make sense to talk about compliers and non-compliers in the population, as there is no imposed treatment assignment; compliance is observable only in the RCT sample.   \\
+%\paragraph{Statistical Analysis}
+%We propose to modify the estimator of PATT from \cite{Hartman} by allowing for the possibility of one-way crossover from treatment to control in the RCT.  We make the same assumptions needed for \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also assume monotonicity (no defiers) and exclusion restriction as in \cite{Angrist1996}.  It does not make sense to talk about compliers and non-compliers in the population, as there is no imposed treatment assignment; compliance is observable only in the RCT sample.   \\
 
-The estimator of PATT involves the expectation of the response of individuals in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we plan to use an ensemble learning method to estimate the response surface.  Then, we will use the response model to estimate population members' outcomes given their covariates.  These estimates will be used to estimate the PATT. \todo{Update this paragraph}
+The estimator of PATT involves the expectation of the response of compliers in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we use an ensemble learning method to estimate the response surface.  Then, we use the response model to estimate population members' outcomes given their covariates, giving an estimate of the PATT.
 
 
 \section{Estimator}
@@ -186,10 +197,17 @@ Exclusion restriction (ER): For non-compliers
 Y_{11} = Y_{10}
 \end{equation*}  
 \end{assumption}
-\noindent A treatment effect may only be non-zero for compliers.
+\noindent The treatment assignment affects the response only through the treatment received.  In particular, the treatment effect may only be non-zero for compliers.  
 
-
-
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.5] 
+\SetGraphUnit{2} 
+\Vertex{W}  \NOEA(W){S} \EA(S){T}  \EA(W){C} \SOEA(T){D} \SOEA(C){Y} \SOWE(D){Y}
+\Edges(W, S, T) \Edges(W,T) \Edges(W, C) \Edges(T, D) \Edges(C, D) \Edges(W, Y) \Edges(D, Y)
+\end{tikzpicture}
+\caption{Causal diagram which satisfies the conditional independence assumptions needed to estimate the PATT.}
+\end{figure}
 
 \subsection{Population Average Treatment Effect on the Treated}
 \todo{Move some of this to appendix?}
@@ -237,7 +255,7 @@ Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct a
 
 The second challenge is that we cannot observe which individuals are included in the estimation of the second term. We cannot tell who is a complier or non-complier in the control group, as they receive $D=0$ in either case.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible. \\
 
-The procedure for estimating $\tau_{\text{PATT}}$ using theorem~\ref{thm1} is the following:
+The procedure for estimating $\tau_{\text{PATT}}$ using theorem~\ref{thm1} as follows:
 \begin{enumerate}
 \item Using the group assigned to treatment in the RCT $(S=1, T=1)$, train a model to predict complier status $C$ using the covariates $W$.
 \item Using the model from step 1, predict who in the RCT assigned to control \textit{would have} complied to treatment had they been assigned to the treatment group.
@@ -245,22 +263,12 @@ The procedure for estimating $\tau_{\text{PATT}}$ using theorem~\ref{thm1} is th
 \item For all compliers who received treatment in the population $(S=0, D=1)$, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
 \end{enumerate}
 
-\section{Data}
 
-We apply the proposed method to estimate the effect of extending Medicaid coverage on emergency--room use and other health outcomes.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. 
 
-\paragraph{Oregon Health Insurance Experiment}
-
-We draw RCT data from the Oregon Health Insurance Experiment \cite{finkelstein2012,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the federal poverty level (FPL) and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid.\footnote{Since randomization is applied on the household level, we will need to account for the number of each participant's household members when specifying the probability of treatment assignment.} In total, about 35,000 participants (representing about 30,000 households) were selected by the lottery; the remaining participants were not able to apply for Medicaid and served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} The RCT data includes demographic variables such as age, gender, ethnicity, pre-existing medical conditions, education, employment, income, and insurance coverage. \\
-
-The Oregon Health Study obtained data on the number of emergency room visits for every RCT participant who resides near twelve hospitals in the Portland area ($N=24,646$). The authors find Medicaid coverage increased emergency-room use over an 18--month period by 40\% relative to the control group \cite{Taubman}. 
- 
- \paragraph{Observational data} 
-
-We have data on the target population from two surveys conducted by the Center for Disease Control: the Behavioral Risk Factors Surveillance Study (BRFSS) \cite{BRFSS} and the National Health Interview Study (NHIS) \cite{NHIS}.  We will restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The BRFSS outcomes are self-reported health ratings.  Both surveys record individuals' demographic covariates, which match those measured in the RCT.
 
 \section{Empirical results}
-\todo{short intro}
+We conduct a simulation study to compare the performance of the proposed estimator, Hartman et. al's estimator, and the instrumental variables estimate of the SATE, as estimators of $\tau_{\text{PATT}}$.  Our simulation is designed so that the effect of treatment is heterogeneous and depends on other covariates
+
 \subsection{Simulation Design}
 RCT eligibility, complier status, and treatment assignment in the population depend on observed covariates. 
 The observed covariates $(W_1, W_2, W_3)$ are multivariate normal with mean $(0.5, 1, -1)$ and covariances $\cov(W_1, W_2) = 1$ and $\cov(W_1, W_3) = \cov(W_2, W_3) = 0.5$. 
@@ -308,6 +316,27 @@ Figure~\ref{fig:sim_compliance} compares the performance of the two estimators a
 \label{fig:sim_compliance}
 \end{center}
 \end{figure}
+
+
+
+
+
+
+\section{Data}
+
+We apply the proposed method to estimate the effect of extending Medicaid coverage on emergency--room use and other health outcomes.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. 
+
+\paragraph{Oregon Health Insurance Experiment}
+
+We draw RCT data from the Oregon Health Insurance Experiment \cite{finkelstein2012,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the federal poverty level (FPL) and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid.\footnote{Since randomization is applied on the household level, we will need to account for the number of each participant's household members when specifying the probability of treatment assignment.} In total, about 35,000 participants (representing about 30,000 households) were selected by the lottery; the remaining participants were not able to apply for Medicaid and served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} The RCT data includes demographic variables such as age, gender, ethnicity, pre-existing medical conditions, education, employment, income, and insurance coverage. \\
+
+The Oregon Health Study obtained data on the number of emergency room visits for every RCT participant who resides near twelve hospitals in the Portland area ($N=24,646$). The authors find Medicaid coverage increased emergency-room use over an 18--month period by 40\% relative to the control group \cite{Taubman}. 
+ 
+ \paragraph{Observational data} 
+
+We have data on the target population from two surveys conducted by the Center for Disease Control: the Behavioral Risk Factors Surveillance Study (BRFSS) \cite{BRFSS} and the National Health Interview Study (NHIS) \cite{NHIS}.  We will restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The BRFSS outcomes are self-reported health ratings.  Both surveys record individuals' demographic covariates, which match those measured in the RCT.
+
+
 \section{Discussion}
 
 The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the Affordable Care Act expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\

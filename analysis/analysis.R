@@ -7,7 +7,7 @@ directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 
 # Source scripts
 source(file.path(directory,"prepare-analysis.R"))
-source(file.path(directory,"SuperLearner.R"))
+#source(file.path(directory,"SuperLearner.R"))
 library(randomForest)
 
 # Create dfs containing common features for RCT and observational study
@@ -70,9 +70,6 @@ rct.compliers <- data.frame("treatment"=treatment.ohie,
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
 
-#save(complier.mod, rct.compliers, file = "complier-mod-rf.RData") # save .Rdata
-
-load("complier-mod-rf.RData")
 # Predict who is a complier in NRT
 nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
                             "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
