@@ -204,7 +204,7 @@ Y_{11} = Y_{10}
 \Vertex{W}  \NOEA(W){S} \EA(S){T}  \EA(W){C} \SOEA(T){D} \SOEA(C){Y} \SOWE(D){Y}
 \Edges(W, S, T) \Edges(W,T) \Edges(W, C) \Edges(T, D) \Edges(C, D) \Edges(W, Y) \Edges(D, Y)
 \end{tikzpicture}
-\caption{Causal diagram which satisfies the conditional independence assumptions needed to estimate the PATT.}\label{fig:DAG}
+\caption{Causal diagram indicating the conditional independence assumptions needed to estimate the PATT.}\label{fig:DAG}
 \end{figure}
 
 \subsection{Population Average Treatment Effect on the Treated}
@@ -331,10 +331,21 @@ The Oregon Health Study obtained data on the number of emergency room visits for
  
  \paragraph{Observational data} 
 
-We have data on the target population from two surveys conducted by the Center for Disease Control: the Behavioral Risk Factors Surveillance Study (BRFSS) \cite{BRFSS} and the National Health Interview Study (NHIS) \cite{NHIS}.  We will restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The BRFSS outcomes are self-reported health ratings.  Both surveys record individuals' demographic covariates, which match those measured in the RCT.
+We have data on the target population from a survey conducted by the Center for Disease Control: the National Health Interview Study (NHIS) \cite{NHIS}.  We restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The survey records individuals' demographic covariates, which match those measured in the RCT.
 
 \subsection{Assumptions}
-\todo{Discuss how the assumptions for estimating PATT are met or not met by the data}
+\todo{Discuss how the assumptions for estimating PATT are met or not met by the data -- just brainstorming for now}
+\begin{enumerate}
+\item Consistency under parallel studies
+\item Strong ignorability of sample assignment for treated
+\item Strong ignorability of sample assignment for controls
+\item SUTVA
+\item Conditional independence of compliance and treatment assignment
+\item Monotonicity: not satisfied! how did we address this?
+\item Exclusion restriction: It would seem reasonable that whether or not someone actually has Medicaid, not their eligibility to enroll, would affect their hospital use.  For generic health insurance one might argue that eligibility could be negatively correlated with hospital use, as people with pre-existing conditions may be less likely to be eligible yet go to the hospital more frequently.  This should not be the case with a federally funded program such as Medicaid.
+\end{enumerate}
+
+
 \subsection{Results}
 \todo{}
 
@@ -342,17 +353,15 @@ We have data on the target population from two surveys conducted by the Center f
 
 The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the Affordable Care Act expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\
 
-\todo{Update tense}
+Simulations shed light on the conditions under which the proposed estimator should work well.  When the rate of crossover from treatment to control is low, the proposed estimator performs better than the estimator which doesn't adjust for non-compliance.  Here, the unadjusted estimator gives the intention-to-treat effect, which tends to underestimate the average treatment effect on compliers. Of course, the simulation results depend on the particular way we parameterized the compliance, selection, treatment assignment, and response schedules.  In particular, the strength of correlation between the covariates and compliance governs how well the estimator will perform, since step one of the estimation procedure is to predict who \textit{would be} a complier in the RCT control group, had they been assigned to treatment. If it is difficult to predict compliance using the observed covariates, then the estimator will perform badly because of noise introduced by incorrectly treating non-compliers as compliers.  Further research should be done into ways to test how well compliance can be predicted. \\
+
+In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  \todo{How well are we able to predict compliance?}  This gives evidence in favor of using the proposed estimator in this situation. \\
+
+
+\todo{Update to reflect what we expected + what we actually saw}
 The proposed method allows us to decompose both SATE and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expect to find substantial differences between sample and population estimates in terms of ethnicity and pre--existing condition subgroups. Overall, we expect the PATT estimate to be lower than the SATE estimate due to the adverse selection problem in the RCT. \\
 
-\noindent discuss implications of the simulation results
-\begin{itemize}
-\item When the rate of crossover from treatment to control is low, the proposed estimator performs better than the estimator which doesn't adjust for non-compliance. 
-\item unadjusted is estimating the intention-to-treat effect, which tends to underestimate the average treatment effect on compliers
-\item Of course, the simulation results depend on the particular way we parameterized the compliance, selection, treatment assignment, and response schedules.  In particular, the strength of correlation between the covariates and compliance governs how well the estimator will perform.
-\item If it is difficult to predict compliance using the observed covariates, then the estimator will perform badly because of noise introduced by incorrectly treating non-compliers as compliers.  Further research should be done into ways to test how well compliance can be predicted.
-\item In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  This gives evidence in favor of using the proposed estimator in this situation.
-\end{itemize}
+
 
 
 \pagebreak
