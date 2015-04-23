@@ -2,13 +2,17 @@
 ## Then, use response model to estimate population members' outcomes given their covariates.
 ## These estimates will be used to estimate the PATT.
 
+# Libraries
+library(randomForest)
+
 # Define directory for analysis 
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 
 # Source scripts
-source(file.path(directory,"prepare-analysis.R"))
+#source(file.path(directory,"prepare-analysis.R"))
 #source(file.path(directory,"SuperLearner.R"))
-library(randomForest)
+
+load(file.path(directory,"prepare-analysis.Rdata")) # result of prepare-analysis.R
 
 # Create dfs containing common features for RCT and observational study
 X.ohie <- na.omit(data.frame(n.hh,  # need to omit rows containing any NA
@@ -116,10 +120,10 @@ Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl
 t.patt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
 }
 
-# Compute SATE for comparison
+# Compute SATE
 rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1)]) - # Num. is ITT effect
                                              mean(Y.ohie[[i]][which(treatment.ohie==0)])) 
-                   /mean(rct.compliers$complier[which(rct.compliers$treatment==1)])) # Denom. is true RCT compliance rate
+                   /mean(rct.compliers$complier[which(treatment.ohie==1)])) # Denom. is true RCT compliance rate
 
 # Save workspace
 save("analysis.Rdata")
