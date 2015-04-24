@@ -31,7 +31,7 @@ n.hh <- dummify(ohie$numhh_list,keep.na=TRUE)
 # Compliance is "ever on Medicaid" during study period (used in Finkelstein et al. (2012))
 insurance <- ifelse(ohie$ohp_all_ever_matchn_30sep2009=="Enrolled",1,0) 
 
-table(insurance, treatment) # there's two-way crossover?
+addmargins(table(insurance, treatment)) # there's two-way crossover?
 
 ## NHIS: compliance analogue
 

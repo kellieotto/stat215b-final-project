@@ -318,15 +318,15 @@ Figure~\ref{fig:sim_compliance} compares the mean squared error of the two PATT 
 
 
 \section{Empirical Example: Medicaid and Hospital Use}
-\subsection{Data}
+\subsection{Data} \label{data}
 
 We apply the proposed method to estimate the effect of extending Medicaid coverage on health care use.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. In particular, we examine the population of nonelderly adults in the U.S. with household incomes at or below 138\% of the FPL (\$32,913 for a four--person household in 2014) who may be eligible for Medicaid following the Affordable Care Act (ACA) expansion.
 
 \paragraph{Oregon Health Insurance Experiment}
 
-We draw RCT data from the Oregon Health Insurance Experiment (OHIE) \citep{finkelstein2012,baicker2013,baicker2014,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the FPL and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid. Sample exclusions brought the sample size down to 74,922 individuals representing 66,385 households.  Within the sample, 29,834 participants were selected by the lottery; the remaining 45,008 participants served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} We use the following pretreatment covariates as features in our prediction models: gender, age, race, ethnicity, health status, education, and household income.\footnote{Since randomization is applied on the household level, we include the number of household members as a feature in all prediction models. Treatment is included as a feature in the response models.}  \\
+We draw RCT data from the Oregon Health Insurance Experiment (OHIE) \citep{finkelstein2012,baicker2013,baicker2014,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the FPL and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid. Sample exclusions brought the sample size down to 74,922 individuals representing 66,385 households.  Within the sample, 29,834 participants were selected by the lottery; the remaining 45,008 participants served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} The OHIE data includes pretreatment covariates for gender, age, race, ethnicity, health status, education, and household income. \\
 
-We use two health care use responses: emergency room (ER) and primary care visits in the past 12 months.\footnote{The variables that capture the total number of visits have been censored so that no individual value has fewer than ten observations.} These data originate from a mail survey that was administered to participants over July and August 2009 ($N = 23,741$ survey respondents) \cite{finkelstein2012}. We use the same definition of insurance coverage as \citet{finkelstein2012} to form our measure of compliance, which is a binary variable indicating whether the participant was enrolled in any Medicaid program (including the lotteried program) between the notification date and 30 September 2009. While \possessivecite{finkelstein2012} IVLS estimates of the effect of Medicaid assume one--way crossover, 14\% of control participants were actually enrolled in Medicaid during the study period (compared to the 60\% of treated participants who did not enroll). 
+We use two health care use responses: emergency room (ER) and primary care visits in the past 12 months.\footnote{The variables that capture the total number of visits have been censored so that no individual value has fewer than ten observations.} These data originate from a mail survey that was administered to participants over July and August 2009 ($N = 23,741$ survey respondents) \cite{finkelstein2012}. We use the same definition of insurance coverage as \citet{finkelstein2012} to form our measure of compliance, which is a binary variable indicating whether the participant was enrolled in any Medicaid program (including the lotteried program) between the notification date and 30 September 2009. 
 
 \paragraph{Observational data} 
 
@@ -339,10 +339,14 @@ Are the assumptions stated in Section \ref{estimator} satisfied by the data? Ass
 
 The exclusion restriction (Assumption \ref{ER}) ensures treatment assignment affects the response only through assignment to Medicaid  and the effect of Medicaid coverage may only be non-zero for compliers. It is reasonable that whether or not someone actually has Medicaid, not their eligibility to enroll, would affect their hospital use.  For generic health insurance one might argue that eligibility could be negatively correlated with hospital use, as people with pre-existing conditions may be less likely to be eligible yet go to the hospital more frequently.  This should not be the case with a federally funded program such as Medicaid.
 
-Assumption \ref{monotonicity} does not hold due to the presence of compliers in the control group --- that is, participants who were assigned to control and enrolled in Medicaid during the study period. The violation of the monotonicity assumption does not appear to be appropriately addressed in \citet{finkelstein2012} nor any of the follow--up papers. We need to explore how double--crossover affects our PATT estimates in a future version of this paper. 
+Assumption \ref{monotonicity} does not hold due to the presence of compliers in the control group --- that is, participants who were assigned to control and enrolled in Medicaid during the study period. While \possessivecite{finkelstein2012} IVLS estimates of the effect of Medicaid assume one--way crossover, 14\% of control participants were actually enrolled in Medicaid during the study period (compared to the 60\% of treated participants who did not enroll).The violation of the monotonicity assumption does not appear to be appropriately addressed in \citet{finkelstein2012} nor any of the authors' follow--up papers. We will explore how double--crossover affects our PATT estimates in a future version of this paper. 
 
 \subsection{Empirical results}
 
+We compare PATT and SATE estimates for ER and primary care use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with random forests prediction models using the default settings \citep{breiman2001}. We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample has size $N=23,205$ and the population has $N=38,579$. There are $N=10,297$ RCT compliers and $N=3,914$ target population ``compliers'' on medicaid. \todo{Population compliers N seems small}. \\
+
+Figures \ref{fig:any-visit-plot} and \ref{fig:num-visit-plot} compare estimates for a binary response indicating whether the participant visited an ER and the number of ER visits in the past 12 months, respectively. We estimate the effect of Medicaid coverage on ER visits is between -0.01 and -0.04 for population compliers (adjusted PATT), depending on which response variable is used. In comparison, the treatment effects on RCT compliers (adjusted SATE) are about zero. There are substantial differences between SATE and PATT estimates across covariate groups. For instance, while there are large negative treatment effects on ER use for sample participants with pre--existing conditions, treatment effects for population participants with pre--existing conditions are large and positive. \\
+ 
 \begin{figure}
 \begin{center}
   \begin{subfigure}[b]{0.86\textwidth}
@@ -358,8 +362,9 @@ Assumption \ref{monotonicity} does not hold due to the presence of compliers in 
   \end{subfigure}
  \caption{Comparison of estimators for treatment effect on ER use.}
   \end{center}
- \label{fig:ER-visit}
 \end{figure}
+
+Figures \ref{fig:any-out-plot} and \ref{fig:num-out-plot}  ....
 
 \begin{figure}
 \begin{center}
@@ -376,7 +381,6 @@ Assumption \ref{monotonicity} does not hold due to the presence of compliers in 
   \end{subfigure}
   \caption{Comparison of estimators for treatment effect on primary care use.}
    \end{center}
-   \label{fig:out-visit}
 \end{figure}
 
 % Compare with table A28 of F2012
