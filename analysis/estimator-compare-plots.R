@@ -44,28 +44,29 @@ Education <- c("Less than high school","High school disploma or GED",
 Income <- c("0","1-2500","2501-5000","5001-7500","7501-10000",
             "10001-12500","12501-15000","15001-17500","17501-20000","20001-22500","22501-25000","25001-27500","27501-30000",
             "30001-32500","32501-35000","35001-37500","37501-40000","400001-42500","42501-45000","45001-47500","47501-50000",">50000")
-cov.groups <- c("Overall","Sex","Age","Race","Health status","Education","Income")
+cov.groups <- c("Overall","Sex","Age","Race","Health status","Education","Income") 
 cov.names <- c(Overall,Sex,Age,Race.ethn,Health.stat,Education,Income)
 
 het.plot <- lapply(y.col, function (i) data.frame(x=factor(c(rep(cov.names,3)), levels=rev(cov.names)), # reverse order
-                                     y = c(t.patt.unadj[[i]],unlist(patt.unadj.het[[i]]),
-                                           t.patt[[i]],unlist(patt.het[[i]]),
+                                     y = c(t.patt[[i]],unlist(patt.het[[i]]),
+                                           t.patt.unadj[[i]],unlist(patt.unadj.het[[i]]),
                                            t.satt.unadj[[i]],unlist(satt.unadj.het[i])), 
-                                     Group = rep(factor(c(cov.groups[1],rep(cov.groups[2],length(Sex)),rep(cov.groups[3],length(Age)),
+                                     Group = factor(rep(c(cov.groups[1],rep(cov.groups[2],length(Sex)),rep(cov.groups[3],length(Age)),
                                                rep(cov.groups[4],length(Race.ethn)),rep(cov.groups[5],length(Health.stat)),
                                                rep(cov.groups[6],length(Education)),rep(cov.groups[7],length(Income))),3), levels=cov.groups),
-                                     Estimator= c(rep("PATT (unadjusted)",length(covs)+1),
-                                                  rep("PATT (adjusted)",length(covs)+1),
-                                                  rep("SATT (unadjusted)",length(covs)+1))))
-
+                                     Estimator= factor(c(rep("PATT (adjusted)",length(covs)+1),
+                                                  rep("PATT (unadjusted)",length(covs)+1),
+                                                  rep("SATT (unadjusted)",length(covs)+1)))))
+                   
 # Plot forest plot
 het.plot.all <- lapply(y.col, function (i) 
-                         ggplot(het.plot[[i]], aes(x=x, y=y,colour=Estimator,group=Estimator)) + 
-                         geom_point(size=3,alpha=0.8) + 
+                         ggplot(het.plot[[i]][het.plot[[i]]$Group!="Income",], aes(x=x, y=y,colour=Estimator)) +  # exclude income groups
+                         geom_point(size=6,alpha=0.4) + 
+                         scale_colour_manual(values=c("red","blue","green")) + # change colors for estimators
                          coord_flip() +
                          geom_line() +
                          geom_hline(aes(x=0), lty=2) +
-                         #facet_grid(Group~.,drop=TRUE) +
+                      #   facet_grid(Group~.) +
                          ylab("Treatment effect") +
                          xlab("")) #switch because of the coord_flip() above 
 

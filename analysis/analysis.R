@@ -135,7 +135,7 @@ rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insuran
 Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj))
 Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj))
 
-t.satt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
+t.satt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj.rct[[i]]) - mean(Y.hat.0.unadj.rct[[i]]))
 
 # Compute SATE
 rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1)]) - # Num. is ITT effect
