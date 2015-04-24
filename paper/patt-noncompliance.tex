@@ -113,7 +113,6 @@
 
 
 
-
 \begin{document}
     
 \maketitle  
@@ -391,7 +390,7 @@ The treatment effect of Medicaid applies to uninsured adults with income below t
 
 Simulations shed light on the conditions under which the proposed estimator should work well.  When the rate of crossover from treatment to control is low, the proposed estimator performs better than the estimator which doesn't adjust for non-compliance.  Here, the unadjusted estimator gives the intention-to-treat effect, which tends to underestimate the average treatment effect on compliers. Of course, the simulation results depend on the particular way we parameterized the compliance, selection, treatment assignment, and response schedules.  In particular, the strength of correlation between the covariates and compliance governs how well the estimator will perform, since step one of the estimation procedure is to predict who \textit{would be} a complier in the RCT control group, had they been assigned to treatment. If it is difficult to predict compliance using the observed covariates, then the estimator will perform badly because of noise introduced by incorrectly treating non-compliers as compliers.  Further research should be done into ways to test how well compliance can be predicted. \\
 
-In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  \todo{How well are we able to predict compliance?}  This gives evidence in favor of using the proposed estimator in this situation. \\
+In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  Our random forest for predicting compliance based on observed covariates has about $61.5\%$ accuracy on the training set of individuals in OHIE assigned to the treatment group.  While we don't know well how the model predicts for the control group, its performance on the training set suggests that compliance is not purely random, but depends on observed covariates.  This gives evidence in favor of using the proposed estimator.  Future work should be done to construct a better model to predict compliance, both in the treated group used for training and the controls in the RCT. \\
 
 
 \todo{Update to reflect what we expected + what we actually saw}
