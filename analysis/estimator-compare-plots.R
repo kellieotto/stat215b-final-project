@@ -65,11 +65,20 @@ het.plot.all <- lapply(y.col, function (i)
                          coord_flip() +
                          geom_line() +
                          geom_hline(aes(x=0), lty=2) +
-                   #      facet_grid(Group~.) +
+                     #    facet_grid(Group~.) +
                          ylab("Treatment effect") +
                          xlab("")) #switch because of the coord_flip() above 
 
-het.plot.all[[1]] # any.visit
-het.plot.all[[2]] # num.visit
-het.plot.all[[3]] # any.out
-het.plot.all[[4]] # num.out
+any.visit.plot<- het.plot.all[[1]] # any.visit
+num.visit.plot <- het.plot.all[[2]] # num.visit
+any.out.plot <- het.plot.all[[3]] # any.out
+num.out.plot <- het.plot.all[[4]] # num.out
+
+# Combine plots
+vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 2)))
+print(any.visit.plot, vp = vplayout(1, 1))
+print(num.visit.plot, vp=vplayout(1,2))
+print(any.out.plot, vp=vplayout(2,1))
+print(num.out.plot, vp=vplayout(2,2))

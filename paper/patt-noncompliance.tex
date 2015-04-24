@@ -123,8 +123,8 @@
 \end{abstract}	
 
 %Move introduction to second page
-\pagebreak
-\setcounter{page}{1} % Reset to Page 1
+%\pagebreak
+%\setcounter{page}{1} % Reset to Page 1
 
 \section{Introduction}
 Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when the individuals in an RCT are unrepresentative of the population of interest.  For example, RCTs in which participants volunteer to sign up for health insurance coverage may exhibit a sample population that is in poorer health than the target population.  External validity is particularly relevant to policymakers who want to know how a sample average treatment effect (SATE) would generalize to the broader population. Hartman et al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, the PATT estimate is asymptotically unbiased (\cite{Hartman}). \\
@@ -321,17 +321,17 @@ Figure~\ref{fig:sim_compliance} compares the mean squared error of the two PATT 
 \section{Empirical Example: Medicaid and Hospital Use}
 \subsection{Data}
 
-We apply the proposed method to estimate the effect of extending Medicaid coverage on emergency--room use and other health outcomes.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. 
+We apply the proposed method to estimate the effect of extending Medicaid coverage on health care use.  Medicaid is a federally-funded program, so understanding how the RCT estimates generalize to a broader population of individuals who will be covered by other Medicaid expansions is informative for public policy. In particular, we examine the population of nonelderly adults in the U.S. with household incomes at or below 138\% of the FPL (about \$32,900 for a family of four in 2014) who may be eligible for Medicaid following the Affordable Care Act (ACA) expansion.
 
 \paragraph{Oregon Health Insurance Experiment}
 
-We draw RCT data from the Oregon Health Insurance Experiment \cite{finkelstein2012,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the federal poverty level (FPL) and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid.\footnote{Since randomization is applied on the household level, we will need to account for the number of each participant's household members when specifying the probability of treatment assignment.} In total, about 35,000 participants (representing about 30,000 households) were selected by the lottery; the remaining participants were not able to apply for Medicaid and served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} The RCT data includes demographic variables such as age, gender, ethnicity, pre-existing medical conditions, education, employment, income, and insurance coverage. \\
+We draw RCT data from the Oregon Health Insurance Experiment (OHIE) \cite{finkelstein2012,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the FPL and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid. Sample exclusions brought the sample size down to 74,922 individuals representing 66,385 households.  Within the sample, 29,834 participants were selected by the lottery; the remaining 45,008 participants served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} We use the following pretreatment covariates as features in our prediction models: gender, age, race, ethnicity, health status, education, and household income.\footnote{Since randomization is applied on the household level, we include the number of household members as a feature in all prediction models. Treatment is included as a feature in the response models.}  \\
 
-The Oregon Health Study obtained data on the number of emergency room visits for every RCT participant who resides near twelve hospitals in the Portland area ($N=24,646$). The authors find Medicaid coverage increased emergency-room use over an 18--month period by 40\% relative to the control group \cite{Taubman}. 
- 
- \paragraph{Observational data} 
+We use two health care use responses: emergency room (ER) and primary care visits in the past 12 months.\footnote{The variables that capture the total number of visits have been censored so that no individual value has fewer than ten observations.} These data originate from a mail survey that was administered to participants over July and August 2009 ($N = 23,741$ survey respondents) \cite{finkelstein2012}. We use the same definition of insurance coverage as \citet{finkelstein2012} to form our measure of compliance, which is a binary variable indicating whether the participant was enrolled in any Medicaid program (including the lotteried program) between the notification date and 30 September 2009. While \possessivecite{finkelstein2012} IVLS estimates of the effect of Medicaid assume one--way crossover, 14\% of control participants were enrolled in Medicaid during the study period (compared to the 60\% of treated participants who did not enroll). 
 
-We have data on the target population from a survey conducted by the Center for Disease Control: the National Health Interview Study (NHIS) \cite{NHIS}.  We restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The survey records individuals' demographic covariates, which match those measured in the RCT.
+\paragraph{Observational data} 
+
+We have data on the target population from a survey conducted by the Center for Disease Control: the National Health Interview Study (NHIS) \cite{NHIS}.  %We restrict our analysis to adults aged 19-64 whose income is below 100\% of the FPL, comparing those with Medicaid to uninsured adults.  The outcomes of interest from NHIS are amount of hospital use: outpatient visits, ER visits, and inpatient hospital admissions.  The survey records individuals' demographic covariates, which match those measured in the RCT.
 
 \subsection{Assumptions}
 \todo{Discuss how the assumptions for estimating PATT are met or not met by the data -- just brainstorming for now}
@@ -347,11 +347,47 @@ We have data on the target population from a survey conducted by the Center for 
 
 
 \subsection{Results}
-\todo{}
 
+\begin{figure}
+\begin{center}
+  \begin{subfigure}[b]{0.86\textwidth}
+    \includegraphics[width=\textwidth]{any-visit-plot.pdf}
+    \caption{Any ER visit.}
+    \label{fig:any-visit-plot}
+  \end{subfigure}
+  %
+  \begin{subfigure}[b]{0.86\textwidth}
+    \includegraphics[width=\textwidth]{num-visit-plot.pdf}
+    \caption{Number of ER visits.}
+    \label{fig:num-visit-plot}
+  \end{subfigure}
+ \caption{Comparison of estimators for treatment effect on ER use.}
+  \end{center}
+ \label{fig:ER-visit}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+     \begin{subfigure}[b]{0.86\textwidth}
+    \includegraphics[width=\textwidth]{any-out-plot.pdf}
+    \caption{Any primary care visit.}
+    \label{fig:any-out-plot}
+  \end{subfigure}
+    %
+    \begin{subfigure}[b]{0.86\textwidth}
+    \includegraphics[width=\textwidth]{num-out-plot.pdf}
+    \caption{Number of primary care visits.}
+    \label{fig:num-out-plot}
+  \end{subfigure}
+  \caption{Comparison of estimators for treatment effect on primary care use.}
+   \end{center}
+   \label{fig:out-visit}
+\end{figure}
+
+% Compare with table A28 of F2012
 \section{Discussion}
 
-The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the Affordable Care Act expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\
+The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the ACA expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\
 
 Simulations shed light on the conditions under which the proposed estimator should work well.  When the rate of crossover from treatment to control is low, the proposed estimator performs better than the estimator which doesn't adjust for non-compliance.  Here, the unadjusted estimator gives the intention-to-treat effect, which tends to underestimate the average treatment effect on compliers. Of course, the simulation results depend on the particular way we parameterized the compliance, selection, treatment assignment, and response schedules.  In particular, the strength of correlation between the covariates and compliance governs how well the estimator will perform, since step one of the estimation procedure is to predict who \textit{would be} a complier in the RCT control group, had they been assigned to treatment. If it is difficult to predict compliance using the observed covariates, then the estimator will perform badly because of noise introduced by incorrectly treating non-compliers as compliers.  Further research should be done into ways to test how well compliance can be predicted. \\
 
