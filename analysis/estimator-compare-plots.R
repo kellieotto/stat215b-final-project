@@ -22,9 +22,9 @@ patt.unadj.het <- lapply(y.col, function (i) lapply(covs, function(x) mean(nrt.p
                                                 mean(nrt.pred.unadj[[i]]$tau[nrt.pred.unadj[[i]][x]==0])))  
 
 # Estimate SATE for each covariate group
-#sate.het <- lapply(y.col, function (i) lapply(covs, function(x) (mean(Y.ohie[[i]][which(treatment.ohie==1)][X.ohie.response[x]==1]) - 
-#                                                                   mean(Y.ohie[[i]][which(treatment.ohie==0)][X.ohie.response[x]==1])) 
-#                                              /mean(rct.compliers$complier[which(treatment.ohie==1)][X.ohie.response[x]==1]))) # heterogenous treatment effect on sample treated compliers
+sate.het <- lapply(y.col, function (i) lapply(covs, function(x) (mean(Y.ohie[[i]][which(treatment.ohie==1)][X.ohie.response[x]==1]) - 
+                                                                   mean(Y.ohie[[i]][which(treatment.ohie==0)][X.ohie.response[x]==1])) 
+                                              /mean(rct.compliers$complier[which(treatment.ohie==1)][X.ohie.response[x]==1]))) # heterogenous treatment effect on sample treated compliers
 
 # Estimate unadjusted SATT for each covariate group
 rct.pred.unadj <- lapply(y.col, function (i) data.frame("tau"=Y.hat.1.unadj.rct[[i]]-Y.hat.0.unadj.rct[[i]],
@@ -50,14 +50,13 @@ cov.names <- c(Overall,Sex,Age,Race.ethn,Health.stat,Education,Income)
 het.plot <- lapply(y.col, function (i) data.frame(x=factor(c(rep(cov.names,3)), levels=rev(cov.names)), # reverse order
                                      y = c(t.patt[[i]],unlist(patt.het[[i]]),
                                            t.patt.unadj[[i]],unlist(patt.unadj.het[[i]]),
-                                           t.satt.unadj[[i]],unlist(satt.unadj.het[i])), 
+                                           rct.sate[[i]],unlist(sate.het[i])), 
                                      Group = factor(rep(c(cov.groups[1],rep(cov.groups[2],length(Sex)),rep(cov.groups[3],length(Age)),
                                                rep(cov.groups[4],length(Race.ethn)),rep(cov.groups[5],length(Health.stat)),
                                                rep(cov.groups[6],length(Education)),rep(cov.groups[7],length(Income))),3), levels=cov.groups),
                                      Estimator= factor(c(rep("PATT (adjusted)",length(covs)+1),
                                                   rep("PATT (unadjusted)",length(covs)+1),
-                                                  rep("SATT (unadjusted)",length(covs)+1)))))
-                   
+                                                  rep("SATE (adjusted)",length(covs)+1)))))
 # Plot forest plot
 het.plot.all <- lapply(y.col, function (i) 
                          ggplot(het.plot[[i]][het.plot[[i]]$Group!="Income",], aes(x=x, y=y,colour=Estimator)) +  # exclude income groups
@@ -66,7 +65,7 @@ het.plot.all <- lapply(y.col, function (i)
                          coord_flip() +
                          geom_line() +
                          geom_hline(aes(x=0), lty=2) +
-                      #   facet_grid(Group~.) +
+                   #      facet_grid(Group~.) +
                          ylab("Treatment effect") +
                          xlab("")) #switch because of the coord_flip() above 
 
