@@ -328,11 +328,11 @@ We apply the proposed method to estimate the effect of extending Medicaid covera
 
 We draw RCT data from the Oregon Health Insurance Experiment (OHIE) \citep{finkelstein2012,baicker2013,baicker2014,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who who have been without insurance for six months, and have income below the FPL and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid. Sample exclusions brought the sample size down to 74,922 individuals representing 66,385 households.  Within the sample, 29,834 participants were selected by the lottery; the remaining 45,008 participants served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} The OHIE data includes pretreatment covariates for gender, age, race, ethnicity, health status, education, and household income. \\
 
-We use two health care use responses: emergency room (ER) and primary care visits in the past 12 months.\footnote{The variables that capture the total number of visits have been censored so that no individual value has fewer than ten observations.} These data originate from a mail survey that was administered to participants over July and August 2009 ($N = 23,741$ survey respondents) \cite{finkelstein2012}. We use the same definition of insurance coverage as \citet{finkelstein2012} to form our measure of compliance, which is a binary variable indicating whether the participant was enrolled in any Medicaid program (including the lotteried program) between the notification date and 30 September 2009. 
+We use two health care use responses: emergency room (ER) and primary care visits in the past 12 months.\footnote{The variables that capture the total number of visits have been censored so that no individual value has fewer than ten observations and are truncated at the 2*99th percentile.} These data originate from a mail survey that was administered to participants over July and August 2009 ($N = 23,741$ survey respondents) \cite{finkelstein2012}. We use the same definition of insurance coverage as \citet{finkelstein2012} to form our measure of compliance, which is a binary variable indicating whether the participant was enrolled in any Medicaid program (including the lotteried program) between the notification date and 30 September 2009. 
 
 \paragraph{Observational data} 
 
-We employ data on the target population from the National Health Interview Study (NHIS) \cite{NHIS}, which is conducted by the Center for Disease Control.  We restrict our analysis to respondents whose income is below 138\% of the FPL. We use covariates on respondent characteristics that match the OHIE pretreatment covariates. The outcomes of interest from NHIS are variables on ER  and primary care visits in the past 12 months. We use a recoded variable which indicates whether respondents are on Medicaid as an analogue to the OHIE compliance measure.
+We employ data on the target population from the National Health Interview Study (NHIS) \cite{NHIS} for study years 2009--2013.  We restrict our analysis to respondents whose income is below 138\% of the FPL. We use covariates on respondent characteristics that match the OHIE pretreatment covariates. The outcomes of interest from NHIS are variables on ER  and primary care visits in the past 12 months. We use a recoded variable which indicates whether respondents are on Medicaid as an analogue to the OHIE compliance measure.
 
 \subsection{Verifying assumptions}
 
@@ -344,11 +344,13 @@ Assumption \ref{monotonicity} does not hold due to the presence of compliers in 
 
 \subsection{Empirical results}
 
-We compare PATT and SATE estimates for ER and primary care use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with random forests prediction models using the default settings \citep{breiman2001}. We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample has size $N=23,205$ and the population has $N=38,579$. There are $N=10,297$ RCT compliers and $N=3,914$ target population ``compliers'' on medicaid. \todo{Population compliers N seems small}. \\
+We compare PATT and SATE estimates for ER and primary care use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with random forests prediction models using the default settings \citep{breiman2001}. We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample has size $N=23,205$ and the population has $N=38,579$. There are $N=10,297$ RCT compliers and $N=3,914$ target population ``compliers'' on medicaid. \\
 
-Figures \ref{fig:any-visit-plot} and \ref{fig:num-visit-plot} compare estimates for a binary response indicating whether the participant visited an ER and the number of ER visits in the past 12 months, respectively. We estimate the effect of Medicaid coverage on ER visits is between -0.01 and -0.04 for population compliers (adjusted PATT), depending on which response variable is used. In comparison, the treatment effects on RCT compliers (adjusted SATE) are about zero. There are substantial differences between SATE and PATT estimates across covariate groups. For instance, while there are large negative treatment effects on ER use for sample participants with pre--existing conditions, treatment effects for population participants with pre--existing conditions are large and positive. \\
- 
-\begin{figure}
+Figures \ref{fig:any-visit-plot} and \ref{fig:num-visit-plot} compare estimates for a binary response indicating whether the participant visited an ER and the number of ER visits in the past 12 months, respectively. We estimate the effect of Medicaid coverage on the likelihood of visiting the ER is about -1\% for population compliers (adjusted PATT). In comparison, the treatment effects on RCT compliers (adjusted SATE) are about zero. There are substantial differences between SATE and PATT estimates across covariate groups. For instance, while there are large negative treatment effects on ER use for sample participants with pre--existing conditions, treatment effects for population participants with pre--existing conditions are large and positive. While the treatment effects on any ER use for college--educated RCT compliers is 9\%, treatment effects on college--educated population compliers is about 0. \\
+
+Figures \ref{fig:any-out-plot} and \ref{fig:num-out-plot} compare treatment effect estimates on primary care use. For population compliers overall, the effect of Medicaid coverage on the likelihood of primary care use is about 2\%. For RCT compliers overall, the effect is about 0. Sample and population estimates are generally similar according to pre--existing conditions. Treatment effects on primary care use are large and negative for college--educated RCT compliers, but about zero for college--education population compliers. 
+
+\begin{figure} [b]
 \begin{center}
   \begin{subfigure}[b]{0.86\textwidth}
     \includegraphics[width=\textwidth]{any-visit-plot.pdf}
@@ -365,9 +367,7 @@ Figures \ref{fig:any-visit-plot} and \ref{fig:num-visit-plot} compare estimates 
   \end{center}
 \end{figure}
 
-Figures \ref{fig:any-out-plot} and \ref{fig:num-out-plot}  ....
-
-\begin{figure}
+\begin{figure} [htb]
 \begin{center}
      \begin{subfigure}[b]{0.86\textwidth}
     \includegraphics[width=\textwidth]{any-out-plot.pdf}
@@ -384,7 +384,9 @@ Figures \ref{fig:any-out-plot} and \ref{fig:num-out-plot}  ....
    \end{center}
 \end{figure}
 
-% Compare with table A28 of F2012
+We compare our estimates with those reported in Appendix Table 28 of F2012 of \citet{finkelstein2012}. In this table, the authors compare their IVLS estimates of the treatment effects on RCT compliers with observational estimates comparing individuals with and without Medicaid using a sample of NHIS respondents similar to the one used in our study. That authors report OLS estimates of the effect of Medicaid on primary care use for the population is slightly lower than the RCT sample; observational estimates of Medicaid on ER visits is slightly higher than for the RCT sample. Our estimates do not demonstrate the relationship between RCT and population estimates. One reason for the failure to replicate is that we are using censored data on the number of visits. 
+
+
 \section{Discussion}
 
 The treatment effect of Medicaid applies to uninsured adults with income below the FPL who express interest in health insurance coverage. The sample population differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions, such as the ACA expansion to cover all adults up to 138\% of the FPL. For instance, the RCT participants are disproportionately white urban--dwellers \cite{Taubman}. The RCT participants volunteered for the study and therefore may be in poorer health compared to the population. \\
@@ -393,14 +395,12 @@ Simulations shed light on the conditions under which the proposed estimator shou
 
 In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  Our random forest for predicting compliance based on observed covariates has about $61.5\%$ accuracy on the training set of individuals in OHIE assigned to the treatment group.  While we don't know well how the model predicts for the control group, its performance on the training set suggests that compliance is not purely random, but depends on observed covariates.  This gives evidence in favor of using the proposed estimator.  Future work should be done to construct a better model to predict compliance, both in the treated group used for training and the controls in the RCT. \\
 
-
-\todo{Update to reflect what we expected + what we actually saw}
-The proposed method allows us to decompose both SATE and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expect to find substantial differences between sample and population estimates in terms of ethnicity and pre--existing condition subgroups. Overall, we expect the PATT estimate to be lower than the SATE estimate due to the adverse selection problem in the RCT. \\
+The proposed method allows us to decompose both SATE and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expected to find substantial differences between sample and population estimates in terms of race, and pre--existing condition subgroups. We find large negative treatment effects on ER use for sample participants with pre--existing conditions, yet the treatment effects for population participants with pre--existing conditions are large and positive. Overall, we expected the PATT estimates to be lower than corresponding SATE estimates due to the adverse selection problem in the RCT. We find the PATT estimates are lower than SATE for number of ER visits, but the PATT estimates are higher than SATE for primary care usage. \\
 
 
 
 
-\pagebreak
+%\pagebreak
 
 \begin{singlespace}		%Single-space for bibliography 
 
@@ -409,10 +409,10 @@ The proposed method allows us to decompose both SATE and PATT estimates by subgr
 \bibliography{refs}
 
 %Appendix
-\pagebreak
-\begin{appendices}
+%\pagebreak
+%\begin{appendices}
 
-\end{appendices}
+%\end{appendices}
 \end{singlespace}
 
 \itemize
