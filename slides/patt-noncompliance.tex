@@ -81,9 +81,22 @@
 \newcommand{\Var}{\mathrm{Var}}
 \newcommand{\Cov}{\mathrm{Cov}}
 \DeclareMathOperator*{\plim}{plim}
+\newcommand{\ind}{\mathbb{I}} % Indicator function
+\newcommand{\pr}{\mathbb{P}} % Generic probability
+\newcommand{\ex}{\mathbb{E}} % Generic expectation
+\newcommand{\cov}{\mathrm{Cov}}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 \newcommand{\possessivecite}[1]{\citeauthor{#1}'s [\citeyear{#1}]} 
+
+% Making a DAG
+\usepackage{tkz-graph}  
+\usetikzlibrary{shapes.geometric}
+\tikzstyle{VertexStyle} = [shape            = ellipse,
+                               minimum width    = 6ex,%
+                               draw]
+ \tikzstyle{EdgeStyle}   = [->,>=stealth']      
+
 
 %color
 \usecolortheme[RGB={50,200,50}]{structure} 
@@ -94,13 +107,12 @@
 \setbeamertemplate{blocks}[rounded][shadow=true] 
 \setbeamertemplate{navigation symbols}{} 
 \mode<presentation>
-\title[]{Wealth, Officeholding, and Elite Ideology \\
-in Antebellum Georgia}
+\title[]{title}
 
-\author[J. Poulos]{Jason Poulos}
-\institute[UCB]{Travers Dept. of Political Science \\
-University of California, Berkeley}
-\date[04/1/15]{}
+\author[J. Poulos, K. Ottoboni]{Jason Poulos, Kellie Ottoboni}
+%\institute[UCB]{Travers Dept. of Political Science \\
+%University of California, Berkeley}
+\date[04/30/15]{}
 \begin{document}
 
 \frame{\titlepage}
@@ -110,62 +122,179 @@ University of California, Berkeley}
 \begin{frame}
 \frametitle{Motivation}
 \begin{itemize}
-\item Does personal wealth cause individuals to select into office, and does it influence ideology of officeholders?
-\item Difficult to test using purely observational data because of confounders
-\begin{itemize}
-\item \citet{carnes2012}: US House members with white--collar backgrounds vote more conservatively on economic policy than members with blue--collar backgrounds
-\item \citet{rossi2011}: natural experiment in land redistribution in $16^{th}$ century Argentina. Families receiving land closer to Buenos Aires have higher probability of ex--post officeholding.
-\end{itemize}
+\item 
 \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Overview of experiment}
 \begin{itemize}
-\item In 1805 and 1807, state of Georgia conducted first two public land lotteries in US history ($>3.2$ million acres of former Creek Nation land)
-\item Approximately 86\% of adult white males participated
-\item About 15\% of participants won a land lot prize valued over \$800, which represented over half of median annual income
+\item Oregon Health Insurance Experiment
 \end{itemize}
 \end{frame}
 
+\section[Estimation]{}
+
 \begin{frame}
-\frametitle{Overview of experiment (cont.)}
+\frametitle{Estimating treatment effects}
 \begin{itemize}
-\item Link lottery records to roster of officeholders and roll call votes
-\item Estimate effect of winning a lottery prize on ex--post officeholding among sample of lottery participants ($N=21,261$)
-\item Estimate treatment effect on elite ideology by comparing mean of votes in support of slavery of participants who were members of Georgia's General assembly  ($N=474$)
-\item Results: winning lottery prize has no significant effect on ex--post officeholding, $p=0.962$, 95\% CI: [-0.0099,  0.0088], nor legislators' support for slavery legislation, $p=0.78$, 95\% CI: [-0.1456, 0.153]
+\item Neyman-Rubin framework: each $i = \left\{1, ..., N \right\}$ participants have four potential outcomes, $Y_{ist}$ for $s = 0,1$ and $t = 0,1$
+\item Define W, S, T, C, D, Y
 \end{itemize}
 \end{frame}
 
-\section[Georgia land lotteries]{}
 
 \begin{frame}
-\frametitle{Lottery process}
+\frametitle{Estimating treatment effects}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.5] 
+\SetGraphUnit{2} 
+\Vertex{W}  \NOEA(W){S} \EA(S){T}  \EA(W){C} \SOEA(T){D} \SOEA(C){Y} \SOWE(D){Y}
+\Edges(W, S, T) \Edges(W,T) \Edges(W, C) \Edges(T, D) \Edges(C, D) \Edges(W, Y) \Edges(D, Y)
+\end{tikzpicture}
+\caption{Causal diagram indicating the conditional independence assumptions needed to estimate the PATT.}\label{fig:DAG}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{1}{}\label{consistency}
+Consistency under parallel studies: for all $i$ and for $t=0, 1$,
+$$Y_{i0t} = Y_{i1t}$$
+\end{assumption}
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{2}{}\label{si_treat}
+Strong ignorability of sample assignment for treated:
+\begin{equation*}
+(Y_{01}, Y_{11}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
+\end{equation*}
+\end{assumption}
+\noindent Potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
+
+\begin{assumption}{3}{}\label{si_ctrl}
+Strong ignorability of sample assignment for controls:
+\begin{equation*}
+(Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
+\end{equation*}\end{assumption}
+
+\noindent Potential outcomes for control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{4}{}\label{sutva}
+Stable unit treatment value assumption (SUTVA):
+\begin{equation*}
+Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
+\end{equation*}
+where $L_j$ is the treatment and sample assignment vector for unit $j$. \end{assumption}
+ 
+\begin{assumption}{5}{}\label{compl}
+Conditional independence of compliance and assignment:
+\begin{equation*}
+C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
+\end{equation*}
+\end{assumption}
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{6}{}\label{monotonicity}
+Monotonicity: 
+\begin{equation*}
+T_i \geq D_i, \forall i
+\end{equation*}
+\end{assumption}
+\noindent This assumption implies that there are no defiers and that crossover is only possible from treatment to control.
+\begin{assumption}{7}{}\label{ER}
+Exclusion restriction: For non-compliers
+\begin{equation*}
+Y_{11} = Y_{10}
+\end{equation*}  
+\end{assumption}
+\noindent The treatment assignment affects the response only through the treatment received.  In particular, the treatment effect may only be non-zero for compliers.  
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{theorem}\label{thm1}
+Under assumptions \eqref{consistency} - \eqref{ER},
+
+$$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
+-\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] $$
+
+where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the treated individuals in the target population.  
+\end{theorem}
+\end{frame}
+
+\begin{frame} % This slide is too wordy
+\frametitle{Estimation Procedure}
+\begin{enumerate}
+\item Using the group assigned to treatment in the RCT $(S=1, T=1)$, train a model to predict complier status $C$ using the covariates $W$.
+\item Predict who in the RCT assigned to control \textit{would have} complied to treatment had they been assigned to the treatment group.
+\item For the group of observed compliers to treatment and predicted compliers in the control group, train a model to predict the response using as features the covariates $W$ and the treatment $T$ (assigned and observed are the same, for these individuals).  This model gives $\ex(Y_{1t} \mid S=1, C=1, T=t, W)$ for $t = 0,1$.
+\item For all individuals who received treatment in the population $(S=0, D=1)$, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
+\end{enumerate}
+\end{frame}
+
+
+%\section[Georgia land lotteries]{}
+%
+%\begin{frame}
+%\frametitle{Lottery process}
+%\begin{itemize}
+%\item 1805 lottery created three new counties from Creek lands: Baldwin, Wayne, and Wilkinson; 1807 lottery extended boundaries of Baldwin and Wilkinson counties
+%\item Land divided into districts and square lots of 202.5 acres each (490 acres for Wayne county)
+%\item Prize tickets representing each lot placed in ``lottery wheel''
+%\begin{itemize}
+%\item Blank tickets equal in number to \# draws - \# prizes also placed in wheel
+%\end{itemize}
+%\item Eligibility extended to free white men 21+ (1 draw); orphaned children (1 draw); married men with children (2 draws) and widows with children (2 draws)
+%\begin{itemize}
+%\item 1807 rules: orphan families with both parents deceased (2 draws); widows (1 draw); free white unmarried females 21+ (1 draw); 1805 fortunate drawers excluded
+%\item Entry fee: 12.5 cents per draw
+%\end{itemize}
+%\end{itemize}
+%\end{frame}
+%
+%%County map
+%\begin{frame}
+%\begin{figure}[htbp] 
+%   \centering
+%   \includegraphics[width=4in]{county-map.pdf} 
+%   \caption{Map of Georgia with 1807 county boundaries \citep{long1995}. The northernmost shaded counties are Baldwin and Wilkinson, respectively, and Wayne is the southernmost shaded county.}
+%   \label{map}
+%\end{figure}
+%\end{frame}
+%
+\section[Simulation]{}
+
+\begin{frame}
+\frametitle{Simulation}
 \begin{itemize}
-\item 1805 lottery created three new counties from Creek lands: Baldwin, Wayne, and Wilkinson; 1807 lottery extended boundaries of Baldwin and Wilkinson counties
-\item Land divided into districts and square lots of 202.5 acres each (490 acres for Wayne county)
-\item Prize tickets representing each lot placed in ``lottery wheel''
-\begin{itemize}
-\item Blank tickets equal in number to \# draws - \# prizes also placed in wheel
-\end{itemize}
-\item Eligibility extended to free white men 21+ (1 draw); orphaned children (1 draw); married men with children (2 draws) and widows with children (2 draws)
-\begin{itemize}
-\item 1807 rules: orphan families with both parents deceased (2 draws); widows (1 draw); free white unmarried females 21+ (1 draw); 1805 fortunate drawers excluded
-\item Entry fee: 12.5 cents per draw
-\end{itemize}
+\item describe simulation design?
 \end{itemize}
 \end{frame}
 
-%County map
+%Simulation results plot
 \begin{frame}
-\begin{figure}[htbp] 
-   \centering
-   \includegraphics[width=4in]{county-map.pdf} 
-   \caption{Map of Georgia with 1807 county boundaries \citep{long1995}. The northernmost shaded counties are Baldwin and Wilkinson, respectively, and Wayne is the southernmost shaded county.}
-   \label{map}
+\begin{figure}[htbp]
+%\caption{Balance in treatment assignment for 1805 sample.}
+\centering
+   \includegraphics[width=\linewidth]{../paper/mse_boxplots_B5.pdf} 
+ %  \footnotesize{Note: $p$ values are calculated using a two--sided randomization test ($\mathcal{L}=1,000$ iterations) for weighted difference of means between treatment and control groups. Refer to footnotes in Table \ref{balance-nom} and Figure \ref{qq} for variable descriptions.}
+\label{simulation-plot}
 \end{figure}
 \end{frame}
+
+
 
 \section[Data]{}
 
@@ -193,76 +322,8 @@ University of California, Berkeley}
 \end{enumerate}
 \end{frame}
 
-\section[Estimation]{}
 
-\begin{frame}
-\frametitle{Estimating treatment effects}
-\begin{itemize}
-\item \citet{neyman1923} framework: each $i = \left\{1, ..., N \right\}$ participants have two potential outcomes, $Y_{1i}$ and $Y_{0i}$
-\item  $Z_i \in \{0,1\}$ denotes treatment assignment for $i$
-\item Calculate weighted difference--in--means estimator for sample average treatment effect:
 
-\begin{equation} \label{tstat}
-\boldsymbol \delta^{*} = \frac{\sum_{i=1}^{N} (Y_{i} | Z_i = 1)}{n \mathrm{P} (Z_i = 1)}  -  \frac{\sum_{i=1}^{N} (Y_{i} | Z_i = 0)}{m(1-\mathrm{P} (Z_i = 1))},
-\end{equation} where $n = \sum_{i=1}^{N} Z_i$, $m = N- n$, and 
-\begin{align} \label{Z} 
-\mathrm{P} (Z_i = 1) = \begin{cases}
-\frac{\# \mathrm{Prizes}}{\# \mathrm{Tickets}} 	& \mbox{if} \, i \, \mathrm{has \, one \, draw}  \\
-2 \left(\frac{\# \mathrm{Prizes}}{\# \mathrm{Tickets}}\right) 	& \mbox{if}\, i \, \mathrm{has \, two \, draws}.
-\end{cases} 
-\end{align} 
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
-\begin{itemize}
-\begin{assumption}{1}{}\label{a1}
-No interference between units: $Y_{i\boldsymbol Z}$ varies with $Z_i$, but does not vary with other elements of \textbf{Z}.
-\end{assumption} 
-
-\begin{assumption}{2}{}\label{a2}
-Random treatment assignment: $\mathrm{P}(Z_i | Y_{i\boldsymbol Z}) = \mathrm{P}(Z_i)$ for all $i$. 
-\end{assumption} 
-
-\item Estimate exact two--sided $p$ value:
-
-\begin{equation} \label{p} 
-\hat{p} = \frac{\sum_{\mathcal{L}=1}^{\mathcal{L}} \boldsymbol Z \left(|\delta_\mathcal{L}| \geq |\delta^{*}|\right)}{\mathcal{L}},
-\end{equation} where $\delta_\mathcal{L}$ is value of test statistic for $\mathcal{L}^{th}$ random sample from randomization distribution
-\item CIs obtained by inverting randomization test
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
-\begin{itemize}
-\item Noncompliance is an issue: 9\% in 1805 sample and 22\% in combined sample
-\item Implement \citet{angrist1996} IV procedure: $Z_i$ instruments for $D_i (\boldsymbol Z) \in\{0,1\}$ indicating if treatment actually received
-\begin{assumption}{3}{}\label{a5}
-No defiers: $D_i (1) \geq D_i (0) =0 \hspace{5mm} \forall \,i.$
-\end{assumption} 
-\item Average causal effect on compliers:
-\begin{align}
-\frac{\E [Y_i  | Z_i = 1] - \E[Y_i | Z_i = 0]}{\E[D_i (1)]} \\ \nonumber
-= \E[Y_{1i} - Y_{0i} | D_i (1)=1] \label{LATE}
-\end{align} 
-\end{itemize}
-\end{frame}
-
-\section[Balance for 1805 sample]{}
-
-%Balance plot
-\begin{frame}
-\begin{figure}[htbp]
-%\caption{Balance in treatment assignment for 1805 sample.}
-\begin{center}
-   \includegraphics[width=0.50\linewidth]{balance-plot.pdf} 
-  \end{center}
- %  \footnotesize{Note: $p$ values are calculated using a two--sided randomization test ($\mathcal{L}=1,000$ iterations) for weighted difference of means between treatment and control groups. Refer to footnotes in Table \ref{balance-nom} and Figure \ref{qq} for variable descriptions.}
-\label{balance-plot}
-\end{figure}
-\end{frame}
 
 \section[Results]{}
 
@@ -392,7 +453,7 @@ Support for slavery & 0 & 401 & 0 & 0.735 & 1 & 0.371 & 1353 \\
 \begin{singlespace}
 \begin{tiny}
 \bibliographystyle{plainnat}
-\bibliography{references}
+\bibliography{../paper/refs}
 \end{tiny}
 \end{singlespace}
 \itemize
