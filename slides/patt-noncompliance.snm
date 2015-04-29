@@ -7,10 +7,6 @@
 \beamer@slide {monotonicity}{9}
 \beamer@slide {ER}{9}
 \beamer@slide {thm1}{10}
-\beamer@slide {simulation-plot}{13}
-\beamer@slide {lotteries}{16}
-\beamer@slide {outcomes-assembly}{17}
-\beamer@slide {forest-plot}{18}
-\beamer@slide {het-plot-oh}{19}
-\beamer@slide {wealth-plot}{20}
-\beamer@slide {het-plot-assembly}{21}
+\beamer@slide {simulation-plot}{12}
+\beamer@slide {het-plot-av}{15}
+\beamer@slide {het-plot-ao}{16}

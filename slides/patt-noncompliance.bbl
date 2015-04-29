@@ -5,9 +5,11 @@
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[Breiman(2001)]{breiman2001}
-Leo Breiman.
-\newblock Random forests.
-\newblock \emph{Machine learning}, 45\penalty0 (1):\penalty0 5--32, 2001.
+\bibitem[Hartman et~al.(to appear)Hartman, Grieve, Ramsahai, and
+  Sekhon]{Hartman}
+Erin Hartman, Richard Grieve, Roland Ramsahai, and Jasjeet~S. Sekhon.
+\newblock From sate to patt: Combining experimental with observational studies
+  to estimate population treatment effects.
+\newblock \emph{Journal of the Royal Statistical Society, Series A}, to appear.
 
 \end{thebibliography}

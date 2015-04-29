@@ -107,12 +107,11 @@
 \setbeamertemplate{blocks}[rounded][shadow=true] 
 \setbeamertemplate{navigation symbols}{} 
 \mode<presentation>
-\title[]{title}
+\title[]{Estimating population average treatment effects from experiments with noncompliance}
 
 \author[J. Poulos, K. Ottoboni]{Jason Poulos, Kellie Ottoboni}
-%\institute[UCB]{Travers Dept. of Political Science \\
-%University of California, Berkeley}
-\date[04/30/15]{}
+\institute[]{Stat 215B}
+\date[04/30/15]{April 30, 2015}
 \begin{document}
 
 \frame{\titlepage}
@@ -122,9 +121,20 @@
 \begin{frame}
 \frametitle{Motivation}
 \begin{itemize}
-\item 
+\item RCTs are the ``gold standard'' for estimating the causal effect of a treatment
+\begin{itemize}
+\item External validity is an issue when RCT participants don't reflect the target population
+\item Non-compliance to treatment assignment biases estimates of the sample average treatment effect (SATE) towards $0$
+\end{itemize}
+\item Idea: reweight responses in the treatment group of RCT compliers to estimate population average treatment effect on the treated (PATT)
+\begin{itemize}
+\item \cite{Hartman} develop a nonparametric reweighting method to extend SATE to PATT
+\item We extend this method to the case of one-way crossover
+\end{itemize}
 \end{itemize}
 \end{frame}
+
+
 
 \begin{frame}
 \frametitle{Overview of experiment}
@@ -234,15 +244,7 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \end{theorem}
 \end{frame}
 
-\begin{frame} % This slide is too wordy
-\frametitle{Estimation Procedure}
-\begin{enumerate}
-\item Using the group assigned to treatment in the RCT $(S=1, T=1)$, train a model to predict complier status $C$ using the covariates $W$.
-\item Predict who in the RCT assigned to control \textit{would have} complied to treatment had they been assigned to the treatment group.
-\item For the group of observed compliers to treatment and predicted compliers in the control group, train a model to predict the response using as features the covariates $W$ and the treatment $T$ (assigned and observed are the same, for these individuals).  This model gives $\ex(Y_{1t} \mid S=1, C=1, T=t, W)$ for $t = 0,1$.
-\item For all individuals who received treatment in the population $(S=0, D=1)$, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
-\end{enumerate}
-\end{frame}
+
 
 
 %\section[Georgia land lotteries]{}
@@ -301,124 +303,64 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \begin{frame}
 \frametitle{Data}
 \begin{itemize}
-\item List of 1805 lottery participants compiled by \citet{graham2005}
-\item Fortunate drawer records for 1805 and 1807 lotteries \citep{graham2004,graham2011}
-\item Roster of officeholders published by Georgia Archives (Trustee period -- 1847)
-\item Roll call votes extracted from Journals of the House and Senate of the State of Georgia
-\begin{itemize}
-\item  15 votes: emancipate certain slaves; facilitate introduction of slaves into state and prevent slaves being carried out of the state; and punish slaves and free blacks
-\end{itemize}
-\item Individual property tax records (1790 -- 1865)  \citep{archives1890,blair1926}
+\item OHIE data
+\item NHIS data
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{Linking participants with officeholders}
+\begin{frame} % This slide is too wordy
+\frametitle{Estimation Procedure}
 \begin{enumerate}
-\item Manually deduplicate 1807 records matched with officeholders based on exact match of surname and Soundex codes of first name
-\item Randomly split matched records into training (60\%) and test (40\%) sets
-\item  Fit an algorithmic model using random forests \citep{breiman2001} on training set with features common to both datasets (test set error rate of 35\%)
-\item Use model to deduplicate 1805 lottery records matched with officeholders
+\item Using the Medicaid lottery winners in the OHIE $(S=1, T=1)$, train a model to predict complier status using observed covariates.
+\item Predict which lottery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible.
+\item For the group of observed compliers to treatment and predicted compliers in the control group, train a model to predict hospital use using the covariates and Medicaid enrollment as features. 
+\item For all individuals who enrolled in Medicaid in the NHIS, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
 \end{enumerate}
 \end{frame}
 
 
 
-
 \section[Results]{}
 
-%Treatment effect on officeholding
-\begin{frame}
-\frametitle{Results}
-\begin{table}[htb]
-\caption{Officeholding by treatment assignment.}   \label{lotteries} 
-  \begin{tabularx}{\linewidth}{l*{8}{Y}}
-    \toprule
-    \multicolumn{8}{l}{\textbf{Panel A: 1805 sample}} \\
-    \midrule
-\textbf{Response}&  & $\textbf{Control}$ & $\mathbf{\%_{\mathrm{m}}}$ & $\textbf{Treated}$ & $\mathbf{\%_{\mathrm{n}}}$ & $\textbf{All}$ & $\mathbf{\%_{\mathrm{N}}}$ \\ 
-  \hline
-Officeholder & 0 & 16747 & 93.1 & 3058 & 93.2 & 19805 & 93.2 \\ 
-   & 1 & 1234 & 6.9 & 222 & 6.8 & 1456 & 6.8 \\ 
-   \hline
- & all & 17981 & 100.0 & 3280 & 100.0 & 21261 & 100.0 \\ 
-  \end{tabularx}
-  \begin{tabularx}{\linewidth}{l*{8}{Y}}
-    \toprule
-    \multicolumn{8}{l}{\textbf{Panel B: Combined sample}} \\
-    \midrule
-Officeholder & 0 & 16747 & 93.1 & 10813 & 93.9 & 27560 & 93.4 \\ 
-   & 1 & 1234 & 6.9 & 705 & 6.1 & 1939 & 6.6 \\ 
-   \hline
- & all & 17981 & 100.0 & 11518 & 100.0 & 29499 & 100.0 \\ 
-    \bottomrule
-  \end{tabularx}
- \footnotesize{Notes: Distribution of officeholders by treatment assignment for sample of 1805 lottery participants (Panel A) and combined sample of 1805 participants and 1807 fortunate drawers (Panel B). Both samples exclude women orphans, and pretreatment officeholders.}
-\end{table}
-\end{frame}
+% Want to do a similar table to compare the paper results with ours?
 
-%Treatment effect on support for slavery
-\begin{frame}
-\frametitle{Results (cont.)}
-\begin{table}[htb]
-\caption{Support for slavery by treatment assignment.}   \label{outcomes-assembly}
-  \begin{tabularx}{\linewidth}{l*{8}{Y}}
-    \toprule
-    \multicolumn{8}{l}{\textbf{Panel A: 1805 sample}} \\
-    \midrule
- \textbf{Variable} & \textbf{Treatment} & $\mathbf{N}$ & \textbf{Min.} & $\mathbf{Mean}$ & \textbf{Max.} & $\mathbf{S.d.}$ & \textbf{\#NA}\\ 
-  \hline
-Support for slavery & 0 & 255 & 0 & 0.737 & 1 & 0.366 &  963 \\ 
-   & 1 & 219 & 0 & 0.722 & 1 & 0.382 &  632 \\ 
-   \hline
- & all & 474 & 0 & 0.730 & 1 & 0.373 & 1595 \\ 
-   \hline
-  \end{tabularx}
-  \begin{tabularx}{\linewidth}{l*{8}{Y}}
-    \toprule
-    \multicolumn{8}{l}{\textbf{Panel B: Combined sample}} \\
-    \midrule
-Support for slavery & 0 & 401 & 0 & 0.735 & 1 & 0.371 & 1353 \\ 
-   & 1 & 216 & 0 & 0.757 & 1 & 0.369 &  763 \\ 
-   \hline
- & all & 617 & 0 & 0.743 & 1 & 0.370 & 2116 \\ 
-    \bottomrule
-  \end{tabularx} \\
-\footnotesize{Distribution of the outcome variable, by treatment assignment, for 1805 participants (Panel A) or combined sample of 1805 participants and 1807 fortunate drawers (Panel B) who held office in the General Assembly before 1848 . `Support for slavery' is the mean of votes in favor of slavery.} 
-\end{table}
-\end{frame}
+%\begin{frame}
+%\frametitle{Results}
+%\begin{table}[htb]
+%\caption{Officeholding by treatment assignment.}   \label{lotteries} 
+%  \begin{tabularx}{\linewidth}{l*{8}{Y}}
+%    \toprule
+%    \multicolumn{8}{l}{\textbf{Panel A: 1805 sample}} \\
+%    \midrule
+%\textbf{Response}&  & $\textbf{Control}$ & $\mathbf{\%_{\mathrm{m}}}$ & $\textbf{Treated}$ & $\mathbf{\%_{\mathrm{n}}}$ & $\textbf{All}$ & $\mathbf{\%_{\mathrm{N}}}$ \\ 
+%  \hline
+%Officeholder & 0 & 16747 & 93.1 & 3058 & 93.2 & 19805 & 93.2 \\ 
+%   & 1 & 1234 & 6.9 & 222 & 6.8 & 1456 & 6.8 \\ 
+%   \hline
+% & all & 17981 & 100.0 & 3280 & 100.0 & 21261 & 100.0 \\ 
+%  \end{tabularx}
+%  \begin{tabularx}{\linewidth}{l*{8}{Y}}
+%    \toprule
+%    \multicolumn{8}{l}{\textbf{Panel B: Combined sample}} \\
+%    \midrule
+%Officeholder & 0 & 16747 & 93.1 & 10813 & 93.9 & 27560 & 93.4 \\ 
+%   & 1 & 1234 & 6.9 & 705 & 6.1 & 1939 & 6.6 \\ 
+%   \hline
+% & all & 17981 & 100.0 & 11518 & 100.0 & 29499 & 100.0 \\ 
+%    \bottomrule
+%  \end{tabularx}
+% \footnotesize{Notes: Distribution of officeholders by treatment assignment for sample of 1805 lottery participants (Panel A) and combined sample of 1805 participants and 1807 fortunate drawers (Panel B). Both samples exclude women orphans, and pretreatment officeholders.}
+%\end{table}
+%\end{frame}
 
-%Summary of results
-\begin{frame}
-\frametitle{Results (cont.)}
-\begin{figure}[htbp]
-\begin{center}
- %     \caption{Treatment effect estimates for each hypothesis test and sample used (horizontal lines represent 95\% confidence intervals)}
-   \includegraphics[scale=0.37]{forest-plot.pdf} 
-   \label{forest-plot} \\
-   \end{center}
-\end{figure}
-\end{frame}
 
 \section[Heterogeneous treatment effects]{}
-
 \begin{frame}
 \begin{figure}[htbp]
 \begin{center}
-      \caption{Heterogenous treatment effects for 1805 lottery participants.}
-   \includegraphics[scale=0.35]{het-plot-oh.pdf} 
-   \label{het-plot-oh}
-   \end{center}
-\end{figure}
-\end{frame}
-
-%Wealth densitiies
-\begin{frame}
-\begin{figure}[htbp]
-\begin{center}
-      \caption{Pre-- and posttreatment wealth densities for legislator--participants who voted on roll calls.}
-   \includegraphics[scale=0.33]{wealth-plot.pdf} 
-   \label{wealth-plot}
+      \caption{Heterogeneous effects of Medicaid enrollment on hospital visits.}
+   \includegraphics[scale=0.35]{../paper/any-visit-plot.pdf} 
+   \label{het-plot-av}
    \end{center}
 \end{figure}
 \end{frame}
@@ -426,24 +368,21 @@ Support for slavery & 0 & 401 & 0 & 0.735 & 1 & 0.371 & 1353 \\
 \begin{frame}
 \begin{figure}[htbp]
 \begin{center}
-      \caption{Heterogenous treatment effects for legislators who voted on roll calls.}
-   \includegraphics[scale=0.35]{het-plot-assembly.pdf} 
-   \label{het-plot-assembly}
+      \caption{Heterogeneous effects of Medicaid enrollment on outpatient visits.}
+   \includegraphics[scale=0.35]{../paper/any-out-plot.pdf} 
+   \label{het-plot-ao}
    \end{center}
 \end{figure}
 \end{frame}
+
+
 
 \section[Discussion]{}
 
 \begin{frame}
 \frametitle{Discussion}
 \begin{itemize}
-\item If property wealth influences political power, we should be able to find evidence in antebellum South
-\item Officeholding: tight CIs on zero effect implies evidence ``in favor of'' null
-\item Elite ideology: too much uncertainty to detect significant treatment effect
-\begin{itemize}
-\item Substantial heterogeneity in treatment effect according to pretreatment wealth
-\end{itemize}
+\item
 \end{itemize}
 \end{frame}
 
