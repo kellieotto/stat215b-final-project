@@ -77,8 +77,8 @@ rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] 
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
 
 # Predict who is a complier in NRT
-nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
-                            "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
+#nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
+#                            "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
 
 # Fit a regression to the compliers in the RCT
 y.col <- 1:ncol(Y.ohie) # number of responses

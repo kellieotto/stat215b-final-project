@@ -231,7 +231,6 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \item Data on the target population from National Health Interview Study (NHIS) \cite{NHIS} for 2009--2013
 \item Restrict to respondents with income below 138\% of FPL and on Medicaid ($N=3,914$)
 \item Covariates and responses match OHIE
-%\item OHIE compliance analogue: indicator for whether respondents are on Medicaid
 \end{itemize}
 \end{frame}
 
@@ -270,7 +269,7 @@ Less than high school  & 994 & 19.5 & 950 & 18.3 & 1555 & 39.7  \\
    \hline
 High school diploma or GED & 2908 & 57.0 & 2775 & 53.4 & 1193 & 30.5 \\ 
    \hline
-Vocational training / 2-year degree & 922 & 18.1 & 1031 & 19.9 & 945 & 24.1 \\ 
+Voc. training / 2-year degree & 922 & 18.1 & 1031 & 19.9 & 945 & 24.1 \\ 
    \hline
 4-year college degree or more & 280 & 5.5 & 437 & 8.4 & 221 & 5.7 \\ 
    \hline
@@ -293,14 +292,14 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{itemize}
 \item Monotonicity is violated: two-way crossover occurred in OHIE
 \begin{itemize}
-\item Lottery winners: 60\% attempted to enroll in Medicaid; only about 30\% successfully enrolled
-\item Lottery losers: 14\% enrolled in Medicaid some other way during study period
+\item 60\% of treated did not enroll in Medicaid 
+\item 14\% of controls enrolled in Medicaid during the study period
 \item Cross-over from control to treatment is low relative to other direction
 \end{itemize}
-\item Key assumption is strong ignorability: model of response given covariates is same in the RCT and in the population
+\item Key assumption is strong ignorability: model of response given covariates is same for RCT and population
 \begin{itemize}
-\item No way to check that we've included all possible confounders
-\item We have included all the confounders we have data on
+%\item No way to check that we've included all possible confounders
+\item We have included all possible confounders we have data on
 \end{itemize}
 \end{itemize}
 \end{frame}
@@ -308,15 +307,14 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame} 
 \frametitle{Estimation Procedure}
 \begin{enumerate}
-\item Using OHIE lottery winners $(S=1, T=1)$, train a random forest \citep{breiman2001} to predict complier status given covariates
-\item Predict which lotttery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible
-\item Using the Medicaid lottery winners in the OHIE $(S=1, T=1)$, train a random forest to predict complier status.
-\item Predict which lottery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible
-\item For the group of RCT compliers (both observed and predicted), train a random forest to predict hospital use using the covariates and Medicaid enrollment as features.
-\item For all individuals who enrolled in Medicaid in the NHIS, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
+\item Train random forests (RF) model to predict complier status, given covariates, for RCT treated
+\item Use model to predict compliers among RCT controls 
+\item For observed and predicted compliers, train RF model to predict response using covariates and treatment as features
+\item Using response model, estimate potential outcomes for population ``compliers'' on medicaid
+\item $\tau_{\text{PATT}}$ is the difference in means between potential outcomes
+%\item Estimate heterogeneous treatment effects by taking differences across response surfaces for each covariate group
 \end{enumerate}
 \end{frame}
-
 
 
 \section[Results]{}
@@ -348,9 +346,11 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame}
 \frametitle{Conclusions}
 \begin{itemize}
-\item If compliance is low and can be predicted by observed covariates, then it makes sense to use the proposed estimator 
-\item Adjusted and unadjusted $\tau_{\text{PATT}}$ estimates tend to be similar
-\item Effects of Medicaid enrollment are heterogeneous and far from SATE for covariates that differ between the OHIE and NHIS samples
+\item Proposed estimator performs better than unadjusted estimator in simulations when compliance is low and can be predicted by observed covariates
+\item Adjusted and unadjusted $\tau_{\text{PATT}}$ estimates similar for primary care visits
+\item Negative treatment effect on population compliers for ER visits (unadjusted $\tau_{\text{PATT}}$ is positive)
+%\item Effects of Medicaid enrollment are heterogeneous and far from SATE for covariates that differ between the OHIE and NHIS samples
+\item Substantial differences between sample and population estimates in terms of race and health status
 \end{itemize}
 \end{frame}
 
@@ -366,10 +366,9 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \itemize
 \end{frame}
 
-
-
+%APPENDIX 
 \begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
+\frametitle{Appendix: estimator assumptions}
 \begin{assumption}{1}{}\label{consistency}
 Consistency under parallel studies: for all $i$ and for $t=0, 1$,
 $$Y_{i0t} = Y_{i1t}$$
@@ -377,7 +376,7 @@ $$Y_{i0t} = Y_{i1t}$$
 \end{frame}
 
 \begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
+\frametitle{Appendix: estimator assumptions (cont.)}
 \begin{assumption}{2}{}\label{si_treat}
 Strong ignorability of sample assignment for treated:
 \begin{equation*}
@@ -395,7 +394,7 @@ Strong ignorability of sample assignment for controls:
 \end{frame}
 
 \begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
+\frametitle{Appendix: estimator assumptions (cont.)}
 \begin{assumption}{4}{}\label{sutva}
 Stable unit treatment value assumption (SUTVA):
 \begin{equation*}
@@ -412,7 +411,7 @@ C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
 \end{frame}
 
 \begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
+\frametitle{Appendix: estimator assumptions (cont.)}
 \begin{assumption}{6}{}\label{monotonicity}
 Monotonicity: 
 \begin{equation*}
