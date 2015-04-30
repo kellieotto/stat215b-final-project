@@ -229,31 +229,14 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \frametitle{Observational data}
 \begin{itemize}
 \item Data on the target population from National Health Interview Study (NHIS) \cite{NHIS} for 2009--2013
-\item Restrict to respondents with income is below 138\% of the FPL
+\item Restrict to respondents with income below 138\% of FPL and on Medicaid ($N=3,914$)
 \item Covariates and responses match OHIE
-\item OHIE compliance analogue: indicator for whether respondents are on Medicaid
+%\item OHIE compliance analogue: indicator for whether respondents are on Medicaid
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Checking Assumptions} % add to this
-\begin{itemize}
-\item Monotonicity is violated: two-way crossover occurred in OHIE
-\begin{itemize}
-\item Lottery winners: 60\% attempted to enroll in Medicaid; only about 30\% successfully enrolled
-\item Lottery losers: 14\% enrolled in Medicaid some other way during the study period
-\item Cross-over from control to treatment is low relative to other direction
-\end{itemize}
-\item Key assumption is strong ignorability: model of response given covariates is the same in the RCT and in the population
-\begin{itemize}
-\item No way to check that we've included all possible confounders
-\item We have included all the confounders we have data on
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Checking Assumptions (cont.)}
+\frametitle{}
 {\scriptsize
 \begin{longtable}{lllllll}
   & OHIE &  & OHIE &  & NHIS &  \\ 
@@ -299,18 +282,34 @@ Any ER visit & 1289 & 25.2 & 1323 & 25.5 & 860 & 22.0  \\
 Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\ 
 \hline
 \hline
-%\caption{Pretreatment covariates and responses for the OHIE and for NHIS respondents who received Medicaid.} 
+%\caption{Pretreatment covariates and responses for OHIE and NHIS respondents on Medicaid.} 
 \label{rct-nrt-compare}
 \end{longtable}
 }
 \end{frame}
 
+\begin{frame}
+\frametitle{Checking Assumptions} 
+\begin{itemize}
+\item Monotonicity is violated: two-way crossover occurred in OHIE
+\begin{itemize}
+\item Lottery winners: 60\% attempted to enroll in Medicaid; only about 30\% successfully enrolled
+\item Lottery losers: 14\% enrolled in Medicaid some other way during study period
+\item Cross-over from control to treatment is low relative to other direction
+\end{itemize}
+\item Key assumption is strong ignorability: model of response given covariates is same in the RCT and in the population
+\begin{itemize}
+\item No way to check that we've included all possible confounders
+\item We have included all the confounders we have data on
+\end{itemize}
+\end{itemize}
+\end{frame}
 
-\begin{frame} % This slide is too wordy
+\begin{frame} 
 \frametitle{Estimation Procedure}
 \begin{enumerate}
-\item Using the Medicaid lottery winners in the OHIE $(S=1, T=1)$, train a random forest to predict complier status.
-\item Predict which lot.tery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible
+\item Using OHIE lottery winners $(S=1, T=1)$, train a random forest \citep{breiman2001} to predict complier status given covariates
+\item Predict which lotttery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible
 \item For the group of RCT compliers (both observed and predicted), train a random forest to predict hospital use using the covariates and Medicaid enrollment as features.
 \item For all individuals who enrolled in Medicaid in the NHIS, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
 \end{enumerate}
