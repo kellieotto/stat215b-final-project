@@ -2,6 +2,7 @@
 
 # Libraries
 library(ggplot2)
+library(reporttools)
 
 # Calculate differences in potential outcomes for population treated compliers
 nrt.pred <- lapply(y.col, function (i) data.frame("tau"=Y.hat.1[[i]]-Y.hat.0[[i]],
@@ -74,11 +75,24 @@ num.visit.plot <- het.plot.all[[2]] # num.visit
 any.out.plot <- het.plot.all[[3]] # any.out
 num.out.plot <- het.plot.all[[4]] # num.out
 
-# Combine plots
-vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(2, 2)))
-print(any.visit.plot, vp = vplayout(1, 1))
-print(num.visit.plot, vp=vplayout(1,2))
-print(any.out.plot, vp=vplayout(2,1))
-print(num.out.plot, vp=vplayout(2,2))
+# Create table similar to Table 1 of Hartman et al. 
+latex <- FALSE
+if() {
+  rct.nrt.tab <- rbind(cbind(study="OHIE",X.ohie.response,
+                             Y.ohie.response[c("any.visit","any.out")]),
+                       cbind(study="NHIS",nrt.tr.counterfactual,
+                             Y.nhis[c("any.visit","any.out")][which(insurance.nhis==1),])) # create data for table
+  rct.nrt.tab$group <- NA
+  rct.nrt.tab$group[rct.nrt.tab$study=="OHIE" & rct.nrt.tab$treatment==0] <- 1
+  rct.nrt.tab$group[rct.nrt.tab$study=="OHIE" & rct.nrt.tab$treatment==1] <- 2
+  rct.nrt.tab$group[rct.nrt.tab$study=="NHIS" & rct.nrt.tab$treatment==1] <- 3
+    
+  tableNominal(vars = rct.nrt.tab, 
+               group = rct.nrt.tab$group, 
+         #      nams=c(cov.names[-1],"Any ER visit","Any primary care visit"),
+               vertical=FALSE,
+               prec = 3,cumsum=FALSE,lab = "rct-nrt-compare",
+               cap="Pretreatment covariates and responses for the OHIE and for NHIS respondents who received Medicaid.") # RCT vs. NRT compliers
+}
+
+

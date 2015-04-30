@@ -1,0 +1,55 @@
+\begin{thebibliography}{6}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Baicker et~al.(2014)Baicker, Finkelstein, Song, and
+  Taubman]{baicker2014}
+K~Baicker, A~Finkelstein, J~Song, and S~Taubman.
+\newblock The impact of medicaid on labor market activity and program
+  participation: Evidence from the oregon health insurance experiment.
+\newblock \emph{The American economic review}, 104\penalty0 (5):\penalty0 322,
+  2014.
+
+\bibitem[Baicker et~al.(2013)Baicker, Taubman, Allen, Bernstein, Gruber,
+  Newhouse, Schneider, Wright, Zaslavsky, and Finkelstein]{baicker2013}
+Katherine Baicker, Sarah~L Taubman, Heidi~L Allen, Mira Bernstein, Jonathan~H
+  Gruber, Joseph~P Newhouse, Eric~C Schneider, Bill~J Wright, Alan~M Zaslavsky,
+  and Amy~N Finkelstein.
+\newblock The oregon experiment—effects of medicaid on clinical outcomes.
+\newblock \emph{New England Journal of Medicine}, 368\penalty0 (18):\penalty0
+  1713--1722, 2013.
+
+\bibitem[Finkelstein et~al.(2012)Finkelstein, Taubman, Wright, Bernstein,
+  Gruber, Newhouse, Allen, Baicker, Group, et~al.]{finkelstein2012}
+Amy Finkelstein, Sarah Taubman, Bill Wright, Mira Bernstein, Jonathan Gruber,
+  Joseph~P Newhouse, Heidi Allen, Katherine Baicker, Oregon Health~Study Group,
+  et~al.
+\newblock The oregon health insurance experiment: Evidence from the first year.
+\newblock \emph{The quarterly journal of economics}, 127\penalty0 (3):\penalty0
+  1057, 2012.
+
+\bibitem[for Health~Statistics()]{NHIS}
+National~Center for Health~Statistics.
+\newblock National health interview survey.
+\newblock \url{http://www.cdc.gov/nchs/nhis.htm}.
+\newblock April 2015.
+
+\bibitem[Hartman et~al.(to appear)Hartman, Grieve, Ramsahai, and
+  Sekhon]{Hartman}
+Erin Hartman, Richard Grieve, Roland Ramsahai, and Jasjeet~S. Sekhon.
+\newblock From sate to patt: Combining experimental with observational studies
+  to estimate population treatment effects.
+\newblock \emph{Journal of the Royal Statistical Society, Series A}, to appear.
+
+\bibitem[Taubman et~al.(2014)Taubman, Allen, Wright, Baicker, Finkelstein, and
+  the Oregon Health Study~Group]{Taubman}
+Sarah Taubman, Heidi Allen, Bill Wright, Katherine Baicker, Amy Finkelstein,
+  and the Oregon Health Study~Group.
+\newblock Medicaid increases emergency department use: Evidence from oregon's
+  health insurance experiment.
+\newblock \emph{Science}, 343\penalty0 (6168):\penalty0 263--268, January 2014.
+
+\end{thebibliography}

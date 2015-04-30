@@ -109,7 +109,7 @@
 \mode<presentation>
 \title[]{Estimating population average treatment effects from experiments with noncompliance}
 
-\author[J. Poulos, K. Ottoboni]{Jason Poulos, Kellie Ottoboni}
+\author[K. Ottoboni, J. Poulos]{Kellie Ottoboni, Jason Poulos}
 \institute[]{Stat 215B}
 \date[04/30/15]{April 30, 2015}
 \begin{document}
@@ -131,16 +131,6 @@
 \item \cite{Hartman} develop a nonparametric reweighting method to extend SATE to PATT
 \item We extend this method to the case of one-way crossover
 \end{itemize}
-\end{itemize}
-\end{frame}
-
-
-
-\begin{frame}
-\frametitle{Overview of experiment}
-\begin{itemize}
-\item Oregon Health Insurance Experiment
-
 \end{itemize}
 \end{frame}
 
@@ -255,37 +245,6 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \end{frame}
 
 
-
-
-%\section[Georgia land lotteries]{}
-%
-%\begin{frame}
-%\frametitle{Lottery process}
-%\begin{itemize}
-%\item 1805 lottery created three new counties from Creek lands: Baldwin, Wayne, and Wilkinson; 1807 lottery extended boundaries of Baldwin and Wilkinson counties
-%\item Land divided into districts and square lots of 202.5 acres each (490 acres for Wayne county)
-%\item Prize tickets representing each lot placed in ``lottery wheel''
-%\begin{itemize}
-%\item Blank tickets equal in number to \# draws - \# prizes also placed in wheel
-%\end{itemize}
-%\item Eligibility extended to free white men 21+ (1 draw); orphaned children (1 draw); married men with children (2 draws) and widows with children (2 draws)
-%\begin{itemize}
-%\item 1807 rules: orphan families with both parents deceased (2 draws); widows (1 draw); free white unmarried females 21+ (1 draw); 1805 fortunate drawers excluded
-%\item Entry fee: 12.5 cents per draw
-%\end{itemize}
-%\end{itemize}
-%\end{frame}
-%
-%%County map
-%\begin{frame}
-%\begin{figure}[htbp] 
-%   \centering
-%   \includegraphics[width=4in]{county-map.pdf} 
-%   \caption{Map of Georgia with 1807 county boundaries \citep{long1995}. The northernmost shaded counties are Baldwin and Wilkinson, respectively, and Wayne is the southernmost shaded county.}
-%   \label{map}
-%\end{figure}
-%\end{frame}
-%
 \section[Simulation]{}
 
 
@@ -315,19 +274,31 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 
 
 
-\section[Data]{}
+\section[Application]{}
 
 \begin{frame}
-\frametitle{Data}
+\frametitle{Application: Oregon Health Insurance Experiment (OHIE)}
 \begin{itemize}
-\item OHIE data
-\item NHIS data
+\item In 2008, $\approx$ 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits \citep{finkelstein2012}
+\item Participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid
+\item After sample exclusions, 29,834 participants were selected by the lottery; remaining 45,008 served as controls 
+\item Two health care use responses from mail survey (N = 23,741): emergency room (ER) and primary care visits in past 12 months
+\item Compliance measure: indicator for whether participant was enrolled in Medicaid program during study period
 \end{itemize}
 \end{frame}
 
+\begin{frame}
+\frametitle{Observational data}
+\begin{itemize}
+\item Data on the target population from National Health Interview Study (NHIS) \cite{NHIS} for 2009--2013
+\item Restrict to respondents with income is below 138\% of the FPL
+\item Covariates and responses match OHIE
+\item OHIE compliance analogue: indicator for whether respondents are on Medicaid
+\end{itemize}
+\end{frame}
 
 \begin{frame}
-\frametitle{Checking Assumptions}
+\frametitle{Checking Assumptions} % add to this
 \begin{itemize}
 \item Monotonicity is violated. There is some 2-way cross-over
 \item Key assumption is strong ignorability: model of response given covariates is the same in the RCT and in the population
@@ -340,7 +311,55 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 
 \begin{frame}
 \frametitle{Checking Assumptions (cont.)}
-table of covariates, in OHIE and NHIS
+{\scriptsize
+\begin{longtable}{lllllll}
+  & OHIE &  & OHIE &  & NHIS &  \\ 
+    & control &  & treated &  &treated &   \\ 
+  & $n=5104$ &  & $n=5193$ &  & $n=3914$ &  \\  
+  \hline   
+    \hline   
+ \textbf{Covariate} &  $\mathbf{n}$ & $\mathbf{\%}$ & $\mathbf{n}$ & $\mathbf{\%}$ & $\mathbf{n}$ & $\mathbf{\%}$ \\ 
+\hline
+Female & 2970 & 58.2 & 2920 & 56.2 & 2712 & 69.3  \\ 
+   \hline
+20-49 & 1307 & 25.6 & 1367 & 26.3 & 1418 & 36.2  \\ 
+   \hline
+50-64 & 3797 & 74.4 & 3826 & 73.7 & 2496 & 63.8 \\ 
+   \hline
+White & 4420 & 86.6 & 4393 & 84.6 & 2308 & 59.0  \\ 
+   \hline
+Black & 227 & 4.5 & 197 & 3.8 & 1192 & 30.4  \\ 
+   \hline
+Hispanic & 331 & 6.5 & 476 & 9.2 & 1054 & 26.9  \\ 
+   \hline
+Diabetes & 518 & 10.2 & 539 & 10.4 & 689 & 17.6 \\ 
+   \hline
+Asthma & 986 & 19.3 & 887 & 17.1 & 748 & 19.1  \\ 
+   \hline
+High blood pressure & 1486 & 29.1 & 1418 & 27.3 & 1581 & 40.4  \\ 
+   \hline
+Heart condition & 159 & 3.1 & 141 & 2.7 & 396 & 10.1 \\ 
+   \hline
+Less than high school  & 994 & 19.5 & 950 & 18.3 & 1555 & 39.7  \\ 
+   \hline
+High school diploma or GED & 2908 & 57.0 & 2775 & 53.4 & 1193 & 30.5 \\ 
+   \hline
+Vocational training / 2-year degree & 922 & 18.1 & 1031 & 19.9 & 945 & 24.1 \\ 
+   \hline
+4-year college degree or more & 280 & 5.5 & 437 & 8.4 & 221 & 5.7 \\ 
+   \hline
+\hline
+ \textbf{Response} &   &  &  & &  &  \\ 
+Any ER visit & 1289 & 25.2 & 1323 & 25.5 & 860 & 22.0  \\ 
+   \hline
+\hline
+Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\ 
+\hline
+\hline
+%\caption{Pretreatment covariates and responses for the OHIE and for NHIS respondents who received Medicaid.} 
+\label{rct-nrt-compare}
+\end{longtable}
+}
 \end{frame}
 
 
@@ -358,43 +377,10 @@ table of covariates, in OHIE and NHIS
 
 \section[Results]{}
 
-% Want to do a similar table to compare the paper results with ours?
-
-%\begin{frame}
-%\frametitle{Results}
-%\begin{table}[htb]
-%\caption{Officeholding by treatment assignment.}   \label{lotteries} 
-%  \begin{tabularx}{\linewidth}{l*{8}{Y}}
-%    \toprule
-%    \multicolumn{8}{l}{\textbf{Panel A: 1805 sample}} \\
-%    \midrule
-%\textbf{Response}&  & $\textbf{Control}$ & $\mathbf{\%_{\mathrm{m}}}$ & $\textbf{Treated}$ & $\mathbf{\%_{\mathrm{n}}}$ & $\textbf{All}$ & $\mathbf{\%_{\mathrm{N}}}$ \\ 
-%  \hline
-%Officeholder & 0 & 16747 & 93.1 & 3058 & 93.2 & 19805 & 93.2 \\ 
-%   & 1 & 1234 & 6.9 & 222 & 6.8 & 1456 & 6.8 \\ 
-%   \hline
-% & all & 17981 & 100.0 & 3280 & 100.0 & 21261 & 100.0 \\ 
-%  \end{tabularx}
-%  \begin{tabularx}{\linewidth}{l*{8}{Y}}
-%    \toprule
-%    \multicolumn{8}{l}{\textbf{Panel B: Combined sample}} \\
-%    \midrule
-%Officeholder & 0 & 16747 & 93.1 & 10813 & 93.9 & 27560 & 93.4 \\ 
-%   & 1 & 1234 & 6.9 & 705 & 6.1 & 1939 & 6.6 \\ 
-%   \hline
-% & all & 17981 & 100.0 & 11518 & 100.0 & 29499 & 100.0 \\ 
-%    \bottomrule
-%  \end{tabularx}
-% \footnotesize{Notes: Distribution of officeholders by treatment assignment for sample of 1805 lottery participants (Panel A) and combined sample of 1805 participants and 1807 fortunate drawers (Panel B). Both samples exclude women orphans, and pretreatment officeholders.}
-%\end{table}
-%\end{frame}
-
-
-\section[Heterogeneous treatment effects]{}
 \begin{frame}
 \begin{figure}[htbp]
 \begin{center}
-      \caption{Heterogeneous effects of Medicaid enrollment on hospital visits.}
+       \caption{Any ER visit.}
    \includegraphics[scale=0.35]{../paper/any-visit-plot.pdf} 
    \label{het-plot-av}
    \end{center}
@@ -404,7 +390,7 @@ table of covariates, in OHIE and NHIS
 \begin{frame}
 \begin{figure}[htbp]
 \begin{center}
-      \caption{Heterogeneous effects of Medicaid enrollment on outpatient visits.}
+    \caption{Any primary care visit.}
    \includegraphics[scale=0.35]{../paper/any-out-plot.pdf} 
    \label{het-plot-ao}
    \end{center}
