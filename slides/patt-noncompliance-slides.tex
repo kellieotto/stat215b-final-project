@@ -168,76 +168,14 @@
 
 \end{frame}
 
-\begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
-\begin{assumption}{1}{}\label{consistency}
-Consistency under parallel studies: for all $i$ and for $t=0, 1$,
-$$Y_{i0t} = Y_{i1t}$$
-\end{assumption}
-\end{frame}
-
-\begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
-\begin{assumption}{2}{}\label{si_treat}
-Strong ignorability of sample assignment for treated:
-\begin{equation*}
-(Y_{01}, Y_{11}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
-\end{equation*}
-\end{assumption}
-\noindent Potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
-
-\begin{assumption}{3}{}\label{si_ctrl}
-Strong ignorability of sample assignment for controls:
-\begin{equation*}
-(Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
-\end{equation*}\end{assumption}
-
-\noindent Potential outcomes for control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
-\end{frame}
-
-\begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
-\begin{assumption}{4}{}\label{sutva}
-Stable unit treatment value assumption (SUTVA):
-\begin{equation*}
-Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
-\end{equation*}
-where $L_j$ is the treatment and sample assignment vector for unit $j$. \end{assumption}
- 
-\begin{assumption}{5}{}\label{compl}
-Conditional independence of compliance and assignment:
-\begin{equation*}
-C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
-\end{equation*}
-\end{assumption}
-\end{frame}
-
-\begin{frame}
-\frametitle{Estimating treatment effects (cont.)}
-\begin{assumption}{6}{}\label{monotonicity}
-Monotonicity: 
-\begin{equation*}
-T_i \geq D_i, \forall i
-\end{equation*}
-\end{assumption}
-\noindent This assumption implies that there are no defiers and that crossover is only possible from treatment to control.
-\begin{assumption}{7}{}\label{ER}
-Exclusion restriction: For non-compliers
-\begin{equation*}
-Y_{11} = Y_{10}
-\end{equation*}  
-\end{assumption}
-\noindent The treatment assignment affects the response only through the treatment received.  In particular, the treatment effect may only be non-zero for compliers.  
-\end{frame}
-
-
 
 \begin{frame}
 \frametitle{Estimating treatment effects (cont.)}
 \begin{theorem}\label{thm1}
+\fontsize{9pt}{7.2}\selectfont
 Under assumptions \eqref{consistency} - \eqref{ER},
 
-$$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
+$$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, C=1, W\right)\right]
 -\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] $$
 
 where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the treated individuals in the target population.  
@@ -300,7 +238,12 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \begin{frame}
 \frametitle{Checking Assumptions} % add to this
 \begin{itemize}
-\item Monotonicity is violated. There is some 2-way cross-over
+\item Monotonicity is violated: two-way crossover occurred in OHIE
+\begin{itemize}
+\item Lottery winners: 60\% attempted to enroll in Medicaid; only about 30\% successfully enrolled
+\item Lottery losers: 14\% enrolled in Medicaid some other way during the study period
+\item Cross-over from control to treatment is low relative to other direction
+\end{itemize}
 \item Key assumption is strong ignorability: model of response given covariates is the same in the RCT and in the population
 \begin{itemize}
 \item No way to check that we've included all possible confounders
@@ -366,9 +309,9 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame} % This slide is too wordy
 \frametitle{Estimation Procedure}
 \begin{enumerate}
-\item Using the Medicaid lottery winners in the OHIE $(S=1, T=1)$, train a model to predict complier status using observed covariates.
-\item Predict which lottery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible.
-\item For the group of observed compliers to treatment and predicted compliers in the control group, train a model to predict hospital use using the covariates and Medicaid enrollment as features. 
+\item Using the Medicaid lottery winners in the OHIE $(S=1, T=1)$, train a random forest to predict complier status.
+\item Predict which lot.tery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible
+\item For the group of RCT compliers (both observed and predicted), train a random forest to predict hospital use using the covariates and Medicaid enrollment as features.
 \item For all individuals who enrolled in Medicaid in the NHIS, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
 \end{enumerate}
 \end{frame}
@@ -404,7 +347,7 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame}
 \frametitle{Conclusions}
 \begin{itemize}
-\item If the compliance rate is moderate and compliance is predictable by observed covariates, then it makes sense to use the proposed estimator % wording
+\item If compliance can be predicted by observed covariates, then it makes sense to use the proposed estimator 
 \item statement or two about the OHIE/NHIS conclusions
 \end{itemize}
 \end{frame}
@@ -420,6 +363,71 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \end{singlespace}
 \itemize
 \end{frame}
+
+
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{1}{}\label{consistency}
+Consistency under parallel studies: for all $i$ and for $t=0, 1$,
+$$Y_{i0t} = Y_{i1t}$$
+\end{assumption}
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{2}{}\label{si_treat}
+Strong ignorability of sample assignment for treated:
+\begin{equation*}
+(Y_{01}, Y_{11}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
+\end{equation*}
+\end{assumption}
+
+\begin{assumption}{3}{}\label{si_ctrl}
+Strong ignorability of sample assignment for controls:
+\begin{equation*}
+(Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1 
+\end{equation*}\end{assumption}
+
+\noindent Potential outcomes are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{4}{}\label{sutva}
+Stable unit treatment value assumption (SUTVA):
+\begin{equation*}
+Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
+\end{equation*}
+where $L_j$ is the treatment and sample assignment vector for unit $j$. \end{assumption}
+ 
+\begin{assumption}{5}{}\label{compl}
+Conditional independence of compliance and assignment:
+\begin{equation*}
+C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
+\end{equation*}
+\end{assumption}
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimating treatment effects (cont.)}
+\begin{assumption}{6}{}\label{monotonicity}
+Monotonicity: 
+\begin{equation*}
+T_i \geq D_i, \forall i
+\end{equation*}
+\end{assumption}
+\noindent This assumption implies that there are no defiers and that crossover is only possible from treatment to control.
+\begin{assumption}{7}{}\label{ER}
+Exclusion restriction: For non-compliers
+\begin{equation*}
+Y_{11} = Y_{10}
+\end{equation*}  
+\end{assumption}
+\noindent The treatment assignment affects the response only through the treatment received.  In particular, the treatment effect may only be non-zero for compliers.  
+\end{frame}
+
+
 
 		
 \end{document}
