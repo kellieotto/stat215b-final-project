@@ -310,6 +310,8 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{enumerate}
 \item Using OHIE lottery winners $(S=1, T=1)$, train a random forest \citep{breiman2001} to predict complier status given covariates
 \item Predict which lotttery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible
+\item Using the Medicaid lottery winners in the OHIE $(S=1, T=1)$, train a random forest to predict complier status.
+\item Predict which lottery losers in the OHIE \textit{would have} signed up for Medicaid had they been eligible
 \item For the group of RCT compliers (both observed and predicted), train a random forest to predict hospital use using the covariates and Medicaid enrollment as features.
 \item For all individuals who enrolled in Medicaid in the NHIS, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
 \end{enumerate}
@@ -346,8 +348,9 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame}
 \frametitle{Conclusions}
 \begin{itemize}
-\item If compliance can be predicted by observed covariates, then it makes sense to use the proposed estimator 
-\item statement or two about the OHIE/NHIS conclusions
+\item If compliance is low and can be predicted by observed covariates, then it makes sense to use the proposed estimator 
+\item Adjusted and unadjusted $\tau_{\text{PATT}}$ estimates tend to be similar
+\item Effects of Medicaid enrollment are heterogeneous and far from SATE for covariates that differ between the OHIE and NHIS samples
 \end{itemize}
 \end{frame}
 
