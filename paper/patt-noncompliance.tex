@@ -130,7 +130,7 @@
 \section{Introduction}
 Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when the individuals in an RCT are unrepresentative of the population of interest.  For example, RCTs in which participants volunteer to sign up for health insurance coverage may exhibit a sample population that is in poorer health than the target population.  External validity is particularly relevant to policymakers who want to know how a sample average treatment effect (SATE) would generalize to the broader population. Hartman et al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, the PATT estimate is asymptotically unbiased (\cite{Hartman}). \\
 
-A prevalent issue in RCTs is non-compliance.  One-way crossover from treatment to control occurs when individuals who are assigned to the treatment group refuse the treatment.  This serves to dilute the effect of treatment assignment, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. estimate the PATT in settings with RCT non-compliance.  We make the same assumptions needed for the estimator proposed by \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also assume monotonicity (no defiers) and exclusion restriction as in \cite{Angrist1996}. \\
+A prevalent issue in RCTs is non-compliance.  One-way crossover from treatment to control occurs when individuals who are assigned to the treatment group refuse the treatment.  This serves to dilute the estimated effect of treatment assignment, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. to estimate the PATT in settings with RCT non-compliance.  We make the same assumptions needed for the estimator proposed by \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also assume monotonicity (no defiers) and exclusion restriction as in \cite{Angrist1996}. \\
 
 The estimator of PATT involves the expectation of the response of compliers in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we use an ensemble learning method to estimate the response surface.  Then, we use the response model to estimate population members' outcomes given their covariates, giving an estimate of the PATT. \\
 
@@ -140,15 +140,17 @@ The paper proceeds as follows: Section 2 presents the proposed estimator, necess
 We are interested in using the outcomes from an RCT to estimate the average treatment effect on the treated in some target population.  Treatment in the population is not assigned at random, but rather depends on other variables, confounding the effect of treatment on the outcome of interest; RCTs are needed to isolate the effect of treatment. However, strict exclusion criteria for RCTs often result in a sample whose distribution of covariates differs substantially from the target population.  Ideally, we would take the results of an RCT and reweight the sample such that the reweighted covariates match the those in the population. In practice, one rarely knows the true covariate distribution in the target population.  Instead, we consider data from a non-randomized, observational study in which participants are representative of the target population.  Our proposed estimator combines RCT and observational data to overcome these issues.
 
 \subsection{Assumptions} 
-Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment assigned.  Let $T_i$ denote the treatment assigned and $D_i$ denote treatment received. Let $W_i$ be individual $i$'s observable pretreatment covariates that are related to the sample selection mechanism for membership in the RCT, treatment assignment in the population, and complier status.  Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  For a generic value, we drop the subscript $i$.  \\
+Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ for the population and $s=1$ for the randomized control trial, and $t$ be the treatment received.  Let $S_i$ denote the sample assignment, $T_i$ denote the treatment assigned, and $D_i$ denote treatment received. Let $W_i$ be individual $i$'s observable pretreatment covariates that are related to the sample selection mechanism for membership in the RCT, treatment assignment in the population, and complier status.  Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  For a generic value, we drop the subscript $i$.  \\
 
-We assume that in the RCT, treatment is assigned at random.  Then for individuals with $C_i = 1$, we observe $D_i = T_i$.  In the population, we suppose that treatment is made available to individuals according to some rule based on their covariates; treatment assignment is not completely random. Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D$, not $T$, in the population.  Among the population controls, we can't distinguish non-compliers (individuals with $T_i=1$ and $D_i = 0$) from compliers (those with $T_i = 0$ and $D_i = 0$).  Compliance is only observable for individuals assigned to treatment in the RCT. \\
+We assume that in the RCT, treatment is assigned at random.  Then for individuals with $C_i = 1$, we observe $D_i = T_i$.  In the population, we suppose that treatment is made available to individuals according to some rule based on their covariates; treatment assignment is not completely random. Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D$, not $T$, in the population.  Among the population controls, we can't distinguish non-compliers who should have received treatment (individuals with $T_i=1$ and $D_i = 0$) from those assigned to control (those with $T_i = 0$ and $D_i = 0$).  Compliance is only observable for individuals assigned to treatment in the RCT. \\
 
 We make the following assumptions:
 \begin{assumption}{1}{}\label{consistency}
 Consistency under parallel studies: for all $i$ and for $t=0, 1$,
 $$Y_{i0t} = Y_{i1t}$$
 \end{assumption}
+
+Each individual $i$ has the same response to treatments, whether $i$ is in the RCT or not.
 
 \begin{assumption}{2}{}\label{si_treat}
 Strong ignorability of sample assignment for treated:
@@ -168,11 +170,13 @@ Strong ignorability of sample assignment for controls:
 
 \begin{assumption}{4}{}\label{sutva}
 Stable unit treatment value assumption (SUTVA):
-\begin{equation*}
-Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
-\end{equation*}
-where $L_j$ is the treatment and sample assignment vector for unit $j$. \end{assumption}
-\noindent This means that the treatment assignment for all other individuals $j$ does not affect the potential outcomes of individual $i$.
+%\begin{equation*}
+%Y_{ist}^{L_i} = Y_{ist}^{L_j},  \forall i \neq j
+
+%\end{equation*}
+%where $L_j$ is the treatment and sample assignment vector for unit $j$. 
+The potential outcomes $Y_{ist}$ for individual $i$, $s = 0,1$, $t=0,1$ do not depend on $T_j$, for all $j\neq i$.
+\end{assumption}
  
 \begin{assumption}{5}{}\label{compl}
 Conditional independence of compliance and assignment:
