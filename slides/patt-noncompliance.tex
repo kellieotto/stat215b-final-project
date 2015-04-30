@@ -150,7 +150,17 @@
 \frametitle{Estimating treatment effects}
 \begin{itemize}
 \item Neyman-Rubin framework: each $i = \left\{1, ..., N \right\}$ participants have four potential outcomes, $Y_{ist}$ for $s = 0,1$ and $t = 0,1$
-\item Define W, S, T, C, D, Y
+\begin{itemize}
+\item S = study assignment: S=1 for RCT, S=0 for population/observational study
+\item T = treatment assignment: T = 1 for treatment, T = 0 for control
+\item D = treatment received
+\end{itemize}
+\item Other variables
+\begin{itemize}
+\item W = observed covariates
+\item C = compliance to treatment
+\item Y = response
+\end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -158,8 +168,7 @@
 \begin{frame}
 \frametitle{Estimating treatment effects}
 \begin{figure}[h]
-\centering
-\begin{tikzpicture}[scale=1.5] 
+\begin{tikzpicture}[scale=1.25] 
 \SetGraphUnit{2} 
 \Vertex{W}  \NOEA(W){S} \EA(S){T}  \EA(W){C} \SOEA(T){D} \SOEA(C){Y} \SOWE(D){Y}
 \Edges(W, S, T) \Edges(W,T) \Edges(W, C) \Edges(T, D) \Edges(C, D) \Edges(W, Y) \Edges(D, Y)
@@ -279,10 +288,17 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 %
 \section[Simulation]{}
 
+
 \begin{frame}
-\frametitle{Simulation}
+\frametitle{Simulation Design}
 \begin{itemize}
-\item describe simulation design?
+\item Generate a population of 30,000 with 3 observable covariates W
+\item Set S, T, C, Y to be linear functions of W, with some Gaussian noise
+\item Heterogeneous treatment effect: magnitude of effect depends on one of the covariates
+\item Sample 5,000 ``randomizables'' for RCT and 5,000 ``observables'' for observational study. Enroll individuals according to S
+\item Predict would-be compliers in the RCT control group using logistic regression
+\item Estimate response curve in RCT compliers using a random forest
+\item Use model to estimate potential outcomes in the observational study to estimate $\tau_{\text{PATT}}$
 \end{itemize}
 \end{frame}
 
