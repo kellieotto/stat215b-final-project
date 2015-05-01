@@ -60,7 +60,7 @@ het.plot <- lapply(y.col, function (i) data.frame(x=factor(c(rep(cov.names,3)), 
                                                   rep("SATE (adjusted)",length(covs)+1)))))
 # Plot forest plot
 het.plot.all <- lapply(y.col, function (i) 
-                         ggplot(het.plot[[i]][het.plot[[i]]$Group!="Income",], aes(x=x, y=y,colour=Estimator)) +  # exclude income groups
+                         ggplot(het.plot[[i]][het.plot[[i]]$Group!="Income" & het.plot[[i]]$x!="Male",], aes(x=x, y=y,colour=Estimator)) +
                          geom_point(size=6,alpha=0.4) + 
                          scale_colour_manual(values=c("red","blue","green")) + # change colors for estimators
                          coord_flip() +
@@ -70,10 +70,10 @@ het.plot.all <- lapply(y.col, function (i)
                          ylab("Treatment effect") +
                          xlab("")) #switch because of the coord_flip() above 
 
-any.visit.plot<- het.plot.all[[1]] # any.visit
-num.visit.plot <- het.plot.all[[2]] # num.visit
-any.out.plot <- het.plot.all[[3]] # any.out
-num.out.plot <- het.plot.all[[4]] # num.out
+het.plot.all[[1]] # any.visit
+#het.plot.all[[2]] # num.visit
+het.plot.all[[3]] # any.out
+#het.plot.all[[4]] # num.out
 
 # Create table similar to Table 1 of Hartman et al. 
 latex <- FALSE
