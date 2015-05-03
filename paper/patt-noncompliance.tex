@@ -253,6 +253,8 @@ We separate the expectation into two terms and treat each individually.
 The last line follows because of the randomization carried out in the RCT.  This ensures $Y_{10} \independent T \mid (W, S=1)$.
 \end{proof}
 
+
+
 \subsection{Estimation Procedure}
 Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  Here, we use random forests to estimate the response curve for compliers, given their treatment assignment and covariates. We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve for each treated individual in the population.  \\
 
@@ -266,6 +268,7 @@ The procedure for estimating $\tau_{\text{PATT}}$ using Theorem~\ref{thm1} is as
 \item For all individuals who received treatment in the population $(S=0, D=1)$, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
 \end{enumerate}
 
+Assumptions \eqref{si_treat} and \eqref{si_ctrl} are particularly important here: the success of the proposed estimator hinges on the assumption that the response curve is the same in the RCT and target population.  If this is not true, then the potential outcomes $Y_{10}$ and $Y_{11}$ for target population individuals cannot be estimated using the model from step 3.
 
 
 
@@ -343,9 +346,56 @@ We employ data on the target population from the National Health Interview Study
 
 In order for the proposed estimator to perform well, assumptions \eqref{consistency}--\eqref{ER} must be met.  Assumption \eqref{consistency} ensures that potential outcomes for participants in the target population (i.e., respondents in the NHIS sample) would be identical to their outcomes in the RCT if they had been randomly assigned their observed treatment. A violation of the consistency assumption might arise, for instance, if there are differences in the mail surveys used to elicit health care use responses between the RCT and the non-randomized study. 
 
-\todo{Devote a paragraph to this -- While we cannot directly test assumptions \eqref{si_treat}--\eqref{si_ctrl}, which imply that potential outcomes for treatment and control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment, \citet{finkelstein2012} demonstrate strong ignorability in treatment assignment in the RCT sample.} \\
+We cannot directly test assumptions \eqref{si_treat}--\eqref{si_ctrl}, which state that potential outcomes for treatment and control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.  The assumptions are only met if every possible confounder associated with the response and the sample assignment is accounted for.  In our estimation of the response curve, we use all demographic, socioeconomic, and pre-existing health condition data that were common in the OHIE and NHIS data.  Table~\ref{rct-nrt-compare} shows the distribution of pre-treatment covariates in the two studies.  \todo{Describe what is notable in the table, how it relates to confounding.}  Future studies on this subject should attempt to control for other potential confounders, such as number of hospital and primary care visits in the previous year, proximity to health services, and enrollment in other federal programs. \\
 
  \todo{Talk about these: There is no theoretical reason or evidence against the assumptions of non--interference between experimental units (Assumption \ref{sutva}) and conditional independence of compliance and treatment assignment (Assumption \ref{compl}); these are standard assumptions.} \\
+\begin{longtable}{lllllll}
+  & OHIE &  & OHIE &  & NHIS &  \\ 
+    & control &  & treated &  &treated &   \\ 
+  & $n=5104$ &  & $n=5193$ &  & $n=3914$ &  \\  
+  \hline   
+    \hline   
+ \textbf{Covariate} &  $\mathbf{n}$ & $\mathbf{\%}$ & $\mathbf{n}$ & $\mathbf{\%}$ & $\mathbf{n}$ & $\mathbf{\%}$ \\ 
+\hline
+Female & 2970 & 58.2 & 2920 & 56.2 & 2712 & 69.3  \\ 
+   \hline
+20-49 & 1307 & 25.6 & 1367 & 26.3 & 1418 & 36.2  \\ 
+   \hline
+50-64 & 3797 & 74.4 & 3826 & 73.7 & 2496 & 63.8 \\ 
+   \hline
+White & 4420 & 86.6 & 4393 & 84.6 & 2308 & 59.0  \\ 
+   \hline
+Black & 227 & 4.5 & 197 & 3.8 & 1192 & 30.4  \\ 
+   \hline
+Hispanic & 331 & 6.5 & 476 & 9.2 & 1054 & 26.9  \\ 
+   \hline
+Diabetes & 518 & 10.2 & 539 & 10.4 & 689 & 17.6 \\ 
+   \hline
+Asthma & 986 & 19.3 & 887 & 17.1 & 748 & 19.1  \\ 
+   \hline
+High blood pressure & 1486 & 29.1 & 1418 & 27.3 & 1581 & 40.4  \\ 
+   \hline
+Heart condition & 159 & 3.1 & 141 & 2.7 & 396 & 10.1 \\ 
+   \hline
+Less than high school  & 994 & 19.5 & 950 & 18.3 & 1555 & 39.7  \\ 
+   \hline
+High school diploma or GED & 2908 & 57.0 & 2775 & 53.4 & 1193 & 30.5 \\ 
+   \hline
+Voc. training / 2-year degree & 922 & 18.1 & 1031 & 19.9 & 945 & 24.1 \\ 
+   \hline
+4-year college degree or more & 280 & 5.5 & 437 & 8.4 & 221 & 5.7 \\ 
+   \hline
+\hline
+ \textbf{Response} &   &  &  & &  &  \\ 
+Any ER visit & 1289 & 25.2 & 1323 & 25.5 & 860 & 22.0  \\ 
+   \hline
+\hline
+Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\ 
+\hline
+\hline
+\caption{Pretreatment covariates and responses for OHIE and NHIS respondents on Medicaid.} 
+\label{rct-nrt-compare}
+\end{longtable}
 
 The exclusion restriction (Assumption \ref{ER}) ensures treatment assignment affects the response only through assignment to Medicaid  and the effect of Medicaid coverage may only be non-zero for compliers. It is reasonable that whether or not someone actually has Medicaid, not their eligibility to enroll, would affect their hospital use.  For generic health insurance one might argue that eligibility could be negatively correlated with hospital use, as people with pre-existing conditions may be less likely to be eligible yet go to the hospital more frequently.  This should not be the case with a federally funded program such as Medicaid. \\
 
