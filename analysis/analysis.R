@@ -2,17 +2,15 @@
 ## Then, use response model to estimate population members' outcomes given their covariates.
 ## These estimates will be used to estimate the PATT.
 
-# Libraries
-library(randomForest)
-
 # Define directory for analysis 
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 load("prepare-analysis.Rdata")
 
 # Source scripts
-
-#source(file.path(directory,"prepare-analysis.R"))
-#source(file.path(directory,"SuperLearner.R"))
+patient <- FALSE
+if(patient){
+source(file.path(directory,"prepare-analysis.R"))
+}
 
 load(file.path(directory,"prepare-analysis.Rdata")) # result of prepare-analysis.R
 

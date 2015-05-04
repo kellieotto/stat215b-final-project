@@ -8,7 +8,7 @@ library(plyr)
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 
 # Source data prep scripts
-source(file.path(directory,"prepare-ohie.R"))
+suppressWarnings(source(file.path(directory,"prepare-ohie.R")))
 source(file.path(directory,"prepare-nhis.R")) # script merges person, sample adult, and imputed income files
 
 ## NHIS: sample selection
@@ -126,8 +126,8 @@ gender.nhis <- foreach(i=years, .combine=rbind) %do% {
 colnames(gender.nhis) <- c("Male","Female")
 
 # Age 19–49
-age.20to49 <- ifelse(ohie$birthyear_0m<1958,1,0)
-age.20to49.nhis <- foreach(i=years, .combine=c) %do% {
+age.19to49 <- ifelse(ohie$birthyear_0m<1958,1,0)
+age.19to49.nhis <- foreach(i=years, .combine=c) %do% {
    ifelse(nhis[[as.character(i)]]$age_p<=49,1,0)
 }
 
@@ -194,12 +194,25 @@ education.nhis <- factor(education.nhis)
 levels(education.nhis) <- colnames(education)
 education.nhis <- dummify(education.nhis, keep.na=TRUE)
 
-# HH income level
-income <- dummify(ohie$hhinc_cat_0m,keep.na=TRUE)
-income.nhis <- foreach(i=years, .combine=c) %do% {  
+# HH income level (three groups)
+income3 <- cut(as.numeric(ohie$hhinc_cat_0m),  #OHIE
+               breaks=c(-Inf,5,11,Inf),
+               labels=c("$0-$10000","$10001-$25000",">$25000")) 
+income <- dummify(income3,keep.na=TRUE)
+
+income.nhis <- foreach(i=years, .combine=c) %do% { # NHIS
+  if(i %in% c(2009:2013)){
   cut(nhis[[as.character(i)]]$faminci2, 
-      breaks=c(-Inf,0,1,2501,5001,7501,100001,12501,15001,17501,20001,22501,25001,27501,30001,32501,35001,37501,40001,42501,45001,47501,50000,Inf))
+      breaks=c(-Inf,10000,25000,Inf),
+      labels=c("$0-$10000","$10001-$25000",">$25000")) 
+  } else{
+    cut(nhis[[as.character(i)]]$incgrpi2,
+        breaks=c(-Inf,2,5,Inf),
+        labels=c("$0-$10000","$10001-$25000",">$25000")) 
+  }
 }
+
 income.nhis <- factor(income.nhis)
 levels(income.nhis) <- colnames(income)
 income.nhis <- dummify(income.nhis, keep.na=TRUE)
+

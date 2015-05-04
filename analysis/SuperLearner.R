@@ -5,6 +5,7 @@ library(glmnet)
 library(gam)
 library(e1071)
 library(gbm)
+library(nnet)
 
 # Creates additional randomForest wrappers changing both mtry and nodesize
 tuneGrid <- expand.grid(mtry=c(1,5,10), nodesize=c(1,5))
@@ -46,28 +47,40 @@ create.SL.gam <- function(deg.gam = c(3, 4)) {
 
 create.SL.gam()
 
+SL.mean <- function (Y, X, newX, family, obsWeights, id, ...) 
+{
+  meanY <- weighted.mean(Y, w = obsWeights)
+  pred <- rep.int(meanY, times = nrow(newX))
+  fit <- list(object = meanY)
+  out <- list(pred = pred, fit = fit)
+  class(out$fit) <- c("SL.mean")
+  return(out)
+}
+
+predict.SL.mean <- function (object, newdata, family, X = NULL, Y = NULL, ...) 
+{
+  pred <- rep.int(object$object, times = nrow(newdata))
+  return(pred)
+}
+
 # Define library
-SL.library.class<- c("SL.svm",
-                    "SL.gbm",
-                    "SL.gam", # degree=2
-                    "SL.gam.3",
-                    "SL.gam.4",
-                    "SL.glm",
-                    "SL.glmnet", # lasso
-                    "SL.glmnet.0", # ridge
+SL.library.class<- c("SL.gbm",
+		    "SL.glmnet", # lasso
+		    "SL.glmnet.0", # ridge
                     "SL.glmnet.0.25",
                     "SL.glmnet.0.5",
                     "SL.glmnet.0.75",
+                    "SL.nnet",
                     "SL.randomForest",
                     "SL.randomForest.1", # nodesize=1 for regression
                     "SL.randomForest.2",
                     "SL.randomForest.3")
+               #     "SL.svm")
 
-SL.library.reg <- c("SL.svm",
-                    "SL.gbm",
-                     "SL.gam", # degree=2
+SL.library.reg <- c("SL.gam", # degree=2
                      "SL.gam.3",
                      "SL.gam.4",
+                     "SL.gbm",
                      "SL.glm",
                      "SL.glmnet", # lasso
                      "SL.glmnet.0", # ridge
@@ -77,7 +90,8 @@ SL.library.reg <- c("SL.svm",
                      "SL.randomForest",
                      "SL.randomForest.4", # nodesize=5 for regression
                      "SL.randomForest.5",
-                     "SL.randomForest.6")
+                     "SL.randomForest.6",
+                     "SL.svm")
 
 run <- FALSE
 
@@ -86,9 +100,7 @@ if(run){
   set.seed(42)
   fitSL <- SuperLearner(Y=Y,X=X,
                         SL.library=SL.library.class,
-                        family=binomial(), # glmnet response is 2-level factor
-                        method="method.NNLS",
-                        cvControl=list(stratifyCV=TRUE))
+                        family=binomial()) # glmnet response is 2-level factor
 
 fitSL # summarize
 }
@@ -103,7 +115,7 @@ fitSL.CV <- CV.SuperLearner(Y=y07[,1],X=x07,
                             V=10,
                             cvControl =list(V=10L)) 
 summary(fitSL.CV)
-toLatex(summary(fitSL.CV))  
+latex(summary(fitSL.CV))  
 
 # Fit model
 fitSL <- SuperLearner(Y=Y,X=X,
