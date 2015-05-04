@@ -469,9 +469,67 @@ The proposed method allows us to decompose both SATE and PATT estimates by subgr
 
 %Appendix
 %\pagebreak
-%\begin{appendices}
+\begin{appendices}
 
-%\end{appendices}
+\section{Ensemble method for complier model}
+
+% complier-mod
+\begin{table}[ht]
+\begin{center}
+\caption{Complier model ensemble.} 
+\begin{tabular}{llcc}
+  \hline
+ Algorithm & Parameters & Risk & Weight \\ 
+  \hline
+Generalized boosted models (\texttt{gbm}) & default &  &  \\ 
+Lasso regression (\texttt{glmnet})  & $\alpha=1$& 0.023 & 0.243 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.023 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.023 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.023 & 0 \\ 
+Neural network (\texttt{nnet}) &  default & 0.066 & 0 \\ 
+Random forests (\texttt{randomForest}) & default & 0.026 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.03 & 0.45 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.025 & 0.305 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.025 & 0 \\ 
+Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.025 & 0 \\ 
+   \hline
+\end{tabular} 
+\end{center}
+\footnotesize{Notes: Cross--validated risk and weights used for each algorithm in super learner ensemble for complier model.  `Risk' is the 10--fold cross-validated risk estimate based on mean squared error for each algorithm. `Weight' is the coefficient for the super learner, which is estimated using non--negative least squares based on the Lawson-Hanson algorithm.}
+\label{complier-ensemble}
+\end{table}
+
+%complier-mod-cv
+
+\section{Ensemble method for response model}
+
+% complier-mod
+\begin{table}[ht]
+\begin{center}
+\caption{Response model ensemble.} 
+\begin{tabular}{llcc}
+  \hline
+ Algorithm & Parameters & Risk & Weight \\ 
+  \hline
+Generalized boosted models (\texttt{gbm}) & default &  &  \\ 
+Lasso regression (\texttt{glmnet})  & $\alpha=1$& 0.023 & 0.243 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.023 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.023 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.023 & 0 \\ 
+Neural network (\texttt{nnet}) &  default & 0.066 & 0 \\ 
+Random forests (\texttt{randomForest}) & default & 0.026 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.03 & 0.45 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.025 & 0.305 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.025 & 0 \\ 
+Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.025 & 0 \\ 
+   \hline
+\end{tabular} 
+\end{center}
+\footnotesize{Notes: Cross--validated risk and weights used for each algorithm in super learner ensemble for response model.}
+\label{reponse-ensemble}
+\end{table}
+
+\end{appendices}
 \end{singlespace}
 
 \itemize
