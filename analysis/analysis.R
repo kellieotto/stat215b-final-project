@@ -56,8 +56,9 @@ Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # need to omit rows con
                      "any.out"=nhis.any.out))
 
 # Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
-#complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
-#                                              y=insurance.ohie[treatment.ohie==1])) 
+# complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
+#                                               y=insurance.ohie[treatment.ohie==1])) 
+
 # Load Super Learner predictions for compliance model (complier-mod.R)
 C.pscore <- read.table(paste0(data.directory,"C.pscore.txt"), quote="\"") 
 
@@ -74,18 +75,23 @@ y.col <- 1:ncol(Y.ohie) # number of responses
 Y.ohie.response <- Y.ohie[which(rct.compliers$complier==1),]
 X.ohie.response <- data.frame("treatment"=treatment.ohie[which(rct.compliers$complier==1)],
                          X.ohie[which(rct.compliers$complier==1),])
-response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response,
-                                                    y=Y.ohie.response[,i]))
-names(response.mod) <- colnames(Y.ohie.response) # name each element of list
+# response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response,
+#                                                        y=Y.ohie.response[,i]))
+# names(response.mod) <- colnames(Y.ohie.response) # name each element of list
+# 
+# # Use response model to estimate potential outcomes for population "compliers" on medicaid
+# nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
+#                                X.nhis[which(insurance.nhis==1),])
+# nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
+#                                  X.nhis[which(insurance.nhis==1),])
+# 
+# Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
+# Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
 
-# Use response model to estimate potential outcomes for population "compliers" on medicaid
-nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
-                               X.nhis[which(insurance.nhis==1),])
-nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
-                                 X.nhis[which(insurance.nhis==1),])
-
-Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
-Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
+# Load Super Learner predictions (response-mod.R)
+fitSL.oh.pred <- read.table("response-mod-pred.txt", quote="\"")
+Y.hat.1.oh <- as.numeric(fitSL.oh.pred[,1])
+Y.hat.0.oh <- as.numeric(fitSL.oh.pred[,2])
 
 # Compute PATT estimator
 t.patt <- lapply(y.col, function (i) mean(Y.hat.1[[i]]) - mean(Y.hat.0[[i]]))
