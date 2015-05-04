@@ -5,6 +5,34 @@ library(ggplot2)
 library(reporttools)
 library(randomForest)
 
+### Confidence intervals for the estimates
+B <- 100
+t.patt.boot <- replicate(B, {
+              samp <- sample(1:length(Y.hat.1[[1]]), length(Y.hat.1[[1]]), replace=T)  
+              lapply(y.col, function (i) mean(Y.hat.1[[i]][samp]) - mean(Y.hat.0[[i]][samp]))
+})
+t.patt.ci <- lapply(y.col, function(i) quantile(unlist(t.patt.boot[i,]),probs = c(0.025, 0.975)))
+t.patt.unadj.boot <- replicate(B, {
+  samp <- sample(1:length(Y.hat.1.unadj[[1]]), length(Y.hat.1.unadj[[1]]), replace=T)  
+  lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]][samp]) - mean(Y.hat.0.unadj[[i]][samp]))
+})
+t.patt.unadj.ci <- lapply(y.col, function(i) quantile(unlist(t.patt.unadj.boot[i,]),probs = c(0.025, 0.975)))
+t.satt.unadj.boot <- replicate(B, {
+  samp <- sample(1:length(Y.hat.1.unadj.rct[[1]]), length(Y.hat.1.unadj.rct[[1]]), replace=T)  
+  lapply(y.col, function (i) mean(Y.hat.1.unadj.rct[[i]][samp]) - mean(Y.hat.0.unadj.rct[[i]][samp]))
+})
+t.satt.unadj.ci <- lapply(y.col, function(i) quantile(unlist(t.satt.unadj.boot[i,]),probs = c(0.025, 0.975)))
+
+t.sate.boot <- replicate(B,{
+                samp <- sample(1:length(treatment.ohie), length(treatment.ohie), replace=T)  
+                lapply(y.col, function (i) (mean(Y.ohie[[i]][samp][which(treatment.ohie[samp]==1)]) - # Num. is ITT effect
+                                          mean(Y.ohie[[i]][samp][which(treatment.ohie[samp]==0)])) 
+                   /mean(rct.compliers$complier[samp][which(treatment.ohie[samp]==1)]))
+})
+t.sate.ci <- lapply(y.col, function(i) quantile(unlist(t.sate.boot[i,]),probs = c(0.025, 0.975)))
+
+
+
 het.effects <- function(boot = FALSE){
   if(boot==TRUE){
     boot.nrt <- sample(1:sum(insurance.nhis==1,na.rm=T), sum(insurance.nhis==1,na.rm=T), replace = T)
@@ -87,27 +115,24 @@ patt.het <- true_effect[[1]]
 patt.unadj.het <- true_effect[[2]]
 sate.het <- true_effect[[3]]
 covs <- colnames(X.nhis)[4:40]
-# boot_effect <- replicate(5, het.effects(boot=T))
-# boot_effect <- lapply(1:ncol(boot_effect), function(b) lapply(boot_effect[,b], unlist))
-# patt.het.bootdist <- do.call(cbind, lapply(boot_effect, "[[", 1)) # rows are for each het. effect
-# patt.unadj.het.bootdist <- do.call(cbind, lapply(boot_effect, "[[", 2)) # rows are for each het. effect
-# sate.het.bootdist <- do.call(cbind, lapply(boot_effect, "[[", 3)) # rows are for each het. effect
-# satt.het.bootdist <- do.call(cbind, lapply(boot_effect, "[[", 4)) # rows are for each het. effect
-# 
+
 
 B <- 50
 boot_effect <- replicate(B, het.effects(boot=T))
+
+### Compute the 95% confidence intervals based on the quantiles of the bootstrap distribution
+
 patt.het.boot.ci <- lapply(1:length(true_effect[[1]][[1]]), function(k) lapply(y.col, function(i) quantile(sapply(1:B, function(b) boot_effect[1,][[b]][[i]][[k]]), probs = c(0.025, 0.975), na.rm=T)))
 patt.unadj.het.boot.ci <- lapply(1:length(true_effect[[1]][[1]]), function(k) lapply(y.col, function(i) quantile(sapply(1:B, function(b) boot_effect[2,][[b]][[i]][[k]]), probs = c(0.025, 0.975), na.rm=T)))
 sate.het.boot.ci <- lapply(1:length(true_effect[[1]][[1]]), function(k) lapply(y.col, function(i) quantile(sapply(1:B, function(b) boot_effect[3,][[b]][[i]][[k]]), probs = c(0.025, 0.975), na.rm=T)))
 satt.het.boot.ci <- lapply(1:length(true_effect[[1]][[1]]), function(k) lapply(y.col, function(i) quantile(sapply(1:B, function(b) boot_effect[4,][[b]][[i]][[k]]), probs = c(0.025, 0.975), na.rm=T)))
 conf.int <- lapply(y.col, function(i){
-                  ci.lower <- c(0, sapply(patt.het.boot.ci, "[[", i)[1,],  #### Put in 0 in place of "overall" confidence bounds for now
-                                0, sapply(patt.unadj.het.boot.ci, "[[", i)[1,],
-                                0, sapply(sate.het.boot.ci, "[[", i)[1,])
-                  ci.upper <- c(0, sapply(patt.het.boot.ci, "[[", i)[2,],
-                                0, sapply(patt.unadj.het.boot.ci, "[[", i)[2,],
-                                0, sapply(sate.het.boot.ci, "[[", i)[2,])
+                  ci.lower <- c(t.patt.ci[[i]][1], sapply(patt.het.boot.ci, "[[", i)[1,],  #### Put in 0 in place of "overall" confidence bounds for now
+                                t.patt.unadj.ci[[i]][1], sapply(patt.unadj.het.boot.ci, "[[", i)[1,],
+                                t.satt.unadj.ci[[i]][1], sapply(satt.het.boot.ci, "[[", i)[1,])
+                  ci.upper <- c(t.patt.ci[[i]][2], sapply(patt.het.boot.ci, "[[", i)[2,],
+                                t.patt.unadj.ci[[i]][2], sapply(patt.unadj.het.boot.ci, "[[", i)[2,],
+                                t.satt.unadj.ci[[i]][2], sapply(satt.het.boot.ci, "[[", i)[2,])
                   cbind(ci.lower, ci.upper)
                   })
 
@@ -126,6 +151,8 @@ Income <- c("0","1-2500","2501-5000","5001-7500","7501-10000",
 cov.groups <- c("Overall","Sex","Age","Race","Health status","Education","Income") 
 cov.names <- c(Overall,Sex,Age,Race.ethn,Health.stat,Education,Income)
 
+
+### Note, I (Kellie) included SATT instead of SATE here because a) that's what Hartman et al do and b) the CIs for SATE are enormous
 het.plot <- lapply(y.col, function (i) data.frame(x=factor(c(rep(cov.names,3)), levels=rev(cov.names)), # reverse order
                                      y = c(t.patt[[i]],unlist(patt.het[[i]]),
                                            t.patt.unadj[[i]],unlist(patt.unadj.het[[i]]),
@@ -135,7 +162,7 @@ het.plot <- lapply(y.col, function (i) data.frame(x=factor(c(rep(cov.names,3)), 
                                                rep(cov.groups[6],length(Education)),rep(cov.groups[7],length(Income))),3), levels=cov.groups),
                                      Estimator= factor(c(rep("PATT (adjusted)",length(covs)+1),
                                                   rep("PATT (unadjusted)",length(covs)+1),
-                                                  rep("SATE (adjusted)",length(covs)+1))),
+                                                  rep("SATT (unadjusted)",length(covs)+1))),
                                       ci.lower = conf.int[[i]][,1],
                                       ci.upper = conf.int[[i]][,2]))
 # Plot forest plot
