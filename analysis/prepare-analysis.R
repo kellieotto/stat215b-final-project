@@ -14,11 +14,25 @@ source(file.path(directory,"prepare-nhis.R")) # script merges person, sample adu
 ## NHIS: sample selection
 
 # Keep participants below 138% FPL
+nhis[["2008"]] <- subset(nhis[["2008"]], nhis[["2008"]]$rat_cati <= 4) # < 124%
 nhis[["2009"]] <- subset(nhis[["2009"]], nhis[["2009"]]$povrati2 <= 138) # diff'nt var
 nhis[["2010"]] <- subset(nhis[["2010"]], nhis[["2010"]]$povrati3 <= 1380) 
 nhis[["2011"]] <- subset(nhis[["2011"]], nhis[["2011"]]$povrati3 <= 1380)
 nhis[["2012"]] <- subset(nhis[["2012"]], nhis[["2012"]]$povrati3 <= 1.380) # diffn't decimals
 nhis[["2013"]] <- subset(nhis[["2013"]], nhis[["2013"]]$povrati3 <= 1.380)
+
+# Age 19-64
+foreach(i=years) %do% {
+  nhis[[as.character(i)]] <- subset(nhis[[as.character(i)]], nhis[[as.character(i)]]$age_p>=19 &
+                                      nhis[[as.character(i)]]$age_p<=64)
+}
+
+# With medicaid or uninsured
+foreach(i=years) %do% {
+  nhis[[as.character(i)]] <- subset(nhis[[as.character(i)]], 
+                                    nhis[[as.character(i)]]$medicaid==1 | nhis[[as.character(i)]]$medicaid==2  | # with medicaid
+                                      nhis[[as.character(i)]]$notcov==1) # not covered
+}
 
 ## OHIE: create vectors for treatment, # of HH members, and compliance status
 
@@ -37,7 +51,7 @@ addmargins(table(insurance, treatment)) # there's two-way crossover?
 
 # Medicaid recode  
 medicaid <- foreach(i=years, .combine=c) %do% {
-  nhis[[as.character(i)]]$medicaid[nhis[[as.character(i)]]$medicaid>3] <- NA # missing is NA
+  nhis[[as.character(i)]]$medicaid[nhis[[as.character(i)]]$medicaid>3] <- NA # Medicaid recode: missing is NA
   ifelse(nhis[[as.character(i)]]$medicaid==1 | nhis[[as.character(i)]]$medicaid==2,1,0)
 }
 
@@ -80,14 +94,6 @@ nhis.num.visit[nhis.num.visit==97 | nhis.num.visit==98 | nhis.num.visit==99]  <-
 nhis.any.visit <- NA
 nhis.any.visit[nhis.num.visit==0] <- 0
 nhis.any.visit[nhis.num.visit>0] <- 1
-  
-# ER visit resulted in hospital admission 
-# (no # of visits variable)
-nhis.any.hosp <- foreach(i=c(2011:2013), .combine=c) %do% { # available for 2011-13
-  nhis[[as.character(i)]]$aerhos
-}
-nhis.any.hosp[nhis.any.hosp==2] <- 0 #recode
-nhis.any.hosp[nhis.any.hosp==7 | nhis.any.hosp==8 | nhis.any.hosp==9] <- NA
 
 # Total number of office visits, past 12 m 
 nhis.num.out <- foreach(i=years, .combine=c) %do% {
@@ -119,17 +125,16 @@ gender.nhis <- foreach(i=years, .combine=rbind) %do% {
 }
 colnames(gender.nhis) <- c("Male","Female")
 
-# Age 20–49
+# Age 19–49
 age.20to49 <- ifelse(ohie$birthyear_0m<1958,1,0)
 age.20to49.nhis <- foreach(i=years, .combine=c) %do% {
-   nhis[[as.character(i)]]$dob_y_p[nhis[[as.character(i)]]$dob_y_p>=9997] <- NA # missing is NA
-   ifelse(nhis[[as.character(i)]]$dob_y_p<1958,1,0)
+   ifelse(nhis[[as.character(i)]]$age_p<=49,1,0)
 }
 
 # Age 50–64
 age.50to64 <- ifelse(ohie$birthyear_0m>=1958,1,0)
 age.50to64.nhis <- foreach(i=years, .combine=c) %do% {
-  ifelse(nhis[[as.character(i)]]$dob_y_p>=1958,1,0)
+  ifelse(nhis[[as.character(i)]]$age_p>=50,1,0)
 }
 
 # Race: white

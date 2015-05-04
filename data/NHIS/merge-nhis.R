@@ -74,7 +74,7 @@ setwd("~/Dropbox/github/stat215b-final-project/data/NHIS")
 # choose what year of data to analyze
 # note: this can be changed to any year that has already been downloaded locally
 # by the "1963-2011 - download all microdata.R" program above
-# year <- 2009 #JP: set year outside script
+# year <- 2008 #JP: set year outside script
 
 
 # construct the filepath (within the current working directory) to the three rda files
@@ -296,18 +296,26 @@ for ( i in 1:5 ){
   gc()
 }
 
-# Take means of imputed income vars
-
+# Take means of family income
+if(year %in% c(2009:2013)){
 faminci2 <- cbind(x1$faminci2,x2$faminci2,x3$faminci2,x4$faminci2,x5$faminci2)
 x.sa$faminci2 <- rowMeans(faminci2)
+}
 
-ernyr_i2 <- cbind(x1$ernyr_i2,x2$ernyr_i2,x3$ernyr_i2,x4$ernyr_i2,x5$ernyr_i2)
-x.sa$ernyr_i2 <- rowMeans(ernyr_i2)
+if(year %in% c(2008)){
+  x.sa$incgrpi2 <-round(rowMeans(cbind(x1$incgrpi2,x2$incgrpi2,x3$incgrpi2,x4$incgrpi2,x5$incgrpi2)),0) 
+}
 
+# Take means of poverty ratio
 if(year %in% c(2010:2013)){
   povrati3 <- cbind(x1$povrati3,x2$povrati3,x3$povrati3,x4$povrati3,x5$povrati3)
   x.sa$povrati3 <- rowMeans(povrati3)
-}   else{
+} 
+if(year %in% c(2009)){
   povrati2 <- cbind(x1$povrati2,x2$povrati2,x3$povrati2,x4$povrati2,x5$povrati2)
   x.sa$povrati2 <- rowMeans(povrati2)
+}
+
+if(year %in% c(2008)){
+x.sa$rat_cati <-round(rowMeans(cbind(x1$rat_cati,x2$rat_cati,x3$rat_cati,x4$rat_cati,x5$rat_cati)),0) 
 }
