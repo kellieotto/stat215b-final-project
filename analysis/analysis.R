@@ -4,20 +4,19 @@
 
 # Define directory for analysis 
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
-load("prepare-analysis.Rdata")
 
 # Source scripts
-patient <- FALSE
-if(patient){
+run <- FALSE
+if(run){
 source(file.path(directory,"prepare-analysis.R"))
+save.image(file.path(directory,"prepare-analysis.Rdata"))
 }
-
 load(file.path(directory,"prepare-analysis.Rdata")) # result of prepare-analysis.R
 
 # Create dfs containing common features for RCT and observational study
 X.ohie <- na.omit(data.frame(n.hh,  # need to omit rows containing any NA
                              gender, 
-                             age.20to49,
+                             age.19to49,
                              age.50to64,
                              white,
                              black,
@@ -31,7 +30,7 @@ X.ohie <- na.omit(data.frame(n.hh,  # need to omit rows containing any NA
 
 X.nhis <-   na.omit(data.frame(n.hh.nhis, # need to omit rows containing any NA
                              gender.nhis, 
-                             "age.20to49"=age.20to49.nhis,
+                             "age.19to49"=age.19to49.nhis,
                              "age.50to64"=age.50to64.nhis,
                              "white"=white.nhis,
                              "black"=black.nhis,
@@ -51,32 +50,24 @@ insurance.nhis <- medicaid[as.numeric(rownames(X.nhis))]
 
 # Create dfs for outcomes 
 Y.ohie <- na.omit(data.frame("any.visit"=any.visit, # need to omit rows containing any NA
-                    "num.visit"=num.visit,
-                  #  "any.hosp"=any.hosp,
-                  #  "num.hosp"=num.hosp,
-                    "any.out"=any.out,
-                    "num.out"=num.out))
+                    "any.out"=any.out))
 
 Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # need to omit rows containing any NA
-                     "num.visit"=nhis.num.visit,
-                #     "any.hosp"=nhis.any.hosp,
-                     "any.out"=nhis.any.out,
-                     "num.out"=nhis.num.out))
+                     "any.out"=nhis.any.out))
 
 # Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
-complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
-                                              y=insurance.ohie[treatment.ohie==1])) 
+#complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
+#                                              y=insurance.ohie[treatment.ohie==1])) 
+# Load Super Learner predictions for compliance model (complier-mod.R)
+C.pscore <- read.table(paste0(data.directory,"C.pscore.txt"), quote="\"") 
+
 rct.compliers <- data.frame("treatment"=treatment.ohie,
                             "insurance"=insurance.ohie,
                             "C.pscore"=predict(complier.mod, X.ohie), 
-                            "C.hat"=ifelse(predict(complier.mod, X.ohie)>=0.5,1,0),
+                            "C.hat"=ifelse(as.numeric(C.pscore[[1]])>=0.5,1,0),
                             "complier"=0)
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
-
-# Predict who is a complier in NRT 
-#nrt.compliers <- data.frame("C.pscore"=predict(complier.mod, X.nhis),
-#                            "C.hat"=ifelse(predict(complier.mod, X.nhis)>=0.5,1,0))
 
 # Fit a regression to the compliers in the RCT
 y.col <- 1:ncol(Y.ohie) # number of responses
