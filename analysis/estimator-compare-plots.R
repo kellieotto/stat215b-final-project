@@ -32,25 +32,11 @@ t.sate.boot <- replicate(B,{
 t.sate.ci <- lapply(y.col, function(i) quantile(unlist(t.sate.boot[i,]),probs = c(0.025, 0.975)))
 
 
+### Function to get heterogeneous treatment effect estimates, using true data and bootstrapped data (set boot = TRUE)
 
 het.effects <- function(boot = FALSE){
   if(boot==TRUE){
     boot.nrt <- sample(1:sum(insurance.nhis==1,na.rm=T), sum(insurance.nhis==1,na.rm=T), replace = T)
-#     insurance.nhis <- insurance.nhis[boot.nrt]
-#     X.nhis_boot <- X.nhis[boot.nrt,][which(insurance.nhis==1),]
-#     X.nhis_unadjboot <- X.nhis[boot.nrt,][which(insurance.nhis==1 | insurance.nhis == 0),]
-#     nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
-#                                    X.nhis_boot)
-#     nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
-#                                      X.nhis_boot)
-#     Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
-#     Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
-#     nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))), X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
-#     nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))), X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
-#     Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj))
-#     Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj))
-#     
-    
     Y.hat.1 <- lapply(y.col, function(i) Y.hat.1[[i]][boot.nrt])
     Y.hat.0 <- lapply(y.col, function(i) Y.hat.0[[i]][boot.nrt])
     X.nhis_boot <- X.nhis[which(insurance.nhis==1),][boot.nrt,]
@@ -110,10 +96,14 @@ het.effects <- function(boot = FALSE){
 return(list(patt.het, patt.unadj.het, sate.het, satt.unadj.het))
 }
 
+
+### Estimate the heterogeneous effects
+
 true_effect <- het.effects() # a list where true_effects[[1]] is patt.het, true_effects[[2]] is patt.unadj.het, etc
 patt.het <- true_effect[[1]]
 patt.unadj.het <- true_effect[[2]]
 sate.het <- true_effect[[3]]
+satt.het <- true_effect[[4]]
 covs <- colnames(X.nhis)[4:40]
 
 
@@ -156,13 +146,13 @@ cov.names <- c(Overall,Sex,Age,Race.ethn,Health.stat,Education,Income)
 het.plot <- lapply(y.col, function (i) data.frame(x=factor(c(rep(cov.names,3)), levels=rev(cov.names)), # reverse order
                                      y = c(t.patt[[i]],unlist(patt.het[[i]]),
                                            t.patt.unadj[[i]],unlist(patt.unadj.het[[i]]),
-                                           rct.sate[[i]],unlist(sate.het[i])), 
+                                           t.satt.unadj[[i]],unlist(satt.het[i])), # changed from SATE to SATT
                                      Group = factor(rep(c(cov.groups[1],rep(cov.groups[2],length(Sex)),rep(cov.groups[3],length(Age)),
                                                rep(cov.groups[4],length(Race.ethn)),rep(cov.groups[5],length(Health.stat)),
                                                rep(cov.groups[6],length(Education)),rep(cov.groups[7],length(Income))),3), levels=cov.groups),
                                      Estimator= factor(c(rep("PATT (adjusted)",length(covs)+1),
                                                   rep("PATT (unadjusted)",length(covs)+1),
-                                                  rep("SATT (unadjusted)",length(covs)+1))),
+                                                  rep("SATT (unadjusted)",length(covs)+1))), # changed from SATE to SATT
                                       ci.lower = conf.int[[i]][,1],
                                       ci.upper = conf.int[[i]][,2]))
 # Plot forest plot
