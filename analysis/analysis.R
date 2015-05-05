@@ -86,37 +86,38 @@ X.ohie.response <- data.frame("treatment"=treatment.ohie[which(rct.compliers$com
 # Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
 
 # Load Super Learner predictions for response model (response-mod.R)
-fitSL.oh.pred <- read.table("response-mod-pred.txt", quote="\"")
-Y.hat.1.oh <- as.numeric(fitSL.oh.pred[,1])
-Y.hat.0.oh <- as.numeric(fitSL.oh.pred[,2])
+any.visit.pred <- read.table(paste0(directory,"/any.visit.txt"), quote="\"")
+any.out.pred <- read.table(paste0(directory,"/any.out.txt"), quote="\"")
+Y.hat.1 <- list(any.visit.pred[1],any.out.pred[1])
+Y.hat.0 <- list(any.visit.pred[2],any.out.pred[2])
 
 # Compute PATT estimator
 t.patt <- lapply(y.col, function (i) mean(Y.hat.1[[i]]) - mean(Y.hat.0[[i]]))
 
-# Compute unadjusted PATT
-run <- FALSE  # this might crash your local machine
-if(run){
+## Compute unadjusted PATT
 Y.ohie.response.unadj <- Y.ohie[which(rct.compliers$complier==1 | rct.compliers$complier==0),]
 X.ohie.response.unadj <- data.frame("treatment"=treatment.ohie,
                                X.ohie)
-response.mod2 <- lapply(y.col, function(i) randomForest(x=X.ohie.response.unadj,
-                                                       y=Y.ohie.response.unadj[,i]))
-names(response.mod2) <- colnames(Y.ohie) # name each element of list
+# 
+# response.mod2 <- lapply(y.col, function(i) randomForest(x=X.ohie.response.unadj,
+#                                                        y=Y.ohie.response.unadj[,i]))
+# names(response.mod2) <- colnames(Y.ohie) # name each element of list
+# 
+# nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))),
+#                                X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
+# nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))),
+#                                  X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
+# 
+# Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj))
+# Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj))
 
-nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))),
-                               X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
-nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))),
-                                 X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
-
-Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj))
-Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj))
+# Load Super Learner predictions for response model (response-mod-unadj.R)
+any.visit.unadj <- read.table(paste0(directory,"/Y.hat.unadj-any.visit.txt"), quote="\"")
+any.out.unadj <- read.table(paste0(directory,"/Y.hat.unadj-any.out.txt"), quote="\"")
+Y.hat.1.unadj <- list(any.visit.unadj[1],any.out.unadj[1])
+Y.hat.0.unadj <- list(any.visit.unadj[2],any.out.unadj[2])
 
 t.patt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
-
-save(Y.ohie.response.unadj,X.ohie.response.unadj,response.mod2,nrt.tr.counterfactual.unadj,nrt.ctrl.counterfactual.unadj,
-     Y.hat.1.unadj,Y.hat.0.unadj,t.patt.unadj,file = file.path(directory,"response-mod2.Rdata"))
-}
-load(file.path(directory,"response-mod2.Rdata"))
 
 # Compute unadjusted SATT
 rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.ohie==1 | insurance.ohie==0))),

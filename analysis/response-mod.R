@@ -9,12 +9,12 @@ load("analysis.RData")
 # Source superlearner scripts to ensure libraries attached
 source("SuperLearner.R")
 
-# Predict who is a complier in the control group
+# Run response model
 set.seed(42)
-response.mod <- lapply(y.col, SuperLearner(Y=Y.ohie.response[,i], 
-                             X=X.ohie.response, 
-                             SL.library=SL.library.class,
-                             family="binomial"))
+response.mod <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response[,i], 
+                                                        X=X.ohie.response, 
+                                                        SL.library=SL.library.class,
+                                                        family="binomial"))
 names(response.mod) <- colnames(Y.ohie.response) # name each element of list
 
 response.mod # summarize
@@ -29,4 +29,5 @@ Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterf
 Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
 
 # Output predictions as .txt file
-write.table(cbind(Y.hat.1,Y.hat.0), "response-mod-pred.txt",  row.names=FALSE, col.names=FALSE)
+lapply(y.col, function (i) write.table(cbind(Y.hat.1[[i]],Y.hat.0[[i]]), 
+                                       paste(names(response.mod)[i], ".txt"),  row.names=FALSE))
