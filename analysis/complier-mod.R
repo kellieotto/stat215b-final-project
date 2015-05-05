@@ -15,10 +15,10 @@ complier.mod <- SuperLearner(Y=insurance.ohie[treatment.ohie==1],
                              X=X.ohie[treatment.ohie == 1,], 
                              SL.library=SL.library.class,
                              family="binomial")
-summary(complier.mod)
+complier.mod
 
 # Store predictions
 C.pscore <- predict(complier.mod, X.ohie)
 
 # Output predictions as .txt file
-write.table(C.pscore, "C.pscore.txt",  row.names=FALSE, col.names=FALSE)
+write.table(C.pscore, "C.pscore.txt",  row.names=FALSE)

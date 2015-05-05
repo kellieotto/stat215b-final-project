@@ -55,16 +55,13 @@ Y.ohie <- na.omit(data.frame("any.visit"=any.visit, # need to omit rows containi
 Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # need to omit rows containing any NA
                      "any.out"=nhis.any.out))
 
-# Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
-# complier.mod <- suppressWarnings(randomForest(x=X.ohie[treatment.ohie == 1,], 
-#                                               y=insurance.ohie[treatment.ohie==1])) 
-
+## Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
 # Load Super Learner predictions for compliance model (complier-mod.R)
-C.pscore <- read.table(paste0(data.directory,"C.pscore.txt"), quote="\"") 
+C.pscore <- read.table(paste0(directory,"/C.pscore.txt"), quote="\"") 
 
 rct.compliers <- data.frame("treatment"=treatment.ohie,
                             "insurance"=insurance.ohie,
-                            "C.pscore"=predict(complier.mod, X.ohie), 
+                            "C.pscore"=as.numeric(C.pscore[[1]]), 
                             "C.hat"=ifelse(as.numeric(C.pscore[[1]])>=0.5,1,0),
                             "complier"=0)
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
@@ -88,7 +85,7 @@ X.ohie.response <- data.frame("treatment"=treatment.ohie[which(rct.compliers$com
 # Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
 # Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
 
-# Load Super Learner predictions (response-mod.R)
+# Load Super Learner predictions for response model (response-mod.R)
 fitSL.oh.pred <- read.table("response-mod-pred.txt", quote="\"")
 Y.hat.1.oh <- as.numeric(fitSL.oh.pred[,1])
 Y.hat.0.oh <- as.numeric(fitSL.oh.pred[,2])

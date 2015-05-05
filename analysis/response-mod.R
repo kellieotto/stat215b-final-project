@@ -17,7 +17,7 @@ response.mod <- lapply(y.col, SuperLearner(Y=Y.ohie.response[,i],
                              family="binomial"))
 names(response.mod) <- colnames(Y.ohie.response) # name each element of list
 
-summary(response.mod) # summarize
+response.mod # summarize
 
 # Use response model to estimate potential outcomes for population "compliers" on medicaid
 nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
