@@ -6,8 +6,8 @@
 directory <- "~/Dropbox/github/stat215b-final-project/analysis"
 
 # Source scripts
-run <- FALSE
-if(run){
+run.source <- FALSE
+if(run.source){
 source(file.path(directory,"prepare-analysis.R"))
 save.image(file.path(directory,"prepare-analysis.Rdata"))
 }
@@ -61,72 +61,75 @@ C.pscore <- read.table(paste0(directory,"/C.pscore.txt"), quote="\"")
 
 rct.compliers <- data.frame("treatment"=treatment.ohie,
                             "insurance"=insurance.ohie,
-                            "C.pscore"=as.numeric(C.pscore[[1]]), 
+                            "C.pscore"=as.numeric(C.pscore[[1]]), # SL predictions in first column
                             "C.hat"=ifelse(as.numeric(C.pscore[[1]])>=0.5,1,0),
                             "complier"=0)
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
 
+## Run response models on SCF --> 
+run.code <- FALSE 
+if(run.code){
 # Fit a regression to the compliers in the RCT
 y.col <- 1:ncol(Y.ohie) # number of responses
 Y.ohie.response <- Y.ohie[which(rct.compliers$complier==1),]
 X.ohie.response <- data.frame("treatment"=treatment.ohie[which(rct.compliers$complier==1)],
                          X.ohie[which(rct.compliers$complier==1),])
-# response.mod <- lapply(y.col, function(i) randomForest(x=X.ohie.response,
-#                                                        y=Y.ohie.response[,i]))
-# names(response.mod) <- colnames(Y.ohie.response) # name each element of list
-# 
-# # Use response model to estimate potential outcomes for population "compliers" on medicaid
-# nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
-#                                X.nhis[which(insurance.nhis==1),])
-# nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
-#                                  X.nhis[which(insurance.nhis==1),])
-# 
-# Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual))
-# Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual))
+# Run response model
+set.seed(42)
+response.mod <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response[,i], 
+                                                        X=X.ohie.response, 
+                                                        SL.library=SL.library.class,
+                                                        family="binomial"))
 
-# Load Super Learner predictions for response model (response-mod.R)
-any.visit.pred <- read.table(paste0(directory,"/any.visit.txt"), quote="\"")
-any.out.pred <- read.table(paste0(directory,"/any.out.txt"), quote="\"")
-Y.hat.1 <- list(any.visit.pred[1],any.out.pred[1])
-Y.hat.0 <- list(any.visit.pred[2],any.out.pred[2])
+names(response.mod) <- colnames(Y.ohie.response) # name each element of list
+
+response.mod # summarize
+
+# Use response model to estimate potential outcomes for population "compliers" on medicaid
+nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
+                               X.nhis[which(insurance.nhis==1),])
+nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
+                                 X.nhis[which(insurance.nhis==1),])
+
+Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual)$pred) # extract only SL predictions
+Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual)$pred)
 
 # Compute PATT estimator
 t.patt <- lapply(y.col, function (i) mean(Y.hat.1[[i]]) - mean(Y.hat.0[[i]]))
 
-## Compute unadjusted PATT
+# Compute unadjusted PATT
 Y.ohie.response.unadj <- Y.ohie[which(rct.compliers$complier==1 | rct.compliers$complier==0),]
 X.ohie.response.unadj <- data.frame("treatment"=treatment.ohie,
-                               X.ohie)
-# 
-# response.mod2 <- lapply(y.col, function(i) randomForest(x=X.ohie.response.unadj,
-#                                                        y=Y.ohie.response.unadj[,i]))
-# names(response.mod2) <- colnames(Y.ohie) # name each element of list
-# 
-# nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))),
-#                                X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
-# nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))),
-#                                  X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
-# 
-# Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj))
-# Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj))
+                                    X.ohie)
+set.seed(42)
+response.mod2 <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response.unadj[,i], 
+                                                         X=X.ohie.response.unadj, 
+                                                         SL.library=SL.library.class,
+                                                         family="binomial"))
 
-# Load Super Learner predictions for response model (response-mod-unadj.R)
-any.visit.unadj <- read.table(paste0(directory,"/Y.hat.unadj-any.visit.txt"), quote="\"")
-any.out.unadj <- read.table(paste0(directory,"/Y.hat.unadj-any.out.txt"), quote="\"")
-Y.hat.1.unadj <- list(any.visit.unadj[1],any.out.unadj[1])
-Y.hat.0.unadj <- list(any.visit.unadj[2],any.out.unadj[2])
+names(response.mod2) <- colnames(Y.ohie) # name each element of list
+
+response.mod2 # summarize
+
+nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))),
+                                     X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
+nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))),
+                                       X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
+
+Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj)$pred)
+Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj)$pred)
 
 t.patt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
 
-# # Compute unadjusted SATT
-# rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.ohie==1 | insurance.ohie==0))),
-#                                      X.ohie[which(insurance.ohie==1| insurance.ohie==0),])
-# rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.ohie==1 | insurance.ohie==0))),
-#                                        X.ohie[which(insurance.ohie==1 | insurance.ohie==0),])
-# 
-# Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj))
-# Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj))
+# Compute unadjusted SATT
+rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.ohie==1 | insurance.ohie==0))),
+                                     X.ohie[which(insurance.ohie==1| insurance.ohie==0),])
+rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.ohie==1 | insurance.ohie==0))),
+                                       X.ohie[which(insurance.ohie==1 | insurance.ohie==0),])
+
+Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj)$pred)
+Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj)$pred)
 
 t.satt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj.rct[[i]]) - mean(Y.hat.0.unadj.rct[[i]]))
 
@@ -136,7 +139,6 @@ rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1
                    /mean(rct.compliers$complier[which(treatment.ohie==1)])) # Denom. is true RCT compliance rate
 
 # Save workspace
-gc()
-save.image(file.path(directory,"analysis.Rdata"))
-
+save.image(file.path(directory,"analysis-pred.Rdata"))
+}
 

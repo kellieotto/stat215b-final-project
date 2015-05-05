@@ -18,7 +18,7 @@ complier.mod <- SuperLearner(Y=insurance.ohie[treatment.ohie==1],
 complier.mod
 
 # Store predictions
-C.pscore <- predict(complier.mod, X.ohie)
+C.pscore <- predict(complier.mod, X.ohie, onlySL=TRUE)
 
 # Output predictions as .txt file
 write.table(C.pscore, "C.pscore.txt",  row.names=FALSE)
