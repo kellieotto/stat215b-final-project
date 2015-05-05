@@ -56,6 +56,23 @@ Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # need to omit rows con
                      "any.out"=nhis.any.out))
 
 ## Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
+run.code <- FALSE
+if(run.code){ # Run compliance model on SCF
+# Predict who is a complier in the control group
+set.seed(42)
+complier.mod <- SuperLearner(Y=insurance.ohie[treatment.ohie==1], 
+                             X=X.ohie[treatment.ohie == 1,], 
+                             SL.library=SL.library.class,
+                             family="binomial")
+complier.mod
+
+# Store predictions
+C.pscore <- predict(complier.mod, X.ohie, onlySL=TRUE)
+
+# Output predictions as .txt file
+write.table(C.pscore, "C.pscore.txt",  row.names=FALSE)
+}
+
 # Load Super Learner predictions for compliance model (complier-mod.R)
 C.pscore <- read.table(paste0(directory,"/C.pscore.txt"), quote="\"") 
 
@@ -66,10 +83,8 @@ rct.compliers <- data.frame("treatment"=treatment.ohie,
                             "complier"=0)
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
-
-## Run response models on SCF --> 
-run.code <- FALSE 
-if(run.code){
+ 
+if(run.code){ # Run response models on SCF
 # Fit a regression to the compliers in the RCT
 y.col <- 1:ncol(Y.ohie) # number of responses
 Y.ohie.response <- Y.ohie[which(rct.compliers$complier==1),]
