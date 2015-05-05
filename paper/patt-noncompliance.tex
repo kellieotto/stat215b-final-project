@@ -468,7 +468,7 @@ The proposed method allows us to decompose both SATE and PATT estimates by subgr
 \bibliography{refs}
 
 %Appendix
-%\pagebreak
+\pagebreak
 \begin{appendices}
 
 \section{Ensemble method for compliance model}
@@ -501,7 +501,10 @@ Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.227 & 0.001 & 0.224 & 0.232
 \label{reponse-ensemble}
 \end{table}
 
+\pagebreak
 \section{Ensemble method for response models} 
+
+\subsection{Response model on RCT compliers}
 
 \begin{table}[htb]
 \caption{Cross--validated risk and weights used for each algorithm in super learner ensemble for response model on RCT compliers.}  \label{reponse-ensemble}
@@ -545,7 +548,8 @@ Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.24 & 0 \\
 \footnotesize{`Risk' is the 10--fold cross-validated risk estimate based on mean squared error for each algorithm. `Weight' is the coefficient for the super learner, which is estimated using non--negative least squares based on the Lawson-Hanson algorithm.}
 \end{table}
 
-% Table for unadjusted response model
+\pagebreak
+\subsection{Response model on all RCT participants}
 
 \begin{table}[htb]
 \caption{Cross--validated risk and weights used for each algorithm in super learner ensemble for response model on all RCT participants.}  \label{reponse-ensemble-unadj}
