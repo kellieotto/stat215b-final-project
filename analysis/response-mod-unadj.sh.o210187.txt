@@ -1,0 +1,120 @@
+
+R version 3.1.2 (2014-10-31) -- "Pumpkin Helmet"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ## Run this script on SCF
+> 
+> # Set WD
+> setwd("~/Documents/stat215b-final-project")
+> 
+> # Load R workspace
+> load("analysis.RData")
+> 
+> # Source superlearner scripts to ensure libraries attached
+> source("SuperLearner.R")
+> 
+> # Compute unadjusted PATT
+> Y.ohie.response.unadj <- Y.ohie[which(rct.compliers$complier==1 | rct.compliers$complier==0),]
+> X.ohie.response.unadj <- data.frame("treatment"=treatment.ohie,
++                                     X.ohie)
+> 
+> set.seed(42)
+> response.mod2 <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response.unadj[,i], 
++                                                         X=X.ohie.response.unadj, 
++                                                         SL.library=SL.library.class,
++                                                         family="binomial"))
+> 
+> names(response.mod2) <- colnames(Y.ohie) # name each element of list
+> 
+> response.mod2 # summarize
+$any.visit
+
+Call:  
+SuperLearner(Y = Y.ohie.response.unadj[, i], X = X.ohie.response.unadj, family = "binomial",  
+    SL.library = SL.library.class) 
+
+
+                           Risk      Coef
+SL.gbm_All            0.1889793 0.0000000
+SL.glmnet_All         0.1889747 0.5400703
+SL.glmnet.0_All       0.1889748 0.4599297
+SL.glmnet.0.25_All    0.1889788 0.0000000
+SL.glmnet.0.5_All     0.1889784 0.0000000
+SL.glmnet.0.75_All    0.1889775 0.0000000
+SL.nnet_All           0.2289738 0.0000000
+SL.randomForest_All   0.2408039 0.0000000
+SL.randomForest.1_All 0.2525246 0.0000000
+SL.randomForest.2_All 0.2416605 0.0000000
+SL.randomForest.3_All 0.2418982 0.0000000
+
+$any.out
+
+Call:  
+SuperLearner(Y = Y.ohie.response.unadj[, i], X = X.ohie.response.unadj, family = "binomial",  
+    SL.library = SL.library.class) 
+
+
+                           Risk        Coef
+SL.gbm_All            0.2392882 0.000000000
+SL.glmnet_All         0.2392937 0.000000000
+SL.glmnet.0_All       0.2392878 0.730212145
+SL.glmnet.0.25_All    0.2392878 0.000000000
+SL.glmnet.0.5_All     0.2392878 0.000000000
+SL.glmnet.0.75_All    0.2392878 0.000000000
+SL.nnet_All           0.2404214 0.000000000
+SL.randomForest_All   0.3273160 0.000000000
+SL.randomForest.1_All 0.3911290 0.261753759
+SL.randomForest.2_All 0.3312791 0.000000000
+SL.randomForest.3_All 0.3291465 0.008034096
+
+> 
+> nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))),
++                                      X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
+> nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))),
++                                        X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
+> 
+> Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj))
+> Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj))
+> 
+> # Output predictions as .txt file
+> lapply(y.col, function (i) write.table(cbind(Y.hat.1.unadj[[i]],Y.hat.0.unadj[[i]]), 
++                                        paste("Y.hat.unadj-",names(response.mod2)[i], ".txt"),  row.names=FALSE))
+[[1]]
+NULL
+
+[[2]]
+NULL
+
+> 
+> # Compute unadjusted SATT
+> rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.ohie==1 | insurance.ohie==0))),
++                                      X.ohie[which(insurance.ohie==1| insurance.ohie==0),])
+> rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.ohie==1 | insurance.ohie==0))),
++                                        X.ohie[which(insurance.ohie==1 | insurance.ohie==0),])
+> 
+> Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj))
+> Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj))
+> 
+> # Output predictions as .txt file
+> lapply(y.col, function (i) write.table(cbind(Y.hat.1.unadj.rct[[i]],Y.hat.0.unadj.rct[[i]]), 
++                                        paste("Y.hat.unadj,rct-",names(response.mod2)[i], ".txt"),  row.names=FALSE))
+[[1]]
+NULL
+
+[[2]]
+NULL
+
+> 

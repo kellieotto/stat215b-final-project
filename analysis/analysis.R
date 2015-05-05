@@ -119,14 +119,14 @@ Y.hat.0.unadj <- list(any.visit.unadj[2],any.out.unadj[2])
 
 t.patt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
 
-# Compute unadjusted SATT
-rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.ohie==1 | insurance.ohie==0))),
-                                     X.ohie[which(insurance.ohie==1| insurance.ohie==0),])
-rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.ohie==1 | insurance.ohie==0))),
-                                       X.ohie[which(insurance.ohie==1 | insurance.ohie==0),])
-
-Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj))
-Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj))
+# # Compute unadjusted SATT
+# rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.ohie==1 | insurance.ohie==0))),
+#                                      X.ohie[which(insurance.ohie==1| insurance.ohie==0),])
+# rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.ohie==1 | insurance.ohie==0))),
+#                                        X.ohie[which(insurance.ohie==1 | insurance.ohie==0),])
+# 
+# Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj))
+# Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj))
 
 t.satt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj.rct[[i]]) - mean(Y.hat.0.unadj.rct[[i]]))
 

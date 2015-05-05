@@ -47,4 +47,4 @@ Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.
 
 # Output predictions as .txt file
 lapply(y.col, function (i) write.table(cbind(Y.hat.1.unadj.rct[[i]],Y.hat.0.unadj.rct[[i]]), 
-                                       paste("Y.hat.unadj,rct-",names(response.mod2)[i], ".txt"),  row.names=FALSE))
+                                       paste("Y.hat.unadj.rct-",names(response.mod2)[i], ".txt"),  row.names=FALSE))

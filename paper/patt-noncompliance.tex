@@ -471,38 +471,81 @@ The proposed method allows us to decompose both SATE and PATT estimates by subgr
 %\pagebreak
 \begin{appendices}
 
-\section{Ensemble method for complier model}
-
-
-%complier-mod-cv
-
-\section{Ensemble method for response model}
+\section{Ensemble method for compliance model}
 
 % complier-mod
 \begin{table}[ht]
 \begin{center}
-\caption{Response model ensemble.} 
-\begin{tabular}{llcc}
+\caption{Risk estimates for compliance model ensemble.} 
+\begin{tabular}{llcccc}
   \hline
- Algorithm & Parameters & Risk & Weight \\ 
+ Algorithm & Parameters & Avg. & SE & Min. & Max. \\ 
   \hline
-Generalized boosted models (\texttt{gbm}) & default &  &  \\ 
-Lasso regression (\texttt{glmnet})  & $\alpha=1$& 0.023 & 0.243 \\ 
-GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.023 & 0 \\ 
-GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.023 & 0 \\ 
-GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.023 & 0 \\ 
-Neural network (\texttt{nnet}) &  default & 0.066 & 0 \\ 
-Random forests (\texttt{randomForest}) & default & 0.026 & 0 \\ 
-Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.03 & 0.45 \\ 
-Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.025 & 0.305 \\ 
-Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.025 & 0 \\ 
-Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.025 & 0 \\ 
+Super Learner (\texttt{SuperLearner}) & default & 0.226 & 0.001 & 0.222 & 0.231 \\
+%Discrete SL & default & 0.226 0.001 0.222 0.231 \\
+Generalized boosted models (\texttt{gbm}) & default & 0.226 & 0.001 & 0.222 &  0.231 \\ 
+Lasso regression (\texttt{glmnet})  & $\alpha=1$ & 0.227 & 0.001 & 0.224 & 0.233 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.227 & 0.001 & 0.224 & 0.232 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.227 & 0.001 & 0.224 & 0.233 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.227 & 0.001 & 0.224 & 0.233 \\ 
+Neural network (\texttt{nnet}) &  default & 0.227 & 0.001 & 0.224 & 0.232 \\ 
+Random forests (\texttt{randomForest}) & default & 0.307 & 0.003 & 0.293 & 0.326  \\  
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.273 & 0.002 & 0.268 & 0.281 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.307 & 0.003 & 0.294 & 0.326 \\  
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.310 & 0.003 & 0.294 & 0.329 \\ 
+Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.227 & 0.001 & 0.224 & 0.232 \\ 
    \hline
 \end{tabular} 
 \end{center}
-\footnotesize{Notes: Cross--validated risk and weights used for each algorithm in super learner ensemble for response model.  `Risk' is the 10--fold cross-validated risk estimate based on mean squared error for each algorithm. `Weight' is the coefficient for the super learner, which is estimated using non--negative least squares based on the Lawson-Hanson algorithm.}
+\footnotesize{Notes: risk based on the 10--fold cross-validated estimate of the mean squared error for each algorithm.}
 \label{reponse-ensemble}
 \end{table}
+
+\section{Ensemble method for response models} 
+
+\begin{table}[htb]
+\caption{Cross--validated risk and weights used for each algorithm in super learner ensemble for response model on RCT compliers.}  \label{reponse-ensemble}
+  \begin{tabularx}{\linewidth}{l*{4}{Y}}
+    \toprule
+    \multicolumn{4}{l}{\textbf{Any ER visit}} \\
+    \midrule
+ Algorithm & Parameters & Risk & Weight \\ 
+  \hline
+Generalized boosted models (\texttt{gbm}) & default & 0.188 & 0  \\ 
+Lasso regression (\texttt{glmnet})  & $\alpha=1$& 0.188 & 1 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.188 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.188 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.188 & 0 \\ 
+Neural network (\texttt{nnet}) &  default & 0.234 & 0 \\ 
+Random forests (\texttt{randomForest}) & default & 0.24 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.251 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.24 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.241 & 0 \\ 
+Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.188 & 0 \\ 
+   \hline
+  \end{tabularx}
+  \begin{tabularx}{\linewidth}{l*{4}{Y}}
+    \toprule
+    \multicolumn{4}{l}{\textbf{Any outpatient visit}} \\
+    \midrule
+Generalized boosted models (\texttt{gbm}) & default & 0.24 & 0  \\ 
+Lasso regression (\texttt{glmnet})  & $\alpha=1$& 0.24 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.24 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.24 & 0.76 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.24 & 0 \\ 
+Neural network (\texttt{nnet}) &  default & 0.242 & 0 \\ 
+Random forests (\texttt{randomForest}) & default & 0.331 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.392 & 0.23 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.333 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.333 & 0.008 \\ 
+Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.24 & 0 \\ 
+   \hline
+    \bottomrule
+  \end{tabularx}
+\footnotesize{`Risk' is the 10--fold cross-validated risk estimate based on mean squared error for each algorithm. `Weight' is the coefficient for the super learner, which is estimated using non--negative least squares based on the Lawson-Hanson algorithm.}
+\end{table}
+
+% Table for unadjusted response model
 
 \end{appendices}
 \end{singlespace}
