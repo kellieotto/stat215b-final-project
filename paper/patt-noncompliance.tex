@@ -547,6 +547,47 @@ Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.24 & 0 \\
 
 % Table for unadjusted response model
 
+\begin{table}[htb]
+\caption{Cross--validated risk and weights used for each algorithm in super learner ensemble for response model on all RCT participants.}  \label{reponse-ensemble-unadj}
+  \begin{tabularx}{\linewidth}{l*{4}{Y}}
+    \toprule
+    \multicolumn{4}{l}{\textbf{Any ER visit}} \\
+    \midrule
+ Algorithm & Parameters & Risk & Weight \\ 
+  \hline
+Generalized boosted models (\texttt{gbm}) & default & 0.188 & 0  \\ 
+Lasso regression (\texttt{glmnet})  & $\alpha=1$& 0.188 & 0.54 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.188 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.188 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.188 & 0 \\ 
+Neural network (\texttt{nnet}) &  default & 0.228 & 0 \\ 
+Random forests (\texttt{randomForest}) & default & 0.24 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.252 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.241 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.241 & 0 \\ 
+Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.188 & 0.459 \\ 
+   \hline
+  \end{tabularx}
+  \begin{tabularx}{\linewidth}{l*{4}{Y}}
+    \toprule
+    \multicolumn{4}{l}{\textbf{Any outpatient visit}} \\
+    \midrule
+Generalized boosted models (\texttt{gbm}) & default & 0.239 & 0  \\ 
+Lasso regression (\texttt{glmnet})  & $\alpha=1$& 0.239 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.239 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.239 & 0 \\ 
+GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.239 & 0 \\ 
+Neural network (\texttt{nnet}) &  default & 0.24 & 0 \\ 
+Random forests (\texttt{randomForest}) & default & 0.327 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.391 & 0.261 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.331 & 0 \\ 
+Random forests (\texttt{randomForest})  & $\mathrm{mtry}=10$ & 0.329 & 0.008 \\ 
+Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.239 & 0.73 \\ 
+   \hline
+    \bottomrule
+  \end{tabularx}
+%\footnotesize{`Risk' is the 10--fold cross-validated risk estimate based on mean squared error for each algorithm. `Weight' is the coefficient for the super learner, which is estimated using non--negative least squares based on the Lawson-Hanson algorithm.}
+\end{table}
 \end{appendices}
 \end{singlespace}
 
