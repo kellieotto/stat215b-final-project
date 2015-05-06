@@ -130,7 +130,7 @@
 \section{Introduction}
 Randomized control trials (RCTs) are the ``gold standard" for estimating the causal effect of a treatment.  However, external validity is often an issue when the individuals in an RCT are unrepresentative of the population of interest.  For example, RCTs in which participants volunteer to sign up for health insurance coverage may exhibit a sample population that is in poorer health than the target population.  External validity is particularly relevant to policymakers who want to know how a sample average treatment effect (SATE) would generalize to the broader population. Hartman et al. propose a method of reweighting the responses of individuals in an RCT study according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, the PATT estimate is asymptotically unbiased (\cite{Hartman}). \\
 
-A prevalent issue in RCTs is non-compliance.  One-way crossover from treatment to control occurs when individuals who are assigned to the treatment group refuse the treatment.  This serves to dilute the estimated effect of treatment assignment, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. to estimate the PATT in settings with RCT non-compliance.  We make the same assumptions needed for the estimator proposed by \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also assume monotonicity (no defiers) and exclusion restriction as in \cite{Angrist1996}. \\
+A prevalent issue in RCTs is non-compliance.  One-way crossover from treatment to control occurs when individuals who are assigned to the treatment group refuse the treatment.  This serves to dilute the estimated effect of treatment assignment, and the resulting intention to treat estimate is biased towards $0$.  We propose to extend the method of Hartman et. al. to estimate the PATT in settings with RCT non-compliance.  We make the same assumptions needed for the estimator proposed by \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability.  To ensure identifiability, we also make the no defiers and exclusion restriction assumptions as in \cite{Angrist1996}. \\
 
 The estimator of PATT involves the expectation of the response of compliers in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  To estimate the conditional expectation of responses in the RCT, we use an ensemble learning method to estimate the response surface.  Then, we use the response model to estimate population members' outcomes given their covariates, giving an estimate of the PATT. \\
 
@@ -187,12 +187,12 @@ C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1
 \noindent This means that compliance is independent of sample and treatment assignment for all individuals with covariates $W$.
 
 \begin{assumption}{6}{}\label{monotonicity}
-Monotonicity: 
+No defiers: 
 \begin{equation*}
 T_i \geq D_i, \forall i
 \end{equation*}
 \end{assumption}
-\noindent This assumption implies that there are no defiers and that crossover is only possible from treatment to control.
+\noindent This assumption ensures that crossover is only possible from treatment to control.
 
 \begin{assumption}{7}{}\label{ER}
 Exclusion restriction: For non-compliers
@@ -256,7 +256,7 @@ The last line follows because of the randomization carried out in the RCT.  This
 
 
 \subsection{Estimation Procedure}
-Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  Here, we use random forests to estimate the response curve for compliers, given their treatment assignment and covariates. We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve for each treated individual in the population.  \\
+Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  Here, we use an ensemble of machine learners \citep{van2007} to estimate the response curve for compliers, given their treatment assignment and covariates.\footnote{The 10--fold cross--validated risk estimate on the training set is 22.6\%. Information on the ensemble's candidate learners and corresponding weights and risk estimates are provided in Appendix Table \ref{reponse-ensemble}.}  We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve for each treated individual in the population.  \\
 
 The second challenge is that we cannot observe which individuals are included in the estimation of the second term. We cannot tell who is a complier or non-complier in the control group, as they receive $D=0$ in either case.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible. \\
 
@@ -294,7 +294,7 @@ $$Y = a + bD + c_1W_1 + c_2W_2 + dU$$
  
  We generate a population of 30,000 individuals and randomly sample 5,000.  Those among the 5,000 who are eligible for the RCT ($S=1$) are selected. Similarly, we sample 5,000 individuals from the population and select those who are not eligible for the RCT ($S=0$); these are our observational study participants. This set-up mimics the reality that a population census is usually impossible. We set each individual's treatment received $D$ according to their treatment assignment and complier status and observe their responses $Y$.  In this design, the way that we've set $S, T, D, C,$ and $Y$ ensures that assumptions \eqref{consistency} - \eqref{ER} hold.\\
  
-In the assigned-treatment RCT group $(S = 1, T = 1)$, we fit a logistic regression to compliance status using the covariates.  With this model, we predict who in the control group $(S = 1, T = 0)$ has $C=1$, since this is unobservable.  These individuals \textit{would have} complied had they been assigned to the treatment group.  For this group of observed compliers to treatment and predicted compliers from the control group of the RCT, we estimate the response curve using a random forest with features $(W_1, W_2, W_3)$ and $D$.  Then population local average treatment effect on the treated is estimated according to the estimation procedure outlined above.
+In the assigned-treatment RCT group $(S = 1, T = 1)$, we fit a logistic regression to compliance status using the covariates.  With this model, we predict who in the control group $(S = 1, T = 0)$ has $C=1$, since this is unobservable.  These individuals \textit{would have} complied had they been assigned to the treatment group.  For this group of observed compliers to treatment and predicted compliers from the control group of the RCT, we estimate the response curve using an ensemble of models with features $(W_1, W_2, W_3)$ and $D$.  Then population local average treatment effect on the treated is estimated according to the estimation procedure outlined above.
 
 
 \subsection{Simulation results}
@@ -305,9 +305,9 @@ Figure~\ref{fig:sim_tiles} shows the relationship between the percent of complie
 
 
 
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
-\includegraphics[width = 0.8\textwidth]{mse_ratec_rates_B5}
+\includegraphics[width = 1\textwidth]{mse_ratec_rates_B5}
 \caption{Simulation mean squared error, transformed by -$\log$. Darker tiles correspond to lower mean squared error.}
 \label{fig:sim_tiles}
 \end{center}
@@ -315,9 +315,9 @@ Figure~\ref{fig:sim_tiles} shows the relationship between the percent of complie
 
 Figure~\ref{fig:sim_compliance} compares the mean squared error of the two PATT estimators and the SATE (as an estimator of PATT) at varying levels of compliance in the total population.  When compliance is low, both PATT estimators have a large mean squared error and variance.  The adjusted estimator has a large variance because the subset of the RCT who are considered compliers is relatively small, whereas the unadjusted estimator has large variance because of the large amount of crossover.  For low levels of compliance, SATE actually tends to approximate PATT more closely; the variance due to small sample size contributes less to the mean squared error than the bias due to crossover in the other two estimators.  On the other hand, when the compliance rate is high, both PATT estimators perform about equally well with mean squared error close to $0$.  Meanwhile, the median mean squared error for SATE stays relatively constant regardless of compliance rate.  This shows that the instrumental variables estimate of SATE is able to adjust for the non-compliance, but is unable to account for differences in pretreatment covariates between the RCT sample and target population.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
-\includegraphics[width = 0.8\textwidth]{mse_boxplots_B5}
+\includegraphics[width = 1\textwidth]{mse_boxplots_B5}
 \caption{Simulation mean squared error, according to compliance rates in the total population.}
 \label{fig:sim_compliance}
 \end{center}
@@ -336,17 +336,17 @@ We apply the proposed method to estimate the effect of extending Medicaid covera
 
 We draw RCT data from the Oregon Health Insurance Experiment (OHIE) \citep{finkelstein2012,baicker2013,baicker2014,Taubman}.  In 2008, approximately 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits.\footnote{Eligible participants include Oregon residents (US citizens or legal immigrants) aged 19 to 64 not otherwise eligible for public insurance, who have been without insurance for six months, and have income below the FPL and assets below \$2,000.} Treatment occurred at the household level: participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid. Sample exclusions brought the sample size down to 74,922 individuals representing 66,385 households.  Within the sample, 29,834 participants were selected by the lottery; the remaining 45,008 participants served as controls in the experiment.  Participants in selected households received benefits if they returned an enrollment application within 45 days of receipt. Among participants in selected households, about 60\% mailed back applications and only 30\% successfully enrolled.\footnote{About half of the returned applications were deemed ineligible, primarily due to failure to demonstrate income below the FPL. Enrolled participants were required to recertify their eligibility status every six months.} The OHIE data includes pretreatment covariates for gender, age, race, ethnicity, health status, education, and household income. \\
 
-We use two health care use responses: emergency room (ER) and outpatient visits in the past 12 months.\footnote{The variables that capture the total number of visits have been censored so that no individual value has fewer than ten observations and are truncated at the 2*99th percentile.} These data originate from a mail survey that was administered to participants over July and August 2009 ($N = 23,741$ survey respondents) \cite{finkelstein2012}. We use the same definition of insurance coverage as \citet{finkelstein2012} to form our measure of compliance, which is a binary variable indicating whether the participant was enrolled in any Medicaid program (including the lotteried program) between the notification date and 30 September 2009. 
+Our outcomes of interest are indicator variables for any emergency room (ER) and outpatient visits in the past 12 months. The response data originate from a mail survey that was administered to participants over July and August 2009 ($N = 23,741$ survey respondents) \cite{finkelstein2012}. We use the same definition of insurance coverage as \citet{finkelstein2012} to form our measure of compliance, which is a binary variable indicating whether the participant was enrolled in any Medicaid program (including the lotteried program) between the notification date and 30 September 2009. 
 
 \paragraph{Observational data} 
 
-We employ data on the target population from the National Health Interview Study (NHIS) \cite{NHIS} for study years 2008--2013.  We restrict our sample to respondents with income below 138\% of the FPL and who are uninsured or on Medicaid ($N=3,914$). We use covariates on respondent characteristics that match the OHIE pretreatment covariates. The outcomes of interest from NHIS are variables on ER  and outpatient visits in the past 12 months. We use a recoded variable that indicates whether respondents are on Medicaid as an analogue to the OHIE compliance measure.
+We employ data on the target population from the National Health Interview Study (NHIS) \cite{NHIS} for years 2008 to 2013.  We restrict our sample to respondents with income below 138\% of the FPL and who are uninsured or on Medicaid ($N=3,382$). We use covariates on respondent characteristics that match the OHIE pretreatment covariates. The outcomes of interest from NHIS are variables on ER and outpatient visits in the past 12 months. We use a recoded variable that indicates whether respondents are on Medicaid as an analogue to the OHIE compliance measure.
 
 \subsection{Verifying assumptions}
 
 In order for the proposed estimator to perform well, assumptions \eqref{consistency}--\eqref{ER} must be met.  Assumption \eqref{consistency} ensures that potential outcomes for participants in the target population (i.e., respondents in the NHIS sample) would be identical to their outcomes in the RCT if they had been randomly assigned their observed treatment. A violation of the consistency assumption might arise, for instance, if there are differences in the mail surveys used to elicit health care use responses between the RCT and the non-randomized study. 
 
-We cannot directly test assumptions \eqref{si_treat}--\eqref{si_ctrl}, which state that potential outcomes for treatment and control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.  The assumptions are only met if every possible confounder associated with the response and the sample assignment is accounted for.  In our estimation of the response curve, we use all demographic, socioeconomic, and pre-existing health condition data that were common in the OHIE and NHIS data.  Table~\ref{rct-nrt-compare} shows the distribution of pre-treatment covariates in the two studies.  \todo{Describe what is notable in the table, how it relates to confounding.}  Future studies on this subject should attempt to control for other potential confounders, such as number of hospital and outpatient visits in the previous year, proximity to health services, and enrollment in other federal programs. \\
+We cannot directly test assumptions \eqref{si_treat}--\eqref{si_ctrl}, which state that potential outcomes for treatment and control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.  The assumptions are only met if every possible confounder associated with the response and the sample assignment is accounted for.  In our estimation of the response curve, we use all demographic, socioeconomic, and pre-existing health condition data that were common in the OHIE and NHIS data.  Table~\ref{rct-nrt-compare} shows the distribution of pre-treatment covariates in the two studies.  \todo{Describe what is notable in the table, how it relates to confounding.}  Potentially important unobserved confounders include the number of hospital and outpatient visits in the previous year, proximity to health services, and enrollment in other federal programs. \\
 
  \todo{Talk about these: There is no theoretical reason or evidence against the assumptions of non--interference between experimental units (Assumption \ref{sutva}) and conditional independence of compliance and treatment assignment (Assumption \ref{compl}); these are standard assumptions.} \\
 \begin{longtable}{lllllll}
@@ -403,51 +403,33 @@ Any outpatient visit & 3299 & 60.2 & 3081 & 59.3 & 2116 & 62.6 \\
 
 The exclusion restriction (Assumption \ref{ER}) ensures treatment assignment affects the response only through assignment to Medicaid  and the effect of Medicaid coverage may only be non-zero for compliers. It is reasonable that whether or not someone actually has Medicaid, not their eligibility to enroll, would affect their hospital use.  For generic health insurance one might argue that eligibility could be negatively correlated with hospital use, as people with pre-existing conditions may be less likely to be eligible yet go to the hospital more frequently.  This should not be the case with a federally funded program such as Medicaid. \\
 
-Assumption \ref{monotonicity} does not hold due to the presence of non-compliers in the control group --- that is, participants who were assigned to control and enrolled in Medicaid during the study period. While \possessivecite{finkelstein2012} IVLS estimates of the effect of Medicaid assume one--way crossover, 14\% of control participants were actually enrolled in Medicaid during the study period (compared to the 60\% of treated participants who did not enroll).The violation of the monotonicity assumption does not appear to be appropriately addressed in \citet{finkelstein2012} nor any of the authors' follow--up papers. We will explore how double--crossover affects our PATT estimates in a future version of this paper. 
+Assumption \ref{monotonicity} does not hold due to the presence of non-compliers in the control group --- that is, participants who were assigned to control and enrolled in Medicaid during the study period. While \possessivecite{finkelstein2012} IVLS estimates of the effect of Medicaid assume one--way crossover, 14\% of control participants were actually enrolled in Medicaid during the study period (compared to the 60\% of treated participants who did not enroll).The violation of the no defiers assumption does not appear to be appropriately addressed in \citet{finkelstein2012} nor any of the authors' follow--up papers. We will explore how double--crossover affects our PATT estimates in a future version of this paper. 
 
 \subsection{Empirical results}
 
-We compare PATT and SATE estimates for ER and outpatient use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with random forests prediction models using the default settings \citep{breiman2001}. We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample has size $N=23,205$ and the population has $N=38,579$. There are $N=10,297$ RCT compliers and $N=3,914$ target population ``compliers'' on medicaid. \\
+We compare PATT and SATE estimates for ER and outpatient use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with an ensemble of learners.\footnote{Appendix Table \ref{reponse-ensemble} provides information on the ensemble's candidate learners and corresponding weights and risk estimates.} We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample size is $N=23,205$ and the population sample is $N=11,129$. There are $N=10,669$ RCT compliers and $N=3,382$ target population ``compliers'' on medicaid. \\
 
-Figures \ref{fig:any-visit-plot} and \ref{fig:num-visit-plot} compare estimates for a binary response indicating whether the participant visited an ER and the number of ER visits in the past 12 months, respectively. We estimate the effect of Medicaid coverage on the likelihood of visiting the ER is about -1\% for population compliers (adjusted PATT). In comparison, the treatment effects on RCT compliers (adjusted SATE) are about zero. There are substantial differences between SATE and PATT estimates across covariate groups. For instance, while there are large negative treatment effects on ER use for sample participants with pre--existing conditions, treatment effects for population participants with pre--existing conditions are large and positive. While the treatment effects on any ER use for college--educated RCT compliers is 9\%, treatment effects on college--educated population compliers is about 0. \\
+Figure \ref{fig:any-visit-plot} compares treatment effect estimates on ER use. We estimate the effect of Medicaid coverage on the likelihood of visiting the ER is about -1\% for population compliers (adjusted PATT). In comparison, the treatment effects on RCT compliers (adjusted SATE) are about zero. There are substantial differences between SATE and PATT estimates across covariate groups. For instance, while there are large negative treatment effects on ER use for sample participants with pre--existing conditions, treatment effects for population participants with pre--existing conditions are large and positive. While the treatment effects on any ER use for college--educated RCT compliers is 9\%, treatment effects on college--educated population compliers is about 0. \\
 
-Figures \ref{fig:any-out-plot} and \ref{fig:num-out-plot} compare treatment effect estimates on outpatient use. For population compliers overall, the effect of Medicaid coverage on the likelihood of outpatient use is about 2\%. For RCT compliers overall, the effect is about 0. Sample and population estimates are generally similar according to pre--existing conditions. Treatment effects on outpatient use are large and negative for college--educated RCT compliers, but about zero for college--education population compliers. 
+Figures \ref{fig:any-out-plot} compare treatment effect estimates on outpatient use. For population compliers overall, the effect of Medicaid coverage on the likelihood of outpatient use is about 2\%. For RCT compliers overall, the effect is about 0. Sample and population estimates are generally similar according to pre--existing conditions. Treatment effects on outpatient use are large and negative for college--educated RCT compliers, but about zero for college--education population compliers. 
 
-\begin{figure} [b]
+\begin{figure}[h]
 \begin{center}
-  \begin{subfigure}[b]{0.86\textwidth}
-    \includegraphics[width=\textwidth]{any-visit-plot.pdf}
-    \caption{Any ER visit.}
-    \label{fig:any-visit-plot}
-  \end{subfigure}
-  %
-  \begin{subfigure}[b]{0.86\textwidth}
-    \includegraphics[width=\textwidth]{num-visit-plot.pdf}
-    \caption{Number of ER visits.}
-    \label{fig:num-visit-plot}
-  \end{subfigure}
- \caption{Comparison of estimators for treatment effect on ER use.}
-  \end{center}
+    \caption{Comparison of estimators: any ER visit.}
+\includegraphics[width = 1\textwidth]{any-visit-plot.pdf}
+\label{fig:any-visit-plot}
+\end{center}
 \end{figure}
 
-\begin{figure} [htb]
+\begin{figure}[h]
 \begin{center}
-     \begin{subfigure}[b]{0.86\textwidth}
-    \includegraphics[width=\textwidth]{any-out-plot.pdf}
-    \caption{Any outpatient visit.}
-    \label{fig:any-out-plot}
-  \end{subfigure}
-    %
-    \begin{subfigure}[b]{0.86\textwidth}
-    \includegraphics[width=\textwidth]{num-out-plot.pdf}
-    \caption{Number of outpatient visits.}
-    \label{fig:num-out-plot}
-  \end{subfigure}
-  \caption{Comparison of estimators for treatment effect on outpatient use.}
-   \end{center}
+    \caption{Comparison of estimators: any outpatient visit.}
+\includegraphics[width = 1\textwidth]{any-out-plot.pdf}
+\label{fig:any-out-plot}
+\end{center}
 \end{figure}
 
-We compare our estimates with those reported in Appendix Table 28 of \citet{finkelstein2012}. In this table, the authors compare their IVLS estimates of the treatment effects on RCT compliers with observational estimates comparing individuals with and without Medicaid using a sample of NHIS respondents similar to the one used in our study. That authors report OLS estimates of the effect of Medicaid on outpatient use for the population is slightly lower than the RCT sample; observational estimates of Medicaid on ER visits is slightly higher than for the RCT sample. Our estimates do not demonstrate the relationship between RCT and population estimates. One reason for the failure to replicate is that we are using censored data on the number of visits. 
+%We compare our estimates with those reported in Appendix Table 28 of \citet{finkelstein2012}. In this table, the authors compare their IVLS estimates of the treatment effects on RCT compliers with observational estimates comparing individuals with and without Medicaid using a sample of NHIS respondents similar to the one used in our study. That authors report OLS estimates of the effect of Medicaid on outpatient use for the population is slightly lower than the RCT sample; observational estimates of Medicaid on ER visits is slightly higher than for the RCT sample. Our estimates do not demonstrate the relationship between RCT and population estimates. One reason for the failure to replicate is that we are using censored data on the number of visits. 
 
 
 \section{Discussion}
@@ -456,12 +438,14 @@ The treatment effect of Medicaid applies to uninsured adults with income below t
 
 Simulations shed light on the conditions under which the proposed estimator should work well.  When the rate of crossover from treatment to control is low, the proposed estimator performs better than the estimator which doesn't adjust for non-compliance.  Here, the unadjusted estimator gives the intention-to-treat effect, which tends to underestimate the average treatment effect on compliers. Of course, the simulation results depend on the particular way we parameterized the compliance, selection, treatment assignment, and response schedules.  In particular, the strength of correlation between the covariates and compliance governs how well the estimator will perform, since step one of the estimation procedure is to predict who \textit{would be} a complier in the RCT control group, had they been assigned to treatment. If it is difficult to predict compliance using the observed covariates, then the estimator will perform badly because of noise introduced by incorrectly treating non-compliers as compliers.  Further research should be done into ways to test how well compliance can be predicted. \\
 
-In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  Our random forest for predicting compliance based on observed covariates has about $61.5\%$ accuracy on the training set of individuals in OHIE assigned to the treatment group.  While we don't know well how the model predicts for the control group, its performance on the training set suggests that compliance is not purely random, but depends on observed covariates.  This gives evidence in favor of using the proposed estimator.  Future work should be done to construct a better model to predict compliance, both in the treated group used for training and the controls in the RCT. \\
+In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled successfully, and successful enrollment depended in part on income levels.  The proposed estimator that adjusts for non-compliance seems to perform better than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  Our ensemble method for predicting compliance based on observed covariates has $22.6\%$ accuracy on the training set of individuals in OHIE assigned to the treatment group.  While we don't know well how the model predicts for the control group, its performance on the training set suggests that compliance is not purely random, but depends on observed covariates.  This gives evidence in favor of using the proposed estimator.  Future work should be done to construct a better model to predict compliance, both in the treated group used for training and the controls in the RCT. \\
 
 The proposed method allows us to decompose both SATE and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expected to find substantial differences between sample and population estimates in terms of race, and pre--existing condition subgroups. We find large negative treatment effects on ER use for sample participants with pre--existing conditions, yet the treatment effects for population participants with pre--existing conditions are large and positive. Overall, we expected the PATT estimates to be lower than corresponding SATE estimates due to the adverse selection problem in the RCT. We find the PATT estimates are lower than SATE for number of ER visits, but the PATT estimates are higher than SATE for outpatient usage. \\
 
+\todo{Make point about ER visits bad, doctor visits good
+	Adjusted PATT for ER visits make sense}
 
-
+\todo{How double--crossover affects our PATT estimates}
 
 %\pagebreak
 
@@ -485,6 +469,7 @@ The proposed method allows us to decompose both SATE and PATT estimates by subgr
   \hline
  Algorithm & Parameters & Avg. & SE & Min. & Max. \\ 
   \hline
+        \rowcolor{Gray}
 Super Learner (\texttt{SuperLearner}) & default & 0.226 & 0.001 & 0.222 & 0.231 \\
 %Discrete SL & default & 0.226 0.001 0.222 0.231 \\
 Generalized boosted models (\texttt{gbm}) & default & 0.226 & 0.001 & 0.222 &  0.231 \\ 

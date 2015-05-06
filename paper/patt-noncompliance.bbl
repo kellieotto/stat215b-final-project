@@ -1,4 +1,4 @@
-\begin{thebibliography}{8}
+\begin{thebibliography}{9}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -62,5 +62,11 @@ Sarah Taubman, Heidi Allen, Bill Wright, Katherine Baicker, Amy Finkelstein,
 \newblock Medicaid increases emergency department use: Evidence from oregon's
   health insurance experiment.
 \newblock \emph{Science}, 343\penalty0 (6168):\penalty0 263--268, January 2014.
+
+\bibitem[van~der Laan et~al.(2007)van~der Laan, Polley, and Hubbard]{van2007}
+Mark~J van~der Laan, Eric~C Polley, and Alan~E Hubbard.
+\newblock Super learner.
+\newblock \emph{Statistical applications in genetics and molecular biology},
+  6\penalty0 (1), 2007.
 
 \end{thebibliography}
