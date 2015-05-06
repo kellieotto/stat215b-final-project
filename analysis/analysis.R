@@ -56,8 +56,8 @@ Y.nhis <- na.omit(data.frame("any.visit"=nhis.any.visit, # need to omit rows con
                      "any.out"=nhis.any.out))
 
 ## Train compliance model on RCT treated. Use model to predict P(insurance == 1|covariates) on controls. 
-run.code <- FALSE
-if(run.code){ # Run compliance model on SCF
+run.model <- FALSE
+if(run.model){ # Run compliance model on SCF
 # Predict who is a complier in the control group
 set.seed(42)
 complier.mod <- SuperLearner(Y=insurance.ohie[treatment.ohie==1], 
@@ -84,12 +84,13 @@ rct.compliers <- data.frame("treatment"=treatment.ohie,
 rct.compliers$complier[rct.compliers$treatment==1 & rct.compliers$insurance==1] <- 1 # true compliers in the treatment group
 rct.compliers$complier[rct.compliers$treatment==0 & rct.compliers$C.hat==1] <- 1 # predicted compliers from the control group
  
-if(run.code){ # Run response models on SCF
 # Fit a regression to the compliers in the RCT
 y.col <- 1:ncol(Y.ohie) # number of responses
 Y.ohie.response <- Y.ohie[which(rct.compliers$complier==1),]
 X.ohie.response <- data.frame("treatment"=treatment.ohie[which(rct.compliers$complier==1)],
                          X.ohie[which(rct.compliers$complier==1),])
+
+if(run.model){ 
 # Run response model
 set.seed(42)
 response.mod <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response[,i], 
@@ -100,6 +101,11 @@ response.mod <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response[,i],
 names(response.mod) <- colnames(Y.ohie.response) # name each element of list
 
 response.mod # summarize
+
+save(response.mod, file = "response.mod.rda") # save model
+}
+
+load(file.path(directory,"response.mod.rda")) # result of response-mod.R
 
 # Use response model to estimate potential outcomes for population "compliers" on medicaid
 nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis==1))),
@@ -117,6 +123,8 @@ t.patt <- lapply(y.col, function (i) mean(Y.hat.1[[i]]) - mean(Y.hat.0[[i]]))
 Y.ohie.response.unadj <- Y.ohie[which(rct.compliers$complier==1 | rct.compliers$complier==0),]
 X.ohie.response.unadj <- data.frame("treatment"=treatment.ohie,
                                     X.ohie)
+
+if(run.model){ 
 set.seed(42)
 response.mod2 <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response.unadj[,i], 
                                                          X=X.ohie.response.unadj, 
@@ -126,6 +134,11 @@ response.mod2 <- lapply(y.col, function (i) SuperLearner(Y=Y.ohie.response.unadj
 names(response.mod2) <- colnames(Y.ohie) # name each element of list
 
 response.mod2 # summarize
+
+save(response2.mod, file = "response.mod2.rda") # save model
+}
+
+load(file.path(directory,"response.mod2.rda")) # result of response-mod.R
 
 nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance.nhis==1 | insurance.nhis==0))),
                                      X.nhis[which(insurance.nhis==1| insurance.nhis==0),])
@@ -154,6 +167,6 @@ rct.sate <- lapply(y.col, function (i) (mean(Y.ohie[[i]][which(treatment.ohie==1
                    /mean(rct.compliers$complier[which(treatment.ohie==1)])) # Denom. is true RCT compliance rate
 
 # Save workspace
-save.image(file.path(directory,"analysis-pred.Rdata"))
-}
+save.image(file.path(directory,"analysis.Rdata"))
+
 
