@@ -386,11 +386,11 @@ Voc. training / 2-year degree & 969 & 17.7 & 1031 & 19.9 & 934 & 27.6 \\
 
 4-year college degree or more & 370 & 6.8 & 437 & 8.4 & 189 & 5.6 \\ 
 
-Income \$0-\$10000 & 5476 & 100.0 & 3204 & 61.7 & 1452 & 42.9 \\
+Income $<\$10$k & 5476 & 100.0 & 3204 & 61.7 & 1452 & 42.9 \\
 
-Income \$10001-\$25000 & 0 & 0.0 & 1616 & 31.1 & 1622 & 48.0 \\
+Income \$10k-\$25k & 0 & 0.0 & 1616 & 31.1 & 1622 & 48.0 \\
 
-Income  $>\$25000$ & 0 & 0.0 & 373 & 7.2 & 308 & 9.1 \\
+Income  $>\$25$k & 0 & 0.0 & 373 & 7.2 & 308 & 9.1 \\
    \hline
 \hline
  \textbf{Response} &   &  &  & &  &  \\ 
@@ -411,7 +411,7 @@ The exclusion restriction (Assumption \ref{ER}) ensures treatment assignment aff
  
 \subsection{Empirical results}
 
-We compare PATT and SATE estimates for ER and outpatient use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with an ensemble of learners.\footnote{Appendix Table \ref{reponse-ensemble} provides information on the ensemble's candidate learners and corresponding weights and risk estimates.} We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample size is $N=23,205$ and the population sample is $N=11,129$. There are $N=10,669$ RCT compliers and $N=3,382$ target population ``compliers'' on medicaid. \\
+We compare PATT and SATE estimates for ER and outpatient use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with an algorithmic model using random forests \citep{breiman2001}.\footnote{Appendix Table \ref{reponse-ensemble} compares the risk estimates of the random forests model (default settings) with other candidate learners.} We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample size is $N=23,205$ and the population sample is $N=11,129$. There are $N=10,669$ RCT compliers and $N=3,382$ target population ``compliers'' on medicaid. \\
 
 Figure \ref{fig:any-visit-plot} compares treatment effect estimates on ER use. We estimate the effect of Medicaid coverage on the likelihood of visiting the ER is about -1\% for population compliers (adjusted PATT). In comparison, the treatment effects on RCT compliers (adjusted SATE) are about zero. There are substantial differences between SATE and PATT estimates across covariate groups. For instance, while there are large negative treatment effects on ER use for sample participants with pre--existing conditions, treatment effects for population participants with pre--existing conditions are large and positive. While the treatment effects on any ER use for college--educated RCT compliers is 9\%, treatment effects on college--educated population compliers is about 0. \\
 
@@ -508,6 +508,7 @@ GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.188 & 
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.188 & 0 \\ 
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.188 & 0 \\ 
 Neural network (\texttt{nnet}) &  default & 0.234 & 0 \\ 
+        \rowcolor{Gray}
 Random forests (\texttt{randomForest}) & default & 0.24 & 0 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.251 & 0 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.24 & 0 \\ 
@@ -525,6 +526,7 @@ GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.24 & 0
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.24 & 0.76 \\ 
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.24 & 0 \\ 
 Neural network (\texttt{nnet}) &  default & 0.242 & 0 \\ 
+        \rowcolor{Gray}
 Random forests (\texttt{randomForest}) & default & 0.331 & 0 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.392 & 0.23 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.333 & 0 \\ 
@@ -578,7 +580,6 @@ Ridge regression (\texttt{glmnet}) &  $\alpha=0$ & 0.239 & 0.73 \\
    \hline
     \bottomrule
   \end{tabularx}
-%\footnotesize{`Risk' is the 10--fold cross-validated risk estimate based on mean squared error for each algorithm. `Weight' is the coefficient for the super learner, which is estimated using non--negative least squares based on the Lawson-Hanson algorithm.}
 \end{table}
 \end{appendices}
 \end{singlespace}

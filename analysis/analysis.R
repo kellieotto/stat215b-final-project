@@ -113,8 +113,8 @@ nrt.tr.counterfactual <- cbind("treatment" = rep(1, length(which(insurance.nhis=
 nrt.ctrl.counterfactual <- cbind("treatment" = rep(0, length(which(insurance.nhis==1))),
                                  X.nhis[which(insurance.nhis==1),])
 
-Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual)$pred) # extract only SL predictions
-Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual)$pred)
+Y.hat.1 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.tr.counterfactual)$library.predict[,8]) # extract RF predictions
+Y.hat.0 <- lapply(y.col, function (i) predict(response.mod[[i]], nrt.ctrl.counterfactual)$library.predict[,8])
 
 # Compute PATT estimator
 t.patt <- lapply(y.col, function (i) mean(Y.hat.1[[i]]) - mean(Y.hat.0[[i]]))
@@ -145,8 +145,8 @@ nrt.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance
 nrt.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.nhis==1 | insurance.nhis==0))),
                                        X.nhis[which(insurance.nhis==1 | insurance.nhis==0),])
 
-Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj)$pred)
-Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj)$pred)
+Y.hat.1.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.tr.counterfactual.unadj)$library.predict[,8]) # extract RF predictions
+Y.hat.0.unadj <- lapply(y.col, function (i) predict(response.mod2[[i]], nrt.ctrl.counterfactual.unadj)$library.predict[,8])
 
 t.patt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj[[i]]) - mean(Y.hat.0.unadj[[i]]))
 
@@ -156,8 +156,8 @@ rct.tr.counterfactual.unadj <- cbind("treatment" = rep(1, length(which(insurance
 rct.ctrl.counterfactual.unadj <- cbind("treatment" = rep(0, length(which(insurance.ohie==1 | insurance.ohie==0))),
                                        X.ohie[which(insurance.ohie==1 | insurance.ohie==0),])
 
-Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj)$pred)
-Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj)$pred)
+Y.hat.1.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.tr.counterfactual.unadj)$library.predict[,8]) # extract RF predictions
+Y.hat.0.unadj.rct <- lapply(y.col, function (i) predict(response.mod2[[i]], rct.ctrl.counterfactual.unadj)$library.predict[,8])
 
 t.satt.unadj <- lapply(y.col, function (i) mean(Y.hat.1.unadj.rct[[i]]) - mean(Y.hat.0.unadj.rct[[i]]))
 

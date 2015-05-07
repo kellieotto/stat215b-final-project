@@ -32,7 +32,7 @@ t.sate.ci <- lapply(y.col, function(i) quantile(unlist(t.sate.boot[i,]),probs = 
 
 ### Function to get heterogeneous treatment effect estimates, using true data and bootstrapped data (set boot = TRUE)
 
-het.effects <- function(boot = FALSE){
+het.effects <- function(covs, boot = FALSE){
   if(boot==TRUE){
     boot.nrt <- sample(1:sum(insurance.nhis==1,na.rm=T), sum(insurance.nhis==1,na.rm=T), replace = T)
     Y.hat.1 <- lapply(y.col, function(i) Y.hat.1[[i]][boot.nrt])
@@ -66,7 +66,6 @@ het.effects <- function(boot = FALSE){
                                                     X.nhis_boot))
   
   # Estimate PATT for each covariate group
-  covs <- colnames(X.nhis)[4:40] # exclude HH dummies
   
   patt.het <- lapply(y.col, function (i) lapply(covs, function(x) mean(nrt.pred[[i]]$tau[nrt.pred[[i]][x]==1]) - 
                                                   mean(nrt.pred[[i]]$tau[nrt.pred[[i]][x]==0]))) # heterogenous treatment effect on population treated compliers
@@ -96,17 +95,16 @@ return(list(patt.het, patt.unadj.het, sate.het, satt.unadj.het))
 
 
 ### Estimate the heterogeneous effects
+covs <- colnames(X.nhis)[5:21] # choose features to est. het effects
 
-true_effect <- het.effects() # a list where true_effects[[1]] is patt.het, true_effects[[2]] is patt.unadj.het, etc
+true_effect <- het.effects(covs) # a list where true_effect[[1]] is patt.het, true_effect[[2]] is patt.unadj.het, etc
 patt.het <- true_effect[[1]]
 patt.unadj.het <- true_effect[[2]]
 sate.het <- true_effect[[3]]
 satt.het <- true_effect[[4]]
-covs <- colnames(X.nhis)[4:40]
-
 
 B <- 50
-boot_effect <- replicate(B, het.effects(boot=T))
+boot_effect <- replicate(B, het.effects(covs,boot=TRUE))
 
 ### Compute the 95% confidence intervals based on the quantiles of the bootstrap distribution
 
@@ -127,37 +125,32 @@ conf.int <- lapply(y.col, function(i){
 
 # Create data for plot
 Overall  <- c("Overall")
-Sex <- c("Male", "Female")
-Age <- c("20-49", "50-64")
+Sex <- c("Female")
+Age <- c("Age 19-49", "Age 50-64")
 Race.ethn <- c("White", "Black", "Hispanic")
 Health.stat <- c( "Diabetes", "Asthma","High blood pressure", "Heart Condition")
 Education <- c("Less than high school","High school disploma or GED",
                "Vocational training or 2-year degree","4-year college degree or more")
-Income <- c("0","1-2500","2501-5000","5001-7500","7501-10000",
-            "10001-12500","12501-15000","15001-17500","17501-20000","20001-22500","22501-25000","25001-27500","27501-30000",
-            "30001-32500","32501-35000","35001-37500","37501-40000","400001-42500","42501-45000","45001-47500","47501-50000",">50000")
+Income <- c("Income < $10k","Income $10k-$25k","Income > $25k")
 cov.groups <- c("Overall","Sex","Age","Race","Health status","Education","Income") 
 cov.names <- c(Overall,Sex,Age,Race.ethn,Health.stat,Education,Income)
 
-
-### Note, I (Kellie) included SATT instead of SATE here because a) that's what Hartman et al do and b) the CIs for SATE are enormous
 het.plot <- lapply(y.col, function (i) data.frame(x=factor(c(rep(cov.names,3)), levels=rev(cov.names)), # reverse order
                                      y = c(t.patt[[i]],unlist(patt.het[[i]]),
                                            t.patt.unadj[[i]],unlist(patt.unadj.het[[i]]),
-                                           t.satt.unadj[[i]],unlist(satt.het[i])), # changed from SATE to SATT
+                                           t.satt.unadj[[i]],unlist(satt.het[i])), 
                                      Group = factor(rep(c(cov.groups[1],rep(cov.groups[2],length(Sex)),rep(cov.groups[3],length(Age)),
                                                rep(cov.groups[4],length(Race.ethn)),rep(cov.groups[5],length(Health.stat)),
                                                rep(cov.groups[6],length(Education)),rep(cov.groups[7],length(Income))),3), levels=cov.groups),
                                      Estimator= factor(c(rep("PATT (adjusted)",length(covs)+1),
                                                   rep("PATT (unadjusted)",length(covs)+1),
-                                                  rep("SATT (unadjusted)",length(covs)+1))), # changed from SATE to SATT
+                                                  rep("SATT (unadjusted)",length(covs)+1))), 
                                       ci.lower = conf.int[[i]][,1],
                                       ci.upper = conf.int[[i]][,2]))
 # Plot forest plot
 het.plot.all <- lapply(y.col, function (i) 
-                         ggplot(het.plot[[i]][het.plot[[i]]$Group!="Income" & het.plot[[i]]$x!="Male",], aes(x=x, y=y, ymin = ci.lower, ymax = ci.upper, colour=Estimator)) +
-                     #    geom_point(size=6,alpha=0.4) + 
-                         geom_pointrange() +
+                         ggplot(het.plot[[i]], aes(x=x, y=y, ymin = ci.lower, ymax = ci.upper, colour=Estimator)) +
+                         geom_pointrange(size=1, alpha=0.6) +
                          scale_colour_manual(values=c("red","blue","green")) + # change colors for estimators
                          coord_flip() +
                          geom_line() +
@@ -167,7 +160,6 @@ het.plot.all <- lapply(y.col, function (i)
                          xlab("")) #switch because of the coord_flip() above 
 
 het.plot.all[[1]] # any.visit
-#het.plot.all[[2]] # num.visit
-het.plot.all[[3]] # any.out
-#het.plot.all[[4]] # num.out
+het.plot.all[[2]] # any.out
+
 
