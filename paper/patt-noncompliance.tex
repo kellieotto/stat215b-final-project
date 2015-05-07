@@ -411,16 +411,17 @@ The exclusion restriction (Assumption \ref{ER}) ensures treatment assignment aff
  
 \subsection{Empirical results}
 
-We compare PATT and SATE estimates for ER and outpatient use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with an algorithmic model using random forests \citep{breiman2001}.\footnote{Appendix Table \ref{reponse-ensemble} compares the risk estimates of the random forests model (default settings) with other candidate learners.} We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in our response models. Our entire RCT sample size is $N=23,205$ and the population sample is $N=11,129$. There are $N=10,669$ RCT compliers and $N=3,382$ target population ``compliers'' on medicaid. \\
+We compare PATT and SATE estimates for ER and outpatient use. We obtain estimates for the overall group of participants and subgroups according to gender, age, race, ethnicity, health status, and education. Subgroup treatment effects are estimated by taking differences across response surfaces for a given covariate group. Response surfaces are estimated with an algorithmic model using random forests \citep{breiman2001}.\footnote{Appendix Table \ref{reponse-ensemble} compares the risk estimates of the random forests model (default settings) with other candidate learners.} We use treatment assignment, number of household members, gender, age, race, ethnicity, health status, education, and household income as features in the response models. The entire RCT sample size is $N=23,205$ and the population sample is $N=11,129$. There are $N=10,669$ RCT compliers and $N=3,382$ target population ``compliers'' on medicaid. \\
 
-Figure \ref{fig:any-visit-plot} compares treatment effect estimates on ER use. We estimate the effect of Medicaid coverage on the likelihood of visiting the ER is about -1\% for population compliers (adjusted PATT). In comparison, the treatment effects on RCT compliers (adjusted SATE) are about zero. There are substantial differences between SATE and PATT estimates across covariate groups. For instance, while there are large negative treatment effects on ER use for sample participants with pre--existing conditions, treatment effects for population participants with pre--existing conditions are large and positive. While the treatment effects on any ER use for college--educated RCT compliers is 9\%, treatment effects on college--educated population compliers is about 0. \\
+Figure \ref{fig:any-visit-plot} compares treatment effect estimates on ER use. We estimate the effect of Medicaid coverage on the likelihood of visiting the ER is about 1.3\% for population compliers (adjusted PATT). In comparison, the effect on RCT compliers (adjusted SATT) is about zero. There are substantial differences between SATT and PATT estimates across covariate groups. For instance, the treatment effect on ER use for white sample participants is positive, but negative for white population participants. \\
 
-Figures \ref{fig:any-out-plot} compare treatment effect estimates on outpatient use. For population compliers overall, the effect of Medicaid coverage on the likelihood of outpatient use is about 2\%. For RCT compliers overall, the effect is about 0. Sample and population estimates are generally similar according to pre--existing conditions. Treatment effects on outpatient use are large and negative for college--educated RCT compliers, but about zero for college--education population compliers. 
+Figures \ref{fig:any-out-plot} compare treatment effect estimates on outpatient use. For population compliers, the effect of Medicaid coverage on the likelihood of outpatient use is about -2.5\%. For RCT compliers, the effect is closer to zero (-1.2\%). Treatment effects on outpatient use are large and positive for college--educated RCT compliers, but about zero for college--education population compliers. 
 
 \begin{figure}[h]
 \begin{center}
     \caption{Comparison of estimators: any ER visit.}
-\includegraphics[width = 1\textwidth]{any-visit-plot.pdf}
+\includegraphics[width = 1.1\textwidth]{any-visit-plot.pdf}
+\footnotesize{Note: horizontal lines represent 95\% bootstrap confidence intervals.}
 \label{fig:any-visit-plot}
 \end{center}
 \end{figure}
@@ -428,12 +429,13 @@ Figures \ref{fig:any-out-plot} compare treatment effect estimates on outpatient 
 \begin{figure}[h]
 \begin{center}
     \caption{Comparison of estimators: any outpatient visit.}
-\includegraphics[width = 1\textwidth]{any-out-plot.pdf}
+\includegraphics[width = 1.1\textwidth]{any-out-plot.pdf}
+\footnotesize{Note: horizontal lines represent 95\% bootstrap confidence intervals.}
 \label{fig:any-out-plot}
 \end{center}
 \end{figure}
 
-%We compare our estimates with those reported in Appendix Table 28 of \citet{finkelstein2012}. In this table, the authors compare their IVLS estimates of the treatment effects on RCT compliers with OLS estimates comparing individuals with and without Medicaid using a sample of NHIS respondents similar to the one used in our study. \citet{finkelstein2012} report a slightly lower effect of Medicaid on outpatient use for the population compared to the RCT sample. The authors'  estimates of Medicaid on ER visits is slightly higher than for the RCT sample. Our estimates do not demonstrate the relationship between RCT and population estimates. One reason for the failure to replicate is that we are using censored data on the number of visits. 
+We compare our estimates with those reported in Appendix Table 28 of \citet{finkelstein2012}. In this table, the authors compare their IVLS estimates of the treatment effects on RCT compliers with OLS estimates comparing individuals with and without Medicaid using a sample of NHIS respondents similar to the one used in our study. \citet{finkelstein2012} report a slightly higher effect of Medicaid on the number of ER visits for the population compared to the RCT sample. The author's effect estimates on the number of outpatient visits is lower for the population compared to the RCT sample. Our estimates generally replicate these patterns. 
 
 
 \section{Discussion}
@@ -444,7 +446,7 @@ Simulations shed light on the conditions under which the proposed estimator shou
 
 In the OHIE trial, only about $30\%$ of those selected to receive Medicaid benefits actually enrolled. The proposed estimator adjusted for non-compliance performs better in simulations than the unadjusted estimator when compliance is low and can be predicted by observed covariates (Figure~\ref{fig:sim_compliance}).  Our ensemble method for predicting compliance based on observed covariates has $77\%$ accuracy on the training set of individuals in OHIE assigned to the treatment group.  While we don't know how well the compliance model predicts for the control group, the model's performance on the training set suggests that compliance is not purely random and depends on observed covariates.  This gives evidence in favor of using the proposed estimator.  \\
 
-The proposed method allows us to decompose both SATT and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). Since the RCT participants are predominately white and volunteered for the study, we expected to find substantial differences between sample and population estimates in terms of race, and pre--existing condition subgroups. We find large negative treatment effects on ER use for sample participants with pre--existing conditions, yet the treatment effects for population participants with pre--existing conditions are large and positive. Overall, we expected the PATT estimates to be lower than corresponding SATT estimates due to the adverse selection problem in the RCT. We find the PATT estimates are lower than SATT for number of ER visits, but the PATT estimates are higher than SATT for outpatient usage. The PATT estimates intuitively make more sense because Medicaid coverage should theoretically decrease covered individuals' use of the ER and increase outpatient visits. 
+The proposed method allows us to decompose both SATT and PATT estimates by subgroup according to covariates common to both RCT and observational datasets (e.g, demographic variables, pre--existing conditions, and insurance coverage). We find substantial differences between sample and population estimates in terms of race, and pre--existing condition subgroups. This pattern is expected because the RCT participants are predominately white and volunteered for the study.  Our PATT estimates on ER visits is lower than the corresponding SATT estimates, which potentially demonstrates the adverse selection problem in the RCT.
 
 %\pagebreak
 
@@ -555,6 +557,7 @@ GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.188 & 
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.188 & 0 \\ 
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.188 & 0 \\ 
 Neural network (\texttt{nnet}) &  default & 0.228 & 0 \\ 
+   \rowcolor{Gray}
 Random forests (\texttt{randomForest}) & default & 0.24 & 0 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.252 & 0 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.241 & 0 \\ 
@@ -572,6 +575,7 @@ GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.25$ & 0.239 & 
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.5$ & 0.239 & 0 \\ 
 GLM with elasticnet regularization (\texttt{glmnet}) &  $\alpha=0.75$ & 0.239 & 0 \\ 
 Neural network (\texttt{nnet}) &  default & 0.24 & 0 \\ 
+   \rowcolor{Gray}
 Random forests (\texttt{randomForest}) & default & 0.327 & 0 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=1$ & 0.391 & 0.261 \\ 
 Random forests (\texttt{randomForest})  & $\mathrm{mtry}=5$  & 0.331 & 0 \\ 
