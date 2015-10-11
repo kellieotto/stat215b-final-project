@@ -191,7 +191,7 @@ ThemeBw1 <- function(base_size = 11, base_family = "") {
       axis.text.y =       element_text(size = base_size, colour = "black", hjust = 0 , vjust=.5 ), # changes position of X axis text
       axis.ticks =        element_blank(),
       axis.title.y =      element_text(size = base_size,angle=90,vjust=.01,hjust=.1),
-      legend.position = "none"
+     legend.position = "right"
     )
 }
 
@@ -203,7 +203,7 @@ het.plot.all <- lapply(y.col, function (i)
     geom_line() +
     geom_hline(aes(x=0), lty=2) +
     ThemeBw1() +
-    ylab("Heterogeneous treatment effect") +
+    ylab("Treatment effect") +
     xlab("")) #switch because of the coord_flip() above 
 
 
