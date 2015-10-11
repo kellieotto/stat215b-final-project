@@ -4,7 +4,7 @@
 library(ggplot2)
 
 ### Confidence intervals for the estimates
-B <- 100
+B <- 1000
 t.patt.boot <- replicate(B, {
               samp <- sample(1:length(Y.hat.1[[1]]), length(Y.hat.1[[1]]), replace=T)  
               lapply(y.col, function (i) mean(Y.hat.1[[i]][samp]) - mean(Y.hat.0[[i]][samp]))
