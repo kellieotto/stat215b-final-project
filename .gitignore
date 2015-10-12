@@ -6,3 +6,4 @@ data/OHIE_Public_Use_Files/.Rhistory
 *.aux
 *.blg
 *.synctex.gz
+*.Rhistory

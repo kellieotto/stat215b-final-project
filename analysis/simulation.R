@@ -58,20 +58,14 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     W2 <- var[,6]
     W3 <- var[,7]
     b <- ifelse(W1 > 0.75, 4, 1)
-    Tt = as.numeric((e1 + f1*W1 + f2*W2 + V) > 0 )
+    Tt = as.numeric((e1 + f1*W1 + f2*W2 + V) > 0 ) # Treatment assigned in NRT
     S = as.numeric(e2 + g1*W1 + g2*W2 + g3*W3 + R > 0) 
-    Tt[S == 1] <- sample(c(0,1), sum(S==1), replace = TRUE)
+    Tt[S == 1] <- sample(c(0,1), sum(S==1), replace = TRUE) # Treatment assigned in RCT
     C <- as.numeric(e3 + h2*W2 + h3*W3 + Q > 0)
-    D <- ifelse(C == 1, Tt, 0)
+    D <- ifelse(C == 1, Tt, 0) # Treatment received
     
     Y <- a + b*D + c1*W1 + c2*W2 + d*U
     dat <- data.frame(Y, Tt, D, S, C, W1, W2, W3)
-#    print(i)
-#     if(i == 1){
-#       cat("Compliance rate is approximately ", mean(C), "\n")
-#       cat("Proportion eligible for RCT is approximately ", mean(S), "\n")
-#       cat("Proportion eligible for treatment is approximately ", mean(X), "\n")
-#     }
     rateC[i] <- mean(C)
     rateS[i] <- mean(S)
     rateT[i] <- mean(Tt)
@@ -90,13 +84,13 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     complier_mod <- glm(C~W1+W2+W3, data = rct, family = "binomial")
     rct$C_pscore <- predict(complier_mod, rct, type = "response")
     rct$Chat <- rep(1, nrow(rct))
-    rct$Chat[rct$D == 0] <- as.numeric(rct$C_pscore[rct$D == 0] >= 0.5)
+    rct$Chat[rct$Tt == 0] <- as.numeric(rct$C_pscore[rct$Tt == 0] >= 0.5)
     rct_compliers <- rct[rct$Chat == 1,]
     
-    nrt$Chat <- rep(1, nrow(nrt))
-    nrt$C_pscore <- predict(complier_mod, nrt, type = "response")
-    nrt$Chat[nrt$Tt == 0] <- as.numeric(nrt$C_pscore[nrt$Tt == 0] >= 0.5)
-    nrt_compliers <- nrt[nrt$Chat == 1,]
+#    nrt$Chat <- rep(1, nrow(nrt))
+#    nrt$C_pscore <- predict(complier_mod, nrt, type = "response")
+#    nrt$Chat[nrt$Tt == 0] <- as.numeric(nrt$C_pscore[nrt$Tt == 0] >= 0.5)
+    nrt_compliers <- nrt[nrt$Tt == 1,]
     
     # Fit a regression to the compliers in the RCT, use it to predict response in population "compliers"
     response_mod <- randomForest(Y~Tt + W1 + W2 + W3, data = rct_compliers)
@@ -118,9 +112,10 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     # SATE
     rct_sate[i] <- (mean(rct$Y[rct$Tt == 1]) - mean(rct$Y[rct$Tt==0]))/mean(rct$C[rct$Tt==1])
     # SATT
-    term1 <- predict(response_mod, )
-    satt_ctrl_counterfactual <- 
-    rct_satt[i] <- 
+    term1 <- predict(response_mod, rct_compliers[rct_compliers$D==1,])
+    satt_ctrl_counterfactual <- rct_compliers[rct_compliers$D==1,] %>% mutate("Tt" = 0)
+    term2 <- predict(response_mod, satt_ctrl_counterfactual)
+    rct_satt[i] <- mean(term1) - mean(term2) 
     # Hartman et al estimator - doesn't account for noncompliance
     response_mod2 <- randomForest(Y~Tt + W1 + W2 + W3, data = rct)
     nrt_tr_counterfactual <- cbind(nrt[,c("W1", "W2", "W3")], "Tt" = rep(1, nrow(nrt)))
@@ -132,7 +127,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     tpatt_unadj[i] <- term1 - term2
     
   }
-res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rateC, rateS, rateT)
+res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rct_satt, rateC, rateS, rateT)
 return(res)
 }
 
@@ -143,14 +138,14 @@ e <- expand.grid(e,e,e)
 B <- 10
 res <- matrix(t(sapply(1:nrow(e), function(x){print(x); sim_estimates(B,e[x,1],e[x,2],e[x,3])})), ncol = 8)
 res <- cbind(rep(1:nrow(e), each = B), res)
- colnames(res) <- c("combo", "true_patt","tpatt","tpatt_unadj","rct_sate","rateC","rateS","rateT")
- mse <- t(sapply(unique(res[,"combo"]), function(x){
+colnames(res) <- c("combo", "true_patt","tpatt","tpatt_unadj","rct_sate","rct_satt","rateC","rateS","rateT")
+mse <- t(sapply(unique(res[,"combo"]), function(x){
                 keep <- which(res[,"combo"] == x)
-                sapply(c("tpatt","tpatt_unadj","rct_sate"), function(cc)mean((res[keep,"true_patt"]-res[keep,cc])^2))
+                sapply(c("tpatt","tpatt_unadj","rct_sate","rct_satt"), function(cc)mean((res[keep,"true_patt"]-res[keep,cc])^2))
                 }))
- mse_dup <- matrix(NA, ncol = 3, nrow = B*nrow(e))
- colnames(mse_dup) <- c("mse_tpatt", "mse_tpatt_unadj", "mse_rct_sate")
- for(i in 1:3){mse_dup[,i] <- rep(mse[,i], each = B)}
- res <- cbind(res, mse_dup)
- res <- as.data.frame(res)
-#save(res, file = "simulation_res.Rdata")
+mse_dup <- matrix(NA, ncol = 4, nrow = B*nrow(e))
+colnames(mse_dup) <- c("mse_tpatt", "mse_tpatt_unadj", "mse_rct_sate", "mse_rct_satt")
+for(i in 1:4){mse_dup[,i] <- rep(mse[,i], each = B)}
+res <- cbind(res, mse_dup)
+res <- as.data.frame(res)
+save(res, file = "simulation_res.Rdata")
