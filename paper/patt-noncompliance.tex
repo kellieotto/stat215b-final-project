@@ -135,19 +135,21 @@ We extend the method of \citet{Hartman} to identify population average treatment
 \section{Introduction}
 Randomized control trials (RCTs) are the gold standard for estimating the causal effect of a treatment.  An RCT may give an unbiased estimate of the sample average treatment effect (SATE), but external validity is an issue when the individuals in the RCT are unrepresentative of the actual population of interest.  For example, the participants in an RCT in which individuals volunteer to sign up for health insurance may be in poorer health at baseline than the overall population.  External validity is particularly relevant to policymakers who want to know how the SATE would generalize to the broader population. Hartman et al. propose a method of reweighting the responses of individuals in an RCT according to the distribution of covariates in the target population in order to estimate the population average treatment effect on the treated (PATT).  Under a series of assumptions, the PATT is identified from the RCT outcomes \citep{Hartman}. 
 
-A prevalent issue in RCTs is noncompliance.  One-way crossover from treatment to control occurs when individuals who are assigned to the treatment group refuse the treatment.  This dilutes the estimated effect of treatment assignment, and the resulting intention--to--treat (ITT) estimate is biased towards zero.  We extend the method of Hartman et al. to estimate the PATT from RCT data with noncompliance.  We make the same assumptions needed for the estimator proposed by \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability of sample assignment.  To deal with noncompliance, we follow the instrumental variables approach and make the no--defiers and exclusion restriction assumptions as in \cite{Angrist1996}. 
+Noncompliance is a prevalent issue in RCTs.  One-way crossover from treatment to control occurs when individuals who are assigned to the treatment group do not comply with the treatment.  This dilutes the estimated effect of treatment assignment, and the resulting intention--to--treat (ITT) estimate is biased towards zero.  We extend the method of Hartman et al. to estimate the PATT from RCT data with noncompliance.  We make the same assumptions needed for the estimator proposed by \cite{Hartman}; these include the stable unit treatment value assumption and strong ignorability of sample assignment.  To deal with noncompliance, we follow the instrumental variables approach and make the no--defiers and exclusion restriction assumptions as in \cite{Angrist1996}. 
 
 The proposed estimator of PATT involves the expectation of the response of compliers in the RCT sample, conditional on their covariates, where the expectation is taken over the distribution of population covariates.  We use a classification or regression model to estimate the response surface, the conditional expectation of responses in the RCT.  We then use the response model to estimate population members' outcomes given their covariates, giving an estimate of the PATT. 
 
 The paper proceeds as follows: Section 2 presents the proposed estimator, necessary assumptions for its identifiability, and an estimation procedure; Section 3 investigates the estimator's performance in simulations; Section 4 uses the estimator to identify the effect of extending Medicaid coverage to the low--income adult population in the U.S; Section 5 discusses the results. 
 
 \section{Estimator} \label{estimator}
-We are interested in using the outcomes from an RCT to estimate the average treatment effect on the treated for a target population.  Treatment in the population is not assigned at random, but rather depends on other variables, confounding the effect of treatment on the outcome of interest. RCTs are needed to isolate the effect of treatment. However, strict exclusion criteria for RCTs often result in a sample whose distribution of covariates differs substantially from the target population.  Ideally, we would take the results of an RCT and reweight the sample such that the reweighted covariates match the those in the population. In practice, one rarely knows the true covariate distribution in the target population.  Instead, we consider data from a non-randomized, observational study in which participants are representative of the target population.  Our proposed estimator combines RCT and observational data to overcome these issues.
+We are interested in using the outcomes from an RCT to estimate the average treatment effect on the treated for a target population.  Treatment in the population is not assigned at random, but rather may depend on other variables, confounding the effect of treatment on the outcome of interest. RCTs are needed to isolate the effect of treatment. However, strict exclusion criteria for RCTs often result in a sample whose distribution of covariates differs substantially from the target population.  Ideally, we would take the results of an RCT and reweight the sample such that the reweighted covariates match the those in the population. In practice, one rarely knows the true covariate distribution in the target population.  Instead, we consider data from a non-randomized, observational study in which participants are representative of the target population.  Our proposed estimator combines RCT and observational data to overcome these issues.
 
 \subsection{Assumptions} 
-Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ is the population and $s=1$ is the RCT, and $t$ be the treatment received.  Let $S_i$ denote the sample assignment, $T_i$ denote the treatment assigned, and $D_i$ denote treatment received. Let $W_i$ be individual $i$'s observable pretreatment covariates that are related to the sample selection mechanism for membership in the RCT, treatment assignment in the population, and complier status.  Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  For a generic value, we drop the subscript $i$.  
+Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s=0$ is the population and $s=1$ is the RCT, and let $t$ be the treatment received.  For simplicity, we assume there are only two possible treatments, $t=1$ for the active treatment and $t=0$ for the control or no treatment.  Let $S_i$ denote the sample assignment, $T_i$ denote the treatment assigned, and $D_i$ denote treatment received. Let $W_i$ be individual $i$'s observable pretreatment covariates that are related to the sample selection mechanism for membership in the RCT, treatment assignment in the population, and complier status.  Let $C_i$ be an indicator for individual $i$'s compliance to treatment.  Treatment is assigned at random by the investigator in the RCT, so we observe both $D_i$ and $T_i$ when $S_i = 1$.  For compliers, $D_i = T_i$.  
 
-Assuming that treatment is assigned at random in the RCT, we observe $D_i = T_i$ for individuals with $C_i = 1$.  In the population, we suppose that treatment is made available to individuals according to some rule based on their covariates; that is, treatment assignment is not completely random. Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D_i$, not $T_i$, for individuals in the population.  Among the population controls, we can't distinguish non-compliers who should have received treatment (individuals with $T_i=1$ and $D_i = 0$) from those assigned to control (those with $T_i = 0$ and $D_i = 0$).  Compliance $C_i$ is only observable for individuals assigned to treatment in the RCT. 
+In the population, we suppose that treatment is made available to individuals based on their covariates $W_i$.  Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D_i$, not $T_i$, for individuals in the population.  Among the population controls, we can't distinguish non-compliers who should have received treatment (individuals with $T_i=1$ and $D_i = 0$) from those assigned to control (those with $T_i = 0$ and $D_i = 0$).  Compliance $C_i$ is only observable for individuals assigned to treatment in the RCT. 
+
+  \textcolor{red}{For a generic value, we drop the subscript $i$.  }  
 
 Assumptions (\ref{consistency}) -- (\ref{sutva}) are made by \cite{Hartman} to identify PATT from an RCT. 
 
@@ -161,15 +163,15 @@ $$Y_{i0t} = Y_{i1t}$$
 \begin{assumption}{2}{}\label{si_treat}
 Strong ignorability of sample assignment for treated:
 \begin{equation*}
-(Y_{01}, Y_{11}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1.
+(Y_{01}, Y_{11}) \independent S \mid (W, T=1,C=1), \qquad 0 < \pr(S=1 \mid W, T=1,C=1) <1.
 \end{equation*}
 \end{assumption}
-\noindent Assumption (\ref{si_treat}) ensures the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment. We make a similar assumption for controls: 
+\noindent Assumption (\ref{si_treat}) ensures the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment. We make a similar assumption for the potential outcomes under control: 
 
 \begin{assumption}{3}{}\label{si_ctrl}
 Strong ignorability of sample assignment for controls:
 \begin{equation*}
-(Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), 0 < \pr(S=1 \mid W, T=1,C = 1) <1. 
+(Y_{00}, Y_{10}) \independent S \mid (W, T=1,C = 1), \qquad 0 < \pr(S=1 \mid W, T=1,C = 1) <1. 
 \end{equation*}\end{assumption}
  
 \begin{assumption}{4}{}\label{sutva}
@@ -186,7 +188,7 @@ We include Assumption (\ref{compl}) among those made by \cite{Hartman} to ensure
 \begin{assumption}{5}{}\label{compl}
 Conditional independence of compliance and assignment:
 \begin{equation*}
-C \independent T=1 \mid W, 0 < \pr(C = 1 \mid W) < 1. 
+C \independent T=1 \mid W, \qquad 0 < \pr(C = 1 \mid W) < 1. 
 \end{equation*}
 \end{assumption}
 
@@ -200,7 +202,7 @@ T_i \geq D_i, \forall i.
 \end{assumption}
 
 \begin{assumption}{7}{}\label{ER}
-Exclusion restriction: For non-compliers
+Exclusion restriction: For non-compliers,
 \begin{equation*}
 Y_{11} = Y_{10}. 
 \end{equation*}  
@@ -209,24 +211,25 @@ Y_{11} = Y_{10}.
 % fig:DAG
 
 \subsection{Population Average Treatment Effect on the Treated (PATT)}
-The estimand of interest is 
+The estimand of interest is the average treatment effect on those in the population who receive treatment:
 
-\begin{equation}
+\begin{equation}\label{tpatt}
 \tau_{\text{PATT}} = \ex\left( Y_{01} - Y_{00} \mid S=0, D=1\right),
 \end{equation}
-or the average treatment effect on those in the population who receive treatment.  It includes individuals who actually receive the treatment, but does not include those who are eligible for treatment and do not accept it (i.e., non-compliers).  The following theorem, which we modify from \cite{Hartman} to handle noncompliance, relates the treatment effect in the population to the treatment effect in the RCT. The result enables us to estimate $\tau_{\text{PATT}}$ by reweighting the RCT responses according to the distribution of covariates in the population. 
+It includes individuals who actually receive the treatment, but does not include those who are eligible for treatment and do not accept it (i.e., non-compliers).  The following theorem, which we modify from \cite{Hartman} to account for noncompliance, relates the treatment effect in the population to the treatment effect in the RCT. The result enables us to estimate $\tau_{\text{PATT}}$ by reweighting the RCT responses according to the distribution of covariates in the population. 
 
 \begin{theorem}\label{thm1}
 Under assumptions \eqref{consistency} - \eqref{ER},
-
-$$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
--\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] $$
+\begin{equation}\label{tpatt-est}
+\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, D=1, W\right)\right]
+-\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] 
+\end{equation}
 
 where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the treated individuals in the target population.  
 \end{theorem}
 
 \begin{proof}
-We separate the expectation into two terms and treat each individually.
+We separate the expectation linearly into two terms and consider each individually.
 \begin{align*}
 \ex\left(Y_{01} \mid S=0,D=1\right) &= \ex\left(Y_{11} \mid S=0, D=1\right) \tag*{by \eqref{consistency}} \\
 &= \ex\left(Y_{11} \mid S=0, T=1, C=1\right) \tag*{by \eqref{monotonicity}} \\
@@ -241,13 +244,13 @@ We separate the expectation into two terms and treat each individually.
 &= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=1, C=1, W\right) \right] \tag*{by \eqref{si_ctrl}} \\
 &= \ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] \\
 \end{align*}
-The last line follows because of the randomization carried out in the RCT.  This ensures $Y_{10} \independent T \mid (W, S=1)$.
+The last line follows because of the randomization carried out in the RCT, which guarantees $Y_{10} \independent T \mid (W, S=1)$.  Finally, the result follows by plugging these two expressions into equation \eqref{tpatt}.
 \end{proof}
 
 \subsection{Estimation procedure}
-Theorem~\ref{thm1} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  In our empirical example, we use an ensemble of machine learners \citep{van2007} to estimate the response curve for compliers, given their covariates.  We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response curve for each treated individual in the population.  
+\textcolor{red}{TODO: Rewrite this paragraph!}  The estimator \eqref{tpatt-est} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  In our empirical example, we use an ensemble of machine learners \citep{van2007} to estimate the response surface for compliers, given their covariates.  We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response surface for each treated individual in the population.
 
-The second challenge is that we cannot observe which individuals are included in the estimation of the second term. We cannot tell who is a complier or non-complier in the control group, as they receive no treatment ($D=0$) in either case.  We must estimate the second term by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible. 
+The second challenge is that we cannot observe which individuals are included in the estimation of the second term. In the RCT control group, $C$ is unobservable, as they always receive no treatment ($D=0$).  We must estimate the second term of equation \eqref{tpatt-est} by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible.
 
 The procedure for estimating $\tau_{\text{PATT}}$ using Theorem~\ref{thm1} is as follows:
 \begin{enumerate}
@@ -257,7 +260,7 @@ The procedure for estimating $\tau_{\text{PATT}}$ using Theorem~\ref{thm1} is as
 \item For all individuals who received treatment in the population $(S=0, D=1)$, estimate their potential outcomes $Y_{10}$ and $Y_{11}$ using the model from step 3.  The mean counterfactual $Y_{11}$ minus the mean counterfactual $Y_{10}$ is the estimate of $\tau_{\text{PATT}}$.
 \end{enumerate}
 
-Assumptions \eqref{si_treat} and \eqref{si_ctrl} are particularly important here: the success of the proposed estimator hinges on the assumption that the response curve is the same in the RCT and target population.  If this is not true, then the potential outcomes $Y_{10}$ and $Y_{11}$ for target population individuals cannot be estimated using the model from step 3.
+Assumptions \eqref{si_treat} and \eqref{si_ctrl} are particularly important here: the success of the proposed estimator hinges on the assumption that the response surface is the same for compliers in the RCT and target population.  If this is not true, then the potential outcomes $Y_{10}$ and $Y_{11}$ for target population individuals cannot be estimated using the model from step 3.
 
 \section{Simulations} \label{sim}
 We conduct a simulation study to compare the performance of the proposed estimator, \possessivecite{Hartman} estimator, and the SATE estimate scaled by the compliance rate.  Our simulation is designed so that the effect of treatment is heterogeneous and depends on covariates which are different in the RCT and target population. The design satisfies the conditional independence assumptions in Figure~\ref{fig:DAG}.
@@ -281,11 +284,11 @@ $$Y = a + bD + c_1W_1 + c_2W_2 + dU.$$
  
 We generate a population of 30,000 individuals and randomly sample 5,000.  Those among the 5,000 who are eligible for the RCT ($S=1$) are selected. Similarly, we sample 5,000 individuals from the population and select those who are not eligible for the RCT ($S=0$); these are our observational study participants.\footnote{This set-up mimics the reality that a population census is usually impossible.} We set each individual's treatment received $D$ according to their treatment assignment and complier status and observe their responses $Y$.  In this design, the way that we've set $S, T, D, C,$ and $Y$ ensures that assumptions \eqref{consistency} - \eqref{ER} hold.
  
-In the assigned-treatment RCT group $(S = 1, T = 1)$, we fit a logistic regression to compliance status using the covariates.  With this model, we predict who in the control group $(S = 1, T = 0)$ has $C=1$, since this is unobservable.  These individuals \textit{would have} complied had they been assigned to the treatment group.  For this group of observed compliers to treatment and predicted compliers from the control group of the RCT, we estimate the response curve using a random forests model with features $(W_1, W_2, W_3)$ and $D$ \citep{breiman2001}.  Then population local average treatment effect on the treated is estimated according to the estimation procedure outlined above.
+In the assigned-treatment RCT group $(S = 1, T = 1)$, we fit a logistic regression to compliance status using the covariates.  With this model, we predict who in the control group $(S = 1, T = 0)$ has $C=1$, since this is unobservable.  These individuals \textit{would have} complied had they been assigned to the treatment group.  For this group of observed compliers to treatment and predicted compliers from the control group of the RCT, we estimate the response surface using a random forests model with features $(W_1, W_2, W_3)$ and $D$ \citep{breiman2001}.  Then population local average treatment effect on the treated is estimated according to the estimation procedure outlined above.
 
 \subsection{Simulation results}
 
-We vary each of the parameters $e_1, e_2,$ and $e_3$ along a grid by $-2$ to $2$ in increments of $0.5$ in order to generate different combinations of rates of compliance, treatment eligibility, and RCT eligibility in the population of 30,000.  For each possible combination of the three parameters, we run the simulation $5$ times and compute the mean squared error (MSE) of our proposed estimator for $\tau_{\text{PATT}}$ that adjusts for noncompliance, the estimator from \citet{Hartman} which is unadjusted for noncompliance, and the scaled SATE.  All other parameters are held fixed. The unadjusted estimate is obtained by estimating the response curve on all individuals in the RCT and applying step 4 of our estimation procedure to the non-randomized trial individuals. 
+We vary each of the parameters $e_1, e_2,$ and $e_3$ along a grid by $-2$ to $2$ in increments of $0.5$ in order to generate different combinations of rates of compliance, treatment eligibility, and RCT eligibility in the population of 30,000.  For each possible combination of the three parameters, we run the simulation $5$ times and compute the mean squared error (MSE) of our proposed estimator for $\tau_{\text{PATT}}$ that adjusts for noncompliance, the estimator from \citet{Hartman} which is unadjusted for noncompliance, and the scaled SATE.  All other parameters are held fixed. The unadjusted estimate is obtained by estimating the response surface on all individuals in the RCT and applying step 4 of our estimation procedure to the non-randomized trial individuals. 
 
 Figure~\ref{fig:sim_tiles} shows the relationship between the percent of compliers in the whole population, the percentage of people in the whole population eligible to participate in the RCT, and the MSE of the PATT estimators.  The pattern of performance is qualitatively similar for the adjusted and unadjusted estimators: both perform best when compliance is high and perform badly when compliance is low.  Furthermore, for a fixed rate of compliance, the estimators tend to have lower MSE when either a very small or very large fraction of the total population is eligible to participate in the RCT. 
 
@@ -314,9 +317,9 @@ We acquire data on the target population from the National Health Interview Stud
 
 In order for the proposed estimator to perform well, assumptions \eqref{consistency}--\eqref{ER} must be met.  Assumption \eqref{consistency} ensures that potential outcomes for participants in the target population (i.e., respondents in the NHIS sample) would be identical to their outcomes in the RCT if they had been randomly assigned their observed treatment. A violation of the consistency assumption might arise, for instance, if there are differences in the mail surveys used to elicit health care use responses between the RCT and the non-randomized study. 
  
-We cannot directly test assumptions \eqref{si_treat}--\eqref{si_ctrl}, which state that potential outcomes for treatment and control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.  The assumptions are only met if every possible confounder associated with the response and the sample assignment is accounted for.  In our estimation of the response curve, we use all demographic, socioeconomic, and pre-existing health condition data that were common in the OHIE and NHIS data.  Potentially important unobserved confounders include the number of hospital and outpatient visits in the previous year, proximity to health services, and enrollment in other federal programs. 
+We cannot directly test assumptions \eqref{si_treat}--\eqref{si_ctrl}, which state that potential outcomes for treatment and control are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.  The assumptions are only met if every possible confounder associated with the response and the sample assignment is accounted for.  In our estimation of the response surface, we use all demographic, socioeconomic, and pre-existing health condition data that were common in the OHIE and NHIS data.  Potentially important unobserved confounders include the number of hospital and outpatient visits in the previous year, proximity to health services, and enrollment in other federal programs. 
 
-Table~\ref{rct-nrt-compare} compares RCT particiapnts selected for Medicaid with NRT participants on Medicaid. Compared to the RCT treated, the target population ``treated''  group is predominantly female, younger, more racially and ethnically diverse, less educated, and live in higher income households. Diagnoses of diabetes, asthma, high blood pressure, and heart disease are more common among the population on Medicaid then the RCT treated. Conditioning on these covariates will improve our estimate of $\tau_{\text{PATT}}$. 
+Table~\ref{rct-nrt-compare} compares RCT participants selected for Medicaid with NRT participants on Medicaid. Compared to the RCT treated, the target population ``treated''  group is predominantly female, younger, more racially and ethnically diverse, less educated, and live in higher income households. Diagnoses of diabetes, asthma, high blood pressure, and heart disease are more common among the population on Medicaid then the RCT treated. Conditioning on these covariates will improve our estimate of $\tau_{\text{PATT}}$. 
 
 % rct-nrt-compare
 
