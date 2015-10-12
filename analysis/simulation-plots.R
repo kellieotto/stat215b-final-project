@@ -30,7 +30,7 @@ res2 <- data.frame(rep(res$rateC, 3), c(res$mse_tpatt, res$mse_tpatt_unadj, res$
 colnames(res2) <- c("rateC", "mse", "Estimator")
 levels(res2$Estimator) <- list("Adjusted" = 1, "Unadjusted" = 2, "SATE" = 3)
 ### Look at just compliance rate
-p1 <- ggplot(res2, aes(x = as.factor(round(rateC,1)), y = mse)) + geom_boxplot(aes(color = Estimator)) +labs(x = "Compliance rate", y = "MSE", title = "MSE of PATT Estimators") + scale_color_brewer(palette="Set1")
+p1 <- ggplot(res2, aes(x = as.factor(round(rateC,1)), y = sqrt(mse))) + geom_boxplot(aes(color = Estimator)) +labs(x = "Compliance rate", y = "RMSE", title = "RMSE of PATT Estimators") + scale_color_brewer(palette="Set1")
 p1
 pdf("mse_boxplots_B5.pdf", width = 12)
 p1
