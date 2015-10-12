@@ -15,8 +15,12 @@ library(Matching)
 library(MASS)
 library(randomForest)
 library(rpart)
-
+library(foreach)
+library(doParallel)
+library(dplyr)
 ## Setup
+ncores <- 10
+registerDoParallel(ncores)
 
 sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
   # e1 controls number in the population who are eligible for treatment
@@ -27,7 +31,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
   tpatt <- true_patt <- rct_sate <- rct_satt <- tpatt_unadj <- rep(0, sims)
   rateC <- rateT <- rateS <- rep(0, sims)
   
-  for(i in 1:sims){
+  foreach(i = 1:sims) %dopar% {
     # Pick target sample size
     popsize <- 30000
     samplesize <- 5000
