@@ -24,7 +24,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
   # e3 controls compliance
 
   # set up storage
-  tpatt <- true_patt <- rct_sate <- tpatt_unadj <- rep(0, sims)
+  tpatt <- true_patt <- rct_sate <- rct_satt <- tpatt_unadj <- rep(0, sims)
   rateC <- rateT <- rateS <- rep(0, sims)
   
   for(i in 1:sims){
@@ -38,9 +38,6 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     # (U, V, R, Q, W1, W2, W3) are multivariate normal. Set parameters
     a <- c1 <- d <- 1
     c2 <- 2
-    #  e1 <- -1
-    #  e2 <-  0.5
-    #  e3 <- 1
     f1 <- g2 <- 0.25
     f2 <- g3 <- 0.75
     g1 <- h2 <- h3 <- 0.5
@@ -112,8 +109,6 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     
     
     # Compute the estimator
-    #  term1 <- mean(nrt_compliers$C_pscore[nrt_compliers$Tt == 1]*nrt_compliers$Yhat_1[nrt_compliers$Tt==1])
-    #  term2 <- mean(nrt_compliers$C_pscore[nrt_compliers$Tt == 1]*nrt_compliers$Yhat_0[nrt_compliers$Tt==1])
     term1 <- mean(nrt_compliers$Yhat_1[nrt_compliers$Tt==1])
     term2 <- mean(nrt_compliers$Yhat_0[nrt_compliers$Tt==1])
     tpatt[i] <- term1 - term2
@@ -122,9 +117,12 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     true_patt[i] <- mean(b[Tt == 1 & S == 0])
     # SATE
     rct_sate[i] <- (mean(rct$Y[rct$Tt == 1]) - mean(rct$Y[rct$Tt==0]))/mean(rct$C[rct$Tt==1])
-    # Hartman et al - doesn't account for noncompliance
+    # SATT
+    term1 <- predict(response_mod, )
+    satt_ctrl_counterfactual <- 
+    rct_satt[i] <- 
+    # Hartman et al estimator - doesn't account for noncompliance
     response_mod2 <- randomForest(Y~Tt + W1 + W2 + W3, data = rct)
-    #response_mod2 <- lm(Y~Tt+W1+W2+W3, data = rct)
     nrt_tr_counterfactual <- cbind(nrt[,c("W1", "W2", "W3")], "Tt" = rep(1, nrow(nrt)))
     nrt_ctrl_counterfactual <- cbind(nrt[,c("W1", "W2", "W3")], "Tt" = rep(0, nrow(nrt)))
     nrt$Yhat_1 <- predict(response_mod2, nrt_tr_counterfactual)
@@ -138,21 +136,9 @@ res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rateC, rateS, rateT)
 return(res)
 }
 
-# res1 <- sim_estimates(10)
-# sapply(2:4, function(x) mean((res1[,1]-res1[,x])^2))
-# 
-# res2 <- sim_estimates(10, e3 = 2)
-# sapply(2:4, function(x) mean((res2[,1]-res2[,x])^2))
-# 
-# res3 <- sim_estimates(10, e2 = -0.5)
-# sapply(2:4, function(x) mean((res3[,1]-res3[,x])^2))
-# 
-# res4 <- sim_estimates(10, e1 = -2, e3 = 2)
-# sapply(2:4, function(x) mean((res4[,1]-res4[,x])^2))
 
 
 e <- seq(-2, 2, by = 0.5)
-#e <- 1:2
 e <- expand.grid(e,e,e)
 B <- 10
 res <- matrix(t(sapply(1:nrow(e), function(x){print(x); sim_estimates(B,e[x,1],e[x,2],e[x,3])})), ncol = 8)
@@ -168,41 +154,3 @@ res <- cbind(rep(1:nrow(e), each = B), res)
  res <- cbind(res, mse_dup)
  res <- as.data.frame(res)
 #save(res, file = "simulation_res.Rdata")
-
-load("simulation_res_B5.RData")
-library(ggplot2)
-library(gridExtra)
-color_extremes <- c("red", "yellow")
-
-### compare compliance rate and treatment rate
-p1 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateT,1)))) + geom_tile(aes(fill = -log(mse_tpatt)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-2,7)) + labs(x = "Compliance rate", y = "% Eligible for Treatment", title = "PATT Adjusted")+ guides(fill = guide_colorbar(title = "-log(MSE)"))
-p1
-p2 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateT,1)))) + geom_tile(aes(fill = -log(mse_tpatt_unadj)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-2,7)) + labs(x = "Compliance rate", y = "% Eligible for Treatment", title = "PATT Unadjusted")+ guides(fill = guide_colorbar(title = "-log(MSE)"))
-p2
-plt <- list(p1, p2)
-#pdf("mse_ratec_ratet_B5.pdf", width = 12)
-grid.arrange(p1, p2)
-dev.off()
-
-
-### compare compliance rate and RCT eligibility rate
-p1 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = -log(mse_tpatt)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-2,7)) + labs(x = "Compliance rate", y = "% Eligible for RCT", title = "PATT Adjusted") + guides(fill = guide_colorbar(title = "-log(MSE)"))
-p1
-p2 <- ggplot(res, aes(as.factor(round(rateC,1)), as.factor(round(rateS,1)))) + geom_tile(aes(fill = -log(mse_tpatt_unadj)),     colour = "yellow")+ scale_fill_gradientn(colours = color_extremes, limits = c(-2,7)) + labs(x = "Compliance rate", y = "% Eligible for RCT", title = "PATT Unadjusted") + guides(fill = guide_colorbar(title = "-log(MSE)"))
-p2
-plt <- list(p1, p2)
-#pdf("mse_ratec_rates_B5.pdf", width = 12)
-grid.arrange(p1, p2)
-dev.off()
-
-library(reshape2); library(dplyr)
-res2 <- data.frame(rep(res$rateC, 3), c(res$mse_tpatt, res$mse_tpatt_unadj, res$mse_rct_sate), rep(c("Adjusted", "Unadjusted", "SATE"), each = nrow(res)));
-colnames(res2) <- c("rateC", "mse", "Estimator")
-levels(res2$Estimator) <- list("Adjusted" = 1, "Unadjusted" = 2, "SATE" = 3)
-### Look at just compliance rate
-p1 <- ggplot(res2, aes(x = as.factor(round(rateC,1)), y = mse)) + geom_boxplot(aes(color = Estimator)) +labs(x = "Compliance rate", y = "MSE", title = "MSE of PATT Estimators") + scale_color_brewer(palette="Set1")
-p1
-pdf("mse_boxplots_B5.pdf", width = 12)
-p1
-dev.off()
-
