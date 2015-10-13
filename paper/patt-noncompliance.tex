@@ -122,11 +122,11 @@ Jason Poulos\thanks{Travers Department of Political Science, University of Calif
 \thispagestyle{empty}
 \begin{abstract}  
 \noindent 
-Randomized control trials (RCTs) can provide unbiased estimates of sample average treatment effect, but estimation becomes complicated when noncompliance occurs.
+Randomized control trials (RCTs) can provide unbiased estimates of sample average treatment effect, but estimation becomes problematic when noncompliance occurs.
 Furthermore, sample estimates may not generalize to the population of interest.
 We extend the method of \citet{Hartman} to identify population average treatment effects from randomized controlled trials (RCTs) with noncompliance. 
 We identify the complier--average causal effect for the target population with few additional assumptions.
-\textcolor{red}{Simulations show the compliance--adjusted estimator performs better than the unadjusted estimator when compliance is relatively low and can be predicted by observed covariates. }
+Simulations show the compliance--adjusted estimator performs better than the unadjusted estimator when compliance is relatively low and can be predicted by observed covariates.
 We apply the proposed estimator to measure the effect of Medicaid coverage on health care use for a target population of adults who may benefit from expansions to the Medicaid program. 
 We draw RCT data from the Oregon Health Insurance Experiment \citep{finkelstein2012}, in which only $30\%$ of those randomly selected to receive Medicaid benefits actually enrolled. 
 The RCT sample differs in several dimensions from the target population of individuals who will be covered by other Medicaid expansions. 
@@ -157,7 +157,6 @@ Let $Y_{ist}$ be the potential outcome for individual $i$ in group $s$, where $s
 
 In the population, we suppose that treatment is made available to individuals based on their covariates $W_i$.  Individuals with $T_i = 0$ do not receive treatment, while those with $T_i=1$ may decide whether or not to accept treatment.  We only observe $D_i$, not $T_i$, for individuals in the population.  Among the population controls, we can't distinguish noncompliers who should have received treatment (individuals with $T_i=1$ and $D_i = 0$) from those assigned to control (those with $T_i = 0$ and $D_i = 0$).  Compliance $C_i$ is only observable for individuals assigned to treatment in the RCT. 
 
-  \textcolor{red}{For a generic value, we drop the subscript $i$.  }  
 
 Assumptions (\ref{consistency}) -- (\ref{sutva}) are made by \cite{Hartman} to identify PATT from an RCT. 
 
@@ -174,7 +173,7 @@ Strong ignorability of sample assignment for treated:
 (Y_{01}, Y_{11}) \independent S \mid (W, T=1,C=1), \qquad 0 < \pr(S=1 \mid W, T=1,C=1) <1.
 \end{equation*}
 \end{assumption}
-\noindent Assumption (\ref{si_treat}) ensures the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment. We make a similar assumption for the potential outcomes under control: 
+\noindent Assumption (\ref{si_treat}) ensures the potential outcomes for treatment are independent of sample assignment for individuals with the same covariates $W$ and assignment to treatment.\footnote{Throughout, we assume individuals are sampled randomly from an infinite population.} We make a similar assumption for the potential outcomes under control: 
 
 \begin{assumption}{3}{}\label{si_ctrl}
 Strong ignorability of sample assignment for controls:
@@ -258,7 +257,7 @@ The last line follows because of the randomization carried out in the RCT, which
 \end{proof}
 
 \subsection{Estimation procedure}
-\textcolor{red}{TODO: Rewrite this paragraph!}  The estimator \eqref{tpatt-est} poses two challenges in practice.  First, we must construct an estimate of the inner expectation over potential outcomes in the RCT.  In our empirical example, we use an ensemble of machine learners \citep{van2007} to estimate the response surface for compliers, given their covariates.  We estimate the outer expectation by taking empirical means.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of mean responses in the treatment group in the RCT. The second term is estimated by the weighted average of the mean control response for compliers assigned to control in the RCT.  We compute these by evaluating the response surface for each treated individual in the population.
+There are two challenges in turning Theorem~\ref{thm1} into an estimator of $\tau_{\text{PATT}}$ in practice.  First, we must estimate the inner expectation over potential outcomes of compliers in the RCT.  In our empirical example, we use an ensemble of machine learners \citep{van2007} to estimate the response surface for compliers in the RCT, given their covariates.  Thus, the first term in the expression for $\tau_{\text{PATT}}$ is estimated by the weighted average of points on the response surface, evaluated for each treated population member's potential outcome under treatment.  The second term is estimated by the weighted average of points on the response surface, evaluated for each treated population member's potential outcome under control.
 
 The second challenge is that we cannot observe which individuals are included in the estimation of the second term. In the RCT control group, $C$ is unobservable, as they always receive no treatment ($D=0$).  We must estimate the second term of equation \eqref{tpatt-est} by predicting who in the control group would be a complier, had they been assigned to treatment.  The exact procedure for classification isn't important, as long as predictions are made as accurate as possible.
 
@@ -300,7 +299,7 @@ In the assigned-treatment RCT group $(S = 1, T = 1)$, we fit a logistic regressi
 
 We vary each of the parameters $e_1, e_2,$ and $e_3$ along a grid by $-2$ to $2$ in increments of $0.5$ in order to generate different combinations of rates of compliance, treatment eligibility, and RCT eligibility in the population of 30,000.  For each possible combination of the three parameters, we run the simulation $5$ times and compute the average root mean squared error (RMSE) of our proposed estimator for $\tau_{\text{PATT}}$ that adjusts for noncompliance, the PATT estimator from \citet{Hartman} which is unadjusted for noncompliance, and the local SATE.  All other parameters are held fixed. The unadjusted PATT estimate is obtained by estimating the response surface on all individuals in the RCT and applying step 4 of our estimation procedure to the nonrandomized trial individuals. 
 
-Figure~\ref{fig:sim_tiles} shows the relationship between the percent of compliers in the whole population, the percentage of people in the whole population eligible to participate in the RCT, and the RMSE of the PATT estimators.  The pattern of performance is qualitatively similar for the adjusted and unadjusted estimators: both perform best when compliance is high and perform badly when compliance is low.  \textcolor{red}{Furthermore, for a fixed rate of compliance, the estimators tend to have lower RMSE when either a very small or very large fraction of the total population is eligible to participate in the RCT. }  In general, the adjusted estimator tends to have lower RMSE than the unadjusted estimator.
+Figure~\ref{fig:sim_tiles} shows the relationship between the percent of compliers in the whole population, the percentage of people in the whole population eligible to participate in the RCT, and the RMSE of the PATT estimators.  The pattern of performance is qualitatively similar for the adjusted and unadjusted estimators: both perform best when compliance is high and perform badly when compliance is low.  Furthermore, for a fixed rate of compliance, the RMSE of both estimators increases with the fraction of the total population eligible to participate in the RCT. In general, the adjusted estimator tends to have lower RMSE than the unadjusted estimator.
 
 % fig:sim_tiles
 
@@ -321,7 +320,7 @@ Our outcomes of interest are binary variables for any emergency room (ER) and ou
 
 \paragraph{Observational data} 
 
-We acquire data on the target population from the National Health Interview Study (NHIS) \cite{NHIS} for years 2008 to 2013.  We restrict our sample to respondents with income below 138\% of the FPL and who are uninsured or on Medicaid ($N=11,129$). We select covariates on respondent characteristics that match the OHIE pretreatment covariates. The outcomes of interest from NHIS are variables on ER and outpatient visits in the past 12 months. We use a recoded variable that indicates whether respondents are on Medicaid as an analogue to the OHIE compliance measure. \textcolor{red}{Todo: check code -- Medicaid enrollment is treatment received, not compliance}
+We acquire data on the target population from the National Health Interview Study (NHIS) \cite{NHIS} for years 2008 to 2013.  We restrict our sample to respondents with income below 138\% of the FPL and who are uninsured or on Medicaid ($N=11,129$). We select covariates on respondent characteristics that match the OHIE pretreatment covariates. The outcomes of interest from NHIS are variables on ER and outpatient visits in the past 12 months. We use a recoded variable that indicates whether respondents are on Medicaid as an analogue to the OHIE compliance measure. 
 
 \subsection{Verifying assumptions}
 
@@ -385,7 +384,7 @@ Our method allows us to decompose SATT and PATT estimates by subgroup according 
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width = 1\textwidth]{mse_ratec_rates_B5}
+\includegraphics[width = 1\textwidth]{rmse_ratec_rates}
 \caption{Simulated RMSE, binned by compliance rate and percent eligible for the RCT. Darker tiles correspond to worse estimates of PATT.}
 \label{fig:sim_tiles}
 \end{center}
@@ -393,7 +392,7 @@ Our method allows us to decompose SATT and PATT estimates by subgroup according 
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width = 1\textwidth]{mse_boxplots_B5}
+\includegraphics[width = 1\textwidth]{rmse_boxplots}
 \caption{Simulated RMSE of compliance-adjusted PATT, unadjusted PATT, and SATE, according to compliance rates in the total population.}
 \label{fig:sim_compliance}
 \end{center}
