@@ -87,13 +87,10 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     #  suppressWarnings(complier_mod <- randomForest(C~W1+W2+W3, data = rct)) # estimate propensity of compliance
     complier_mod <- glm(C~W1+W2+W3, data = rct, family = "binomial")
     rct$C_pscore <- predict(complier_mod, rct, type = "response")
-    rct$Chat <- rep(1, nrow(rct))
-    rct$Chat[rct$D == 0] <- as.numeric(rct$C_pscore[rct$D == 0] >= 0.5)
-    rct_compliers <- rct[rct$Chat == 1,]
+    rct$Chat <- rep(0, nrow(rct))
+    rct$Chat[rct$Tt == 0] <- as.numeric(rct$C_pscore[rct$Tt == 0] >= 0.5)
+    rct_compliers <- rct[rct$Chat == 1 | rct$D == 1, ]
     
-#    nrt$Chat <- rep(1, nrow(nrt))
-#    nrt$C_pscore <- predict(complier_mod, nrt, type = "response")
-#    nrt$Chat[nrt$Tt == 0] <- as.numeric(nrt$C_pscore[nrt$Tt == 0] >= 0.5)
     nrt_compliers <- nrt[nrt$Tt == 1,]
     
     # Fit a regression to the compliers in the RCT, use it to predict response in population "compliers"
