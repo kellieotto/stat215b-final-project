@@ -19,7 +19,7 @@ library(foreach)
 library(doParallel)
 library(dplyr)
 ## Setup
-ncores <- 10
+ncores <- 12
 registerDoParallel(ncores)
 
 sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
@@ -31,7 +31,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
   tpatt <- true_patt <- rct_sate <- rct_satt <- tpatt_unadj <- rep(0, sims)
   rateC <- rateT <- rateS <- rep(0, sims)
   
-  foreach(i = 1:sims) %dopar% {
+  for(i in 1:sims){
     # Pick target sample size
     popsize <- 30000
     samplesize <- 5000
@@ -88,7 +88,7 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     complier_mod <- glm(C~W1+W2+W3, data = rct, family = "binomial")
     rct$C_pscore <- predict(complier_mod, rct, type = "response")
     rct$Chat <- rep(1, nrow(rct))
-    rct$Chat[rct$Tt == 0] <- as.numeric(rct$C_pscore[rct$Tt == 0] >= 0.5)
+    rct$Chat[rct$D == 0] <- as.numeric(rct$C_pscore[rct$D == 0] >= 0.5)
     rct_compliers <- rct[rct$Chat == 1,]
     
 #    nrt$Chat <- rep(1, nrow(nrt))
@@ -131,8 +131,8 @@ sim_estimates <- function(sims = 100, e1= -1, e2 = 0.5, e3 = 1){
     tpatt_unadj[i] <- term1 - term2
     
   }
-res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rct_satt, rateC, rateS, rateT)
-return(res)
+  res <- cbind(true_patt, tpatt, tpatt_unadj, rct_sate, rct_satt, rateC, rateS, rateT)
+  return(res)
 }
 
 
@@ -140,9 +140,13 @@ return(res)
 e <- seq(-2, 2, by = 0.5)
 e <- expand.grid(e,e,e)
 B <- 10
-res <- matrix(t(sapply(1:nrow(e), function(x){print(x); sim_estimates(B,e[x,1],e[x,2],e[x,3])})), ncol = 8)
+res <- foreach(i = 1:nrow(e)) %dopar% {
+  cat(i)
+  return(sim_estimates(B,e[i,1],e[i,2],e[i,3]))
+}
+res <- do.call(rbind, res)
 res <- cbind(rep(1:nrow(e), each = B), res)
-colnames(res) <- c("combo", "true_patt","tpatt","tpatt_unadj","rct_sate","rct_satt","rateC","rateS","rateT")
+colnames(res)[1] <- "combo"
 mse <- t(sapply(unique(res[,"combo"]), function(x){
                 keep <- which(res[,"combo"] == x)
                 sapply(c("tpatt","tpatt_unadj","rct_sate","rct_satt"), function(cc)mean((res[keep,"true_patt"]-res[keep,cc])^2))
