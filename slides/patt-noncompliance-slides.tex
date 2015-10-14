@@ -122,15 +122,17 @@
 \frametitle{Motivation}
 \begin{itemize}
 \item RCTs are the ``gold standard'' for estimating the causal effect of a treatment
-\begin{itemize}
 \item External validity is an issue when RCT participants don't reflect the target population
 \item Non-compliance to treatment assignment biases estimates of the sample average treatment effect (SATE) towards $0$
 \end{itemize}
-\item Idea: reweight responses in the treatment group of RCT compliers to estimate population average treatment effect on the treated (PATT)
+\end{frame}
+
+\begin{frame}
+\frametitle{Motivation (cont.)}
 \begin{itemize}
+\item Idea: reweight responses in the treatment group of RCT compliers to estimate population average treatment effect on the treated (PATT)
 \item \cite{Hartman} develop a nonparametric reweighting method to extend SATE to PATT
 \item We extend this method to the case of one-way crossover
-\end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -218,10 +220,12 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \frametitle{Application: Oregon Health Insurance Experiment (OHIE)}
 \begin{itemize}
 \item In 2008, $\approx$ 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits \citep{finkelstein2012}
-\item Participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid
-\item After sample exclusions, 29,834 participants were selected by the lottery; remaining 45,008 served as controls 
+\begin{itemize}
+\item Selected participants won the opportunity for themselves and any household member to apply for Medicaid
+\item 29,834 participants were selected by the lottery; remaining 45,008 served as controls 
+\item Compliance measured by whether participant enrolled in Medicaid program during study period
+\end{itemize}
 \item Two health care use responses from mail survey (N = 23,741): emergency room (ER) and primary care visits in past 12 months
-\item Compliance measure: indicator for whether participant was enrolled in Medicaid program during study period
 \end{itemize}
 \end{frame}
 
@@ -322,9 +326,9 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \begin{frame} 
 \frametitle{Estimation Procedure}
 \begin{enumerate}
-\item Train random forests (RF) model to predict complier status, given covariates, for RCT treated
-\item Use model to predict compliers among RCT controls 
-\item For observed and predicted compliers, train RF model to predict response using covariates and treatment as features
+\item Use ensemble method to predict complier status, given covariates, for RCT treated
+\item Use ensemble fit to predict compliers among RCT controls 
+\item For observed and predicted compliers, train random forests model to predict response using covariates and treatment as features
 \item Using response model, estimate potential outcomes for population ``compliers'' on medicaid
 \item $\tau_{\text{PATT}}$ is the difference in means between potential outcomes
 %\item Estimate heterogeneous treatment effects by taking differences across response surfaces for each covariate group
@@ -362,10 +366,8 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \frametitle{Conclusions}
 \begin{itemize}
 \item Proposed estimator performs better than unadjusted estimator in simulations when compliance is low and can be predicted by observed covariates
-\item Adjusted and unadjusted $\tau_{\text{PATT}}$ estimates similar for primary care visits
-\item Negative treatment effect on population compliers for ER visits (unadjusted $\tau_{\text{PATT}}$ is positive)
-%\item Effects of Medicaid enrollment are heterogeneous and far from SATE for covariates that differ between the OHIE and NHIS samples
-\item Substantial differences between sample and population estimates in terms of race and health status
+\item Ensemble method for predicting compliance based on observed covariates has $77\%$ accuracy on the training set of OHIE treated
+\item Substantial differences between sample and population estimates in terms of race, education, and health status subgroups
 \end{itemize}
 \end{frame}
 
