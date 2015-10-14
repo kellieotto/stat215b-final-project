@@ -109,9 +109,9 @@
 \mode<presentation>
 \title[]{Estimating population average treatment effects from experiments with noncompliance}
 
-\author[K. Ottoboni, J. Poulos]{Kellie Ottoboni, Jason Poulos}
-\institute[]{Stat 215B}
-\date[04/30/15]{April 30, 2015}
+\author[K. Ottoboni, J. Poulos]{Kellie Ottoboni \hspace{10mm} Jason Poulos}
+%\institute[]{Stat 215B}
+\date[10/15/15]{Oct. 15, 2015}
 \begin{document}
 
 \frame{\titlepage}
@@ -122,15 +122,17 @@
 \frametitle{Motivation}
 \begin{itemize}
 \item RCTs are the ``gold standard'' for estimating the causal effect of a treatment
-\begin{itemize}
 \item External validity is an issue when RCT participants don't reflect the target population
 \item Non-compliance to treatment assignment biases estimates of the sample average treatment effect (SATE) towards $0$
 \end{itemize}
-\item Idea: reweight responses in the treatment group of RCT compliers to estimate population average treatment effect on the treated (PATT)
+\end{frame}
+
+\begin{frame}
+\frametitle{Motivation (cont.)}
 \begin{itemize}
+\item Idea: reweight responses in the treatment group of RCT compliers to estimate population average treatment effect on the treated (PATT)
 \item \cite{Hartman} develop a nonparametric reweighting method to extend SATE to PATT
 \item We extend this method to the case of one-way crossover
-\end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -156,7 +158,7 @@
 
 
 \begin{frame}
-\frametitle{Estimating treatment effects}
+\frametitle{Estimating treatment effects (cont.)}
 \begin{figure}[h]
 \begin{tikzpicture}[scale=1.25] 
 \SetGraphUnit{2} 
@@ -218,10 +220,12 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 \frametitle{Application: Oregon Health Insurance Experiment (OHIE)}
 \begin{itemize}
 \item In 2008, $\approx$ 90,000 uninsured low-income adults participated in a lottery to receive Medicaid benefits \citep{finkelstein2012}
-\item Participants selected by the lottery won the opportunity for themselves and any household member to apply for Medicaid
-\item After sample exclusions, 29,834 participants were selected by the lottery; remaining 45,008 served as controls 
+\begin{itemize}
+\item Selected participants won the opportunity for themselves and any household member to apply for Medicaid
+\item 29,834 participants were selected by the lottery; remaining 45,008 served as controls 
+\item Compliance measured by whether participant enrolled in Medicaid program during study period
+\end{itemize}
 \item Two health care use responses from mail survey (N = 23,741): emergency room (ER) and primary care visits in past 12 months
-\item Compliance measure: indicator for whether participant was enrolled in Medicaid program during study period
 \end{itemize}
 \end{frame}
 
@@ -236,54 +240,69 @@ where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation wit
 
 \begin{frame}
 \frametitle{}
-{\scriptsize
+{\tiny
+\begin{singlespace}
+\begin{landscape}
 \begin{longtable}{lllllll}
-  & OHIE &  & OHIE &  & NHIS &  \\ 
-    & control &  & treated &  &treated &   \\ 
-  & $n=5104$ &  & $n=5193$ &  & $n=3914$ &  \\  
+  & OHIE control &  & OHIE treated &  & NHIS treated&  \\ 
+%    & control &  & treated &  &treated &   \\ 
+  & $n=5476$ &  & $n=5193$ &  & $n=3382$ &  \\  
   \hline   
     \hline   
  \textbf{Covariate} &  $\mathbf{n}$ & $\mathbf{\%}$ & $\mathbf{n}$ & $\mathbf{\%}$ & $\mathbf{n}$ & $\mathbf{\%}$ \\ 
 \hline
-Female & 2970 & 58.2 & 2920 & 56.2 & 2712 & 69.3  \\ 
-   \hline
-20-49 & 1307 & 25.6 & 1367 & 26.3 & 1418 & 36.2  \\ 
-   \hline
-50-64 & 3797 & 74.4 & 3826 & 73.7 & 2496 & 63.8 \\ 
-   \hline
-White & 4420 & 86.6 & 4393 & 84.6 & 2308 & 59.0  \\ 
-   \hline
-Black & 227 & 4.5 & 197 & 3.8 & 1192 & 30.4  \\ 
-   \hline
-Hispanic & 331 & 6.5 & 476 & 9.2 & 1054 & 26.9  \\ 
-   \hline
-Diabetes & 518 & 10.2 & 539 & 10.4 & 689 & 17.6 \\ 
-   \hline
-Asthma & 986 & 19.3 & 887 & 17.1 & 748 & 19.1  \\ 
-   \hline
-High blood pressure & 1486 & 29.1 & 1418 & 27.3 & 1581 & 40.4  \\ 
-   \hline
-Heart condition & 159 & 3.1 & 141 & 2.7 & 396 & 10.1 \\ 
-   \hline
-Less than high school  & 994 & 19.5 & 950 & 18.3 & 1555 & 39.7  \\ 
-   \hline
-High school diploma or GED & 2908 & 57.0 & 2775 & 53.4 & 1193 & 30.5 \\ 
-   \hline
-Voc. training / 2-year degree & 922 & 18.1 & 1031 & 19.9 & 945 & 24.1 \\ 
-   \hline
-4-year college degree or more & 280 & 5.5 & 437 & 8.4 & 221 & 5.7 \\ 
+\textit{Sex:} &  & & &  &  & \\ 
+
+\hspace{3mm} Female & 3148 & 57.5 & 2920 & 56.2 & 2380 & 70.4 \\ 
+% &  & & &  &  & \\ 
+\textit{Age:} &  & & &  &  & \\ 
+\hspace{3mm}19-49 & 1636 & 29.9 & 1367 & 26.3 & 2429 & 71.8  \\ 
+
+\hspace{3mm}50-64 & 3840 & 70.1 & 3826 & 73.7 & 953 & 28.2 \\ 
+% &  & & &  &  & \\ 
+\textit{Race:} &  & & &  &  & \\ 
+\hspace{3mm}White & 4829 & 88.2 & 4393 & 84.6 & 1991 & 58.9  \\ 
+
+\hspace{3mm}Black & 243 & 4.4 & 197 & 3.8 & 1050 & 31.1  \\ 
+
+\hspace{3mm}Hispanic & 301 & 5.5 & 476 & 9.2 & 910 & 26.9  \\ 
+% &  & & &  &  & \\ 
+\textit{Health status:} &  & & &  &  & \\ 
+\hspace{3mm}Diabetes & 581 & 10.6 & 539 & 10.4 & 452 & 13.4 \\ 
+
+\hspace{3mm}Asthma & 1036 & 18.9 & 887 & 17.1 & 652 & 19.3  \\ 
+
+\hspace{3mm}High blood pressure & 1670 & 30.5 & 1418 & 27.3 & 1143 & 33.8  \\ 
+  
+\hspace{3mm}Heart condition & 170 & 3.1 & 141 & 2.7 & 285 & 8.4 \\ 
+% &  & & &  &  & \\ 
+\textit{Education:} &  & & &  &  & \\  
+\hspace{3mm}Less than high school  & 1056 & 19.3 & 950 & 18.3 & 1183 & 35.0  \\ 
+  
+\hspace{3mm}High school diploma or GED & 3081 & 56.3 & 2775 & 53.4 & 1076 & 31.8  \\ 
+
+\hspace{3mm}Voc. training / 2-year degree & 969 & 17.7 & 1031 & 19.9 & 934 & 27.6 \\ 
+
+\hspace{3mm}4-year college degree or more & 370 & 6.8 & 437 & 8.4 & 189 & 5.6 \\ 
+% &  & & &  &  & \\ 
+\textit{Income:} &  & & &  &  & \\ 
+\hspace{3mm} $<\$10$k & 5476 & 100.0 & 3204 & 61.7 & 1452 & 42.9 \\
+
+\hspace{3mm} \$10k-\$25k & 0 & 0.0 & 1616 & 31.1 & 1622 & 48.0 \\
+
+\hspace{3mm} $>\$25$k & 0 & 0.0 & 373 & 7.2 & 308 & 9.1 \\
    \hline
 \hline
  \textbf{Response} &   &  &  & &  &  \\ 
-Any ER visit & 1289 & 25.2 & 1323 & 25.5 & 860 & 22.0  \\ 
-   \hline
-\hline
-Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\ 
+\hspace{3mm}Any ER visit &  1393 & 25.4 & 1301 & 25.1 & 881 & 26.1 \\ 
+\hspace{3mm}Any outpatient visit & 3299 & 60.2 & 3081 & 59.3 & 2116 & 62.6 \\ 
 \hline
 \hline
 %\caption{Pretreatment covariates and responses for OHIE and NHIS respondents on Medicaid.} 
 \label{rct-nrt-compare}
 \end{longtable}
+\end{landscape}
+\end{singlespace}
 }
 \end{frame}
 
@@ -307,9 +326,9 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame} 
 \frametitle{Estimation Procedure}
 \begin{enumerate}
-\item Train random forests (RF) model to predict complier status, given covariates, for RCT treated
-\item Use model to predict compliers among RCT controls 
-\item For observed and predicted compliers, train RF model to predict response using covariates and treatment as features
+\item Use ensemble method to predict complier status, given covariates, for RCT treated
+\item Use ensemble fit to predict compliers among RCT controls 
+\item For observed and predicted compliers, train random forests model to predict response using covariates and treatment as features
 \item Using response model, estimate potential outcomes for population ``compliers'' on medicaid
 \item $\tau_{\text{PATT}}$ is the difference in means between potential outcomes
 %\item Estimate heterogeneous treatment effects by taking differences across response surfaces for each covariate group
@@ -322,8 +341,8 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame}
 \begin{figure}[htbp]
 \begin{center}
-       \caption{Any ER visit.}
-   \includegraphics[scale=0.35]{../paper/any-visit-plot.pdf} 
+%       \caption{Any ER visit.}
+   \includegraphics[scale=0.4]{../paper/any-visit-plot-horz.pdf} 
    \label{het-plot-av}
    \end{center}
 \end{figure}
@@ -332,8 +351,8 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \begin{frame}
 \begin{figure}[htbp]
 \begin{center}
-    \caption{Any primary care visit.}
-   \includegraphics[scale=0.35]{../paper/any-out-plot.pdf} 
+%    \caption{Any primary care visit.}
+   \includegraphics[scale=0.4]{../paper/any-out-plot-horz.pdf} 
    \label{het-plot-ao}
    \end{center}
 \end{figure}
@@ -347,10 +366,8 @@ Any primary care visit & 3044 & 59.6 & 3125 & 60.2 & 3175 & 81.1 \\
 \frametitle{Conclusions}
 \begin{itemize}
 \item Proposed estimator performs better than unadjusted estimator in simulations when compliance is low and can be predicted by observed covariates
-\item Adjusted and unadjusted $\tau_{\text{PATT}}$ estimates similar for primary care visits
-\item Negative treatment effect on population compliers for ER visits (unadjusted $\tau_{\text{PATT}}$ is positive)
-%\item Effects of Medicaid enrollment are heterogeneous and far from SATE for covariates that differ between the OHIE and NHIS samples
-\item Substantial differences between sample and population estimates in terms of race and health status
+\item Ensemble method for predicting compliance based on observed covariates has $77\%$ accuracy on the training set of OHIE treated
+\item Substantial differences between sample and population estimates in terms of race, education, and health status subgroups
 \end{itemize}
 \end{frame}
 
