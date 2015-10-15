@@ -89,6 +89,11 @@
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 \newcommand{\possessivecite}[1]{\citeauthor{#1}'s [\citeyear{#1}]} 
 
+% to highlight parts of theorem
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node (#1) {};}
+
 % Making a DAG
 \usepackage{tkz-graph}  
 \usetikzlibrary{shapes.geometric}
@@ -157,7 +162,7 @@
 \item Other variables
 \begin{itemize}
 \item W = observed covariates
-\item C = compliance to treatment
+\item C = complier status (specifically, compliance to treatment)
 \end{itemize}
 \end{itemize}
 \end{frame}
@@ -184,10 +189,43 @@
 Under assumptions \eqref{consistency} - \eqref{ER},
 
 $$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, C=1, W\right)\right]
--\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, T=0, C=1, W\right) \right] $$
+-\ex_{01}\left[  \ex\left(Y_{10} \mid S=1,T=0, C=1, W\right) \right] $$
 
 where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the treated individuals in the target population.  
 \end{theorem}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Estimating treatment effects}
+\begin{theorem}\label{thm1}
+\fontsize{9pt}{7.2}\selectfont
+Under assumptions \eqref{consistency} - \eqref{ER},
+
+$$\tau_{\text{PATT}} = \ex_{01}\left[  \ex\left(Y_{11} \mid S=1, T=1, C=1, W\right)\right]
+-\ex_{01}\left[  \ex\left(Y_{10} \mid S=1, \tikzmark{unobserved}{T=0, C=1,} W\right) \right] $$
+
+where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the treated individuals in the target population.  
+\end{theorem}
+\tikz[overlay,remember picture]{\draw[draw=red,thick,double,fill opacity=0.2] ($(unobserved)+(-0.1,0.4)$) rectangle ($(unobserved)+(2,-0.2)$);}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Estimating treatment effects}
+\begin{theorem}\label{thm1}
+\fontsize{9pt}{7.2}\selectfont
+Under assumptions \eqref{consistency} - \eqref{ER},
+
+$$\tau_{\text{PATT}} = \ex_{01}\left[  \tikzmark{exp1}{\ex\left(Y_{11} \mid S=1, T=1, C=1, W\right)}\right]
+-\ex_{01}\left[  \tikzmark{exp2}{ \ex\left(Y_{10} \mid S=1,T=0, C=1, W\right) }\right] $$
+
+where $\ex_{01}\left[\ex(\cdot \mid\dots, W)\right]$ denotes the expectation with respect to the distribution of $W$ in the treated individuals in the target population.  
+\end{theorem}
+\tikz[overlay,remember picture]{\draw[draw=red,thick,double,fill opacity=0.2] ($(exp1)+(-0.2,0.4)$) rectangle ($(exp1)+(4.7,-0.2)$);}
+\tikz[overlay,remember picture]{\draw[draw=red,thick,double,fill opacity=0.2] ($(exp2)+(-0.2,0.4)$) rectangle ($(exp2)+(4.7,-0.2)$);}
 \end{frame}
 
 

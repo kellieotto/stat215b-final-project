@@ -1,6 +1,0 @@
-\beamer@endinputifotherversion {3.26pt}
-\beamer@sectionintoc {1}{Motivation}{3}{0}{1}
-\beamer@sectionintoc {2}{Estimation}{5}{0}{2}
-\beamer@sectionintoc {3}{Empirical Results}{8}{0}{3}
-\beamer@sectionintoc {4}{Application -- Oregon Health Insurance Experiment}{10}{0}{4}
-\beamer@sectionintoc {6}{Conclusions}{18}{0}{5}
